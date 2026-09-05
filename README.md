@@ -63,6 +63,7 @@ conformance.
 
 | Resource | Purpose |
 | --- | --- |
+| [Documentation site](https://webmaxru.github.io/ai-engineering-system/) | Astro/Starlight documentation published on GitHub Pages |
 | [Learning guide](docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md) | Non-negotiable architectural authority |
 | [Guide conformance](docs/GUIDE-CONFORMANCE.md) | Requirement-by-requirement audit of the framework and reference |
 | [Technical extensions](docs/TECHNICAL-EXTENSIONS.md) | Audited register of compatible implementation choices not prescribed by the guide |

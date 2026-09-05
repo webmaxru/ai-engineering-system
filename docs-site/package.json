@@ -1,0 +1,22 @@
+{
+  "name": "ai-engineering-system-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "sync-docs": "node scripts/sync-docs.mjs",
+    "prebuild": "npm run sync-docs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/starlight": "^0.41.9",
+    "astro": "^7.2.7"
+  }
+}
