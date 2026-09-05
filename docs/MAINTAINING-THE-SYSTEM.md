@@ -1,5 +1,9 @@
 # Maintaining the system
 
+All maintenance is subordinate to
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md).
+No maintenance path may weaken or bypass that architecture.
+
 ## Why this repository is not self-governing
 
 A framework must remain changeable when the current framework version is
@@ -19,7 +23,9 @@ The controlled proving ground is
 
 Identify the affected concept, terminology, lifecycle transition, capability,
 evidence rule, or hosted control. State whether the change is normative or
-only editorial.
+only editorial. Cite the controlling guide heading and line range, classify
+the decision as guide-defined, choice-based, or gap-filling, and update
+`docs/TECHNICAL-EXTENSIONS.md` for every gap-filling mechanism.
 
 ### 2. Implement it in Northstar
 
@@ -58,8 +64,10 @@ consistent.
 ### 5. Refresh the inert snapshot
 
 When Northstar control-plane files changed, refresh `templates/northstar/` from
-the validated commit. Preserve the safe `AGENTS.snapshot.md` name, then update
-`reference-lock.json` with the exact source SHA and file hashes.
+the accepted commit. Preserve the safe `AGENTS.snapshot.md` name, then update
+`reference-lock.json` with the exact source SHA and file hashes. Do not mark
+architecture conformance as restored while any required Northstar pull request,
+hosted workflow proof, or human acceptance remains pending.
 
 The snapshot is for study and comparison. Northstar remains the executable
 source of truth.
@@ -67,8 +75,11 @@ source of truth.
 With both repositories checked out as siblings:
 
 ```powershell
-pwsh -File tools\verify-reference.ps1
+pwsh -File tools\verify-architecture.ps1
 ```
+
+The verifier must fail when `architecture-lock.json` reports a blocked
+reference. That is a release stop, not a condition to bypass.
 
 ### 6. Bind the evidence
 
@@ -170,6 +181,14 @@ edit, treat it as a system change and prove it in Northstar.
 
 ## Release checklist
 
+- Every normative decision cites the non-negotiable learning guide.
+- `docs/GUIDE-CONFORMANCE.md` reflects the audited guide and Northstar commit.
+- Every non-guide mechanism has a current technical-extension entry.
+- The machine-readable extension coverage exactly matches the extension
+  register and every evidence path exists.
+- `architecture-lock.json` says `conformant`, the audited Northstar revision
+  says `accepted`, and no blocking reference change remains.
+- `pwsh -File tools\verify-architecture.ps1` passes.
 - Canonical terms are unchanged or intentionally versioned.
 - The architecture and quickstart agree.
 - Northstar contains the executable behavior.

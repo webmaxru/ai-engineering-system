@@ -3,6 +3,24 @@
 The executable proof of concept is
 [`webmaxru/northstar-orders-api-demo`](https://github.com/webmaxru/northstar-orders-api-demo).
 
+Its strict mapping to the non-negotiable
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md)
+is recorded in
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md). Reference mechanisms that make
+the guide concrete without being prescribed by it are recorded in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md).
+
+## Current release status
+
+The locked Northstar baseline is **known defective**: GitHub rejects
+`.github/workflows/governed-change.yml` before creating jobs. The terminology
+repair in `webmaxru/northstar-orders-api-demo#7` and the high-risk workflow
+repair tracked by `webmaxru/northstar-orders-api-demo#8` and
+`webmaxru/northstar-orders-api-demo#9` are not yet accepted on `main`. Until
+they are accepted, validated, and captured in a refreshed lock, Northstar is
+an inspectable proof of concept but not an adoption source. See
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact blockers.
+
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
 service instances, while PostgreSQL provides shared durability and concurrency
@@ -42,9 +60,9 @@ remains the only executable source, and the lock makes drift visible.
 
 ## Evidence levels
 
-### Local reference validated
+### Local reference evidence
 
-Northstar can prove locally:
+The locked baseline's local validation reported:
 
 - contracts, policy, agents, hooks, scripts, schemas, and instructions;
 - lint, typecheck, build, and unit behavior;
@@ -53,6 +71,10 @@ Northstar can prove locally:
 - merge compatibility and governance policy;
 - Agentic Workflow compilation and workflow static analysis;
 - a final `ready_for_review` execution report.
+
+That local result did not detect the hosted workflow parser failure and is
+therefore insufficient for the current release. Workflow changes additionally
+require a real GitHub run that creates the expected jobs.
 
 ### Hosted integration validated
 

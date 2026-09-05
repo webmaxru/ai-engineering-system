@@ -1,5 +1,10 @@
 # Goals and non-goals
 
+These goals and non-goals apply
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md).
+They cannot override it. Reference-specific mechanisms are identified in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md).
+
 ## Goals
 
 ### Make agent-assisted delivery inspectable
@@ -20,7 +25,7 @@ Every governed change starts from an issue that defines inputs, outputs,
 success criteria, scope, constraints, non-goals, validation, rollout, and stop
 conditions. Chat history and branch names are context, not authority.
 
-### Route autonomy by risk
+### Apply risk-based autonomy
 
 The system classifies work as `low`, `medium`, `high`, or `critical`.
 Deterministic policy sets a risk floor based on affected capabilities and
@@ -38,12 +43,17 @@ mediation.
 
 Required evidence must be present, successful, current, and bound to the same
 repository, pull request, commit, workflow, and run. Missing, skipped, stale,
-duplicate, or mismatched evidence is a failure.
+duplicate, or mismatched evidence is a failure. The strict envelope and
+cross-run rules are documented in
+[EXT-006](TECHNICAL-EXTENSIONS.md#ext-006---evidence-envelopes-and-readiness-decisions).
 
 ### Support stateless, multi-instance systems
 
 The reference workload must prove behavior across process boundaries. Shared
 durability and concurrency belong in PostgreSQL, not process memory.
+This proving workload is
+[EXT-012](TECHNICAL-EXTENSIONS.md#ext-012---postgresql-idempotency-proving-workload),
+not a required application architecture for adopters.
 
 ### Bound recovery
 
@@ -61,7 +71,8 @@ authority.
 
 The framework specification lives outside its own active enforcement plane.
 Normative changes are proved in the Northstar reference before they are
-documented as supported behavior.
+documented as supported behavior. This repository boundary is
+[EXT-013](TECHNICAL-EXTENSIONS.md#ext-013---frameworkreference-repository-separation).
 
 ## Non-goals
 

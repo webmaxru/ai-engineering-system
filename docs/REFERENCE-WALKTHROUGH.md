@@ -1,5 +1,15 @@
 # Reference implementation walkthrough
 
+This walkthrough demonstrates
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md)
+through the Northstar reference and identifies implementation-specific
+mechanisms in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md).
+
+Use only the exact accepted Northstar commit from a framework revision whose
+`architecture-lock.json` status is `conformant`. The current audit is blocked;
+see [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md).
+
 ## Run the reference implementation
 
 Prerequisites:
@@ -12,6 +22,7 @@ Prerequisites:
 ```powershell
 git clone https://github.com/webmaxru/northstar-orders-api-demo.git
 Set-Location northstar-orders-api-demo
+git switch --detach <accepted-northstar-commit>
 npm ci
 npm run db:up
 npm run demo:system
@@ -74,7 +85,7 @@ The first response is `201` with `x-idempotent-replay: false`. The second is
 suite proves the same behavior across two service instances sharing
 PostgreSQL.
 
-## Exercise plan -> act -> evaluate
+## Exercise plan → act → evaluate
 
 For a live task in Northstar:
 

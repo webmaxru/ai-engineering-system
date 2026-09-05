@@ -3,6 +3,10 @@
   "sourceRepository": "webmaxru/northstar-orders-api-demo",
   "sourceBranch": "main",
   "sourceCommit": "703ac2911b32d49ddab369140b877f35cf5d4c32",
+  "releaseStatus": "known-defective",
+  "knownDefects": [
+    "GitHub rejects .github/workflows/governed-change.yml before creating jobs because DATABASE_URL begins with an invalid YAML alias scalar."
+  ],
   "generatedAt": "2026-09-05T14:56:21Z",
   "hashNormalization": "UTF-8 text with CRLF normalized to LF",
   "validation": {
@@ -15,7 +19,7 @@
     "agenticCompileErrors": 0,
     "agenticCompileWarnings": 0,
     "zizmorFindings": 0,
-    "hostedAcceptance": "not-verified"
+    "hostedAcceptance": "failed-workflow-parse"
   },
   "files": [
     {

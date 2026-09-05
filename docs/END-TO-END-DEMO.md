@@ -2,6 +2,15 @@
 
 This walkthrough demonstrates the complete local reference and separates that
 evidence from the hosted evidence required for acceptance.
+It exercises the architecture required by
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md)
+and the compatible mechanisms registered in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md).
+
+This local walkthrough is not a release certificate. Use only the exact
+accepted Northstar commit from a framework revision whose
+`architecture-lock.json` status is `conformant`. The current audit is blocked;
+see [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md).
 
 ## Prerequisites
 
@@ -16,6 +25,7 @@ evidence from the hosted evidence required for acceptance.
 ```powershell
 git clone https://github.com/webmaxru/northstar-orders-api-demo.git
 Set-Location northstar-orders-api-demo
+git switch --detach <accepted-northstar-commit>
 npm ci
 npm run db:up
 npm run demo:system
@@ -121,7 +131,7 @@ Expected result:
 The decision depends on the requested capability, not on whether untrusted text
 persuaded the model.
 
-## 4. Run plan -> act -> evaluate
+## 4. Run plan → act → evaluate
 
 For a live task:
 

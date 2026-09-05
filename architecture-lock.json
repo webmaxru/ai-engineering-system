@@ -1,0 +1,150 @@
+{
+  "schema": "ai-engineering-system/architecture-lock/2",
+  "guide": {
+    "path": "docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md",
+    "canonicalTextSha256": "c247b45ed53bb7b901954611c3bc03a37294d9adfb02a6542d71522f694f62be"
+  },
+  "auditedReference": {
+    "repository": "webmaxru/northstar-orders-api-demo",
+    "commit": "703ac2911b32d49ddab369140b877f35cf5d4c32",
+    "status": "known-defective"
+  },
+  "conformance": {
+    "status": "blocked",
+    "blockingReferenceChanges": [
+      {
+        "id": "canonical-terminology",
+        "issue": 6,
+        "pullRequest": 7,
+        "branch": "agent/implement/aes-terminology",
+        "commit": "82ae863bda42b7bed536296a77fe0d415b6686fc",
+        "state": "pending-human-acceptance"
+      },
+      {
+        "id": "governed-workflow-syntax",
+        "issue": 8,
+        "planPullRequest": 9,
+        "state": "pending-plan-approval"
+      }
+    ]
+  },
+  "requiredAuthorityDocuments": [
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "docs/ARCHITECTURE.md",
+    "docs/AGENT-HOOKS-COMPATIBILITY.md",
+    "docs/ALIGNMENT-ASSESSMENT.md",
+    "docs/END-TO-END-DEMO.md",
+    "docs/GOALS-AND-NON-GOALS.md",
+    "docs/GUIDE-CONFORMANCE.md",
+    "docs/MAINTAINING-THE-SYSTEM.md",
+    "docs/QUICKSTART.md",
+    "docs/REFERENCE-IMPLEMENTATION.md",
+    "docs/REFERENCE-WALKTHROUGH.md",
+    "docs/TECHNICAL-EXTENSIONS.md",
+    "docs/TERMINOLOGY.md"
+  ],
+  "extensionCoverage": [
+    {
+      "id": "EXT-001",
+      "mechanisms": ["versioned contracts", "digest binding"],
+      "evidencePaths": ["templates/northstar/scripts/plan-contract.mjs"]
+    },
+    {
+      "id": "EXT-002",
+      "mechanisms": ["deterministic risk floors"],
+      "evidencePaths": ["templates/northstar/scripts/risk-policy.mjs"]
+    },
+    {
+      "id": "EXT-003",
+      "mechanisms": ["plan publication", "branch topology"],
+      "evidencePaths": ["templates/northstar/scripts/publish-plan.mjs"]
+    },
+    {
+      "id": "EXT-004",
+      "mechanisms": ["exact pre-tool authorization"],
+      "evidencePaths": ["templates/northstar/scripts/authorize-tool.mjs"]
+    },
+    {
+      "id": "EXT-005",
+      "mechanisms": ["payload-minimized local audit"],
+      "evidencePaths": ["templates/northstar/scripts/audit-hook.mjs"]
+    },
+    {
+      "id": "EXT-006",
+      "mechanisms": ["evidence envelopes", "readiness decisions"],
+      "evidencePaths": ["templates/northstar/scripts/build-execution-report.mjs"]
+    },
+    {
+      "id": "EXT-007",
+      "mechanisms": ["trusted publication", "validation-authority maintenance"],
+      "evidencePaths": ["templates/northstar/scripts/check-validation-authority.mjs"]
+    },
+    {
+      "id": "EXT-008",
+      "mechanisms": ["split GitHub App identities", "secret placement"],
+      "evidencePaths": ["templates/northstar/.github/workflows/publish-evidence.yml"]
+    },
+    {
+      "id": "EXT-009",
+      "mechanisms": ["governance drift audit", "evidence retention"],
+      "evidencePaths": ["templates/northstar/scripts/governance-audit.mjs"]
+    },
+    {
+      "id": "EXT-010",
+      "mechanisms": ["failure-signature repair budget"],
+      "evidencePaths": ["templates/northstar/scripts/repair-budget.mjs"]
+    },
+    {
+      "id": "EXT-011",
+      "mechanisms": ["reference validation toolchain"],
+      "evidencePaths": ["docs/REFERENCE-IMPLEMENTATION.md"]
+    },
+    {
+      "id": "EXT-012",
+      "mechanisms": ["PostgreSQL idempotency proving workload"],
+      "evidencePaths": ["docs/REFERENCE-IMPLEMENTATION.md"]
+    },
+    {
+      "id": "EXT-013",
+      "mechanisms": [
+        "framework/reference repository separation",
+        "single README reference",
+        "inert commit-locked snapshot",
+        "inactive instruction-file renaming"
+      ],
+      "evidencePaths": ["tools/verify-reference.ps1"]
+    },
+    {
+      "id": "EXT-014",
+      "mechanisms": ["repository-local gh-aw MCP adapter"],
+      "evidencePaths": ["templates/northstar/.github/mcp.json"]
+    },
+    {
+      "id": "EXT-015",
+      "mechanisms": ["supplemental security checks", "merge checks"],
+      "evidencePaths": ["templates/northstar/scripts/secret-scan.mjs"]
+    },
+    {
+      "id": "EXT-016",
+      "mechanisms": ["Responsible AI Agent Hooks comparison"],
+      "evidencePaths": ["docs/AGENT-HOOKS-COMPATIBILITY.md"]
+    },
+    {
+      "id": "EXT-017",
+      "mechanisms": ["guide conformance ledger", "architecture lock", "extension coverage manifest"],
+      "evidencePaths": ["docs/GUIDE-CONFORMANCE.md", "tools/verify-architecture.ps1"]
+    },
+    {
+      "id": "EXT-018",
+      "mechanisms": ["single-source agent instructions"],
+      "evidencePaths": ["templates/northstar/scripts/sync-agent-instructions.mjs"]
+    },
+    {
+      "id": "EXT-019",
+      "mechanisms": ["controlled bootstrap", "deferred hook activation", "local staging exclusion"],
+      "evidencePaths": ["docs/QUICKSTART.md"]
+    }
+  ]
+}

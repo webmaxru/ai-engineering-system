@@ -1,5 +1,19 @@
 # Architecture
 
+## Architectural authority
+
+The architecture in this document is an application of
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md).
+That guide is non-negotiable. The complete requirement mapping is in
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md); implementation choices that
+fill guide gaps are isolated in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md).
+
+This document defines the target architecture. It is not a release certificate.
+The current executable-reference decision is in
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md), and a blocked architecture lock
+must prevent adoption even when the conceptual design below is unchanged.
+
 ## System model
 
 The AI engineering system coordinates people, agents, repositories, tools, and
@@ -15,9 +29,12 @@ Its responsibility boundary is:
 
 > Agents propose; humans and policy accept.
 
-The system is not an autonomous developer. It is a governed delivery system in
-which agent capabilities are explicit, evidence is machine-verifiable, and
-acceptance remains independent from implementation.
+The system is not an autonomous developer. GitHub is the system of record and
+control plane. Agent contributions are evaluated through the contributor
+model: the work is judged by intent, scope, evidence, ownership, policy, and
+fallback, not by whether the author was human or an agent. Agent capabilities
+are explicit, evidence is machine-verifiable, and acceptance remains
+independent from implementation.
 
 ## Architecture layers
 
@@ -74,9 +91,13 @@ Planning is read-only. The plan contract binds:
 - required checks and evidence;
 - decisions, handoffs, rollback, and escalation.
 
-High and critical plans require approval of the plan-only commit. The approval
-record binds the contract digest, plan digest, base SHA, plan commit, reviewer,
-review ID, and timestamp.
+The guide permits a **plan-first workflow** and a **plan + execution
+workflow**. Northstar uses plan-first for high and critical work and may use
+plan + execution for lower-risk work when policy allows it. The plan-first
+approval record binds the contract digest, plan digest, base SHA, plan commit,
+reviewer, review ID, and timestamp
+([EXT-001](TECHNICAL-EXTENSIONS.md#ext-001---versioned-contracts-and-digest-binding),
+[EXT-003](TECHNICAL-EXTENSIONS.md#ext-003---plan-publication-and-branch-topology)).
 
 ### Capability layer
 
@@ -110,7 +131,8 @@ Evaluation fans independent checks out and evidence back in:
 
 Each producer emits a commit-bound evidence envelope. The execution report
 rejects missing, failed, skipped, duplicate, stale, cross-run, or cross-commit
-evidence.
+evidence
+([EXT-006](TECHNICAL-EXTENSIONS.md#ext-006---evidence-envelopes-and-readiness-decisions)).
 
 ### Acceptance layer
 
@@ -134,7 +156,19 @@ conflict, policy failure, security failure, transient environment failure, or
 unknown. Automated repair stops on repeated signatures, policy/security
 failures, unknown failures, or an exhausted attempt budget.
 
-## GitHub as external memory
+## GitHub as the system of record and control plane
+
+GitHub is the **system of record** because it stores the issues, pull requests,
+commits, reviews, workflow runs, logs, and artifacts through which work is
+proposed and evaluated. GitHub is the **control plane** because required
+checks, CODEOWNERS, rulesets or branch protection, protected environments,
+permissions, and security signals enforce what may be accepted.
+
+### External memory and source of truth
+
+Those durable GitHub artifacts are the system's external memory. Each kind of
+state has one declared source of truth so agents can reload it without relying
+on transient conversation context.
 
 | Artifact | Durable responsibility |
 | --- | --- |
@@ -147,26 +181,39 @@ failures, unknown failures, or an exhausted attempt budget.
 | Environment events | Critical authorization |
 
 Agents reload this state on resume. Conversation history and hidden reasoning
-are not authoritative.
+are not authoritative sources of truth.
 
 ## Technology mapping
 
-The reference implementation uses:
+### Guide-defined technologies
+
+The reference implementation uses the guide's named GitHub technologies:
 
 - GitHub Issues, branches, pull requests, reviews, CODEOWNERS, rulesets, and
   protected environments;
 - GitHub Copilot custom agents, repository instructions, prompt files, and
   native lifecycle hooks;
 - GitHub Actions for deterministic fan-out/fan-in evaluation;
-- CodeQL, dependency audit, and supplemental secret scanning;
+- CodeQL, dependency review, secret scanning, push protection, SARIF, workflow
+  outputs, and artifacts;
 - GitHub Agentic Workflows for bounded Continuous AI;
-- GitHub MCP controls for registry and named-tool governance;
-- GitHub Apps with environment-scoped private keys for trusted publication and
-  maintenance dispatch;
-- PostgreSQL to prove multi-instance application behavior.
+- GitHub MCP servers, registries, and MCP allow lists;
+- `GITHUB_TOKEN` and GitHub App tokens with explicit workflow and job
+  permissions;
+- workflow triggers, concurrency, and protected deployment approvals.
 
 Equivalent technologies are acceptable only when they preserve the same
 contracts, capability boundaries, evidence, and acceptance semantics.
+
+### Gap-filling reference technologies
+
+Northstar also uses documented extensions: versioned JSON and digests,
+deterministic risk floors, evidence envelopes, a trusted publisher with split
+GitHub App identities, supplemental scanners, Node.js/Vitest control tooling,
+and a PostgreSQL cross-instance proving workload. These mechanisms and their
+rollback boundaries are defined in
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md); they are not silently
+presented as guide requirements.
 
 ## Self-modifying control plane
 
@@ -184,7 +231,9 @@ does not create a reusable bypass.
 
 The specification repository avoids this circularity entirely: it has no
 active copy of the controls. Changes are proved in Northstar and only then
-documented here.
+documented here
+([EXT-007](TECHNICAL-EXTENSIONS.md#ext-007---trusted-publication-and-validation-authority-maintenance),
+[EXT-013](TECHNICAL-EXTENSIONS.md#ext-013---frameworkreference-repository-separation)).
 
 ## Continuous AI
 
@@ -203,6 +252,7 @@ agentic workflow:
 MCP servers are external capabilities. Administrators must:
 
 - approve servers through an organization or enterprise registry;
+- enforce the organization or enterprise MCP allow list;
 - enable named tools rather than wildcards;
 - supply credentials only through protected runtime variables;
 - treat new servers or expanded tools as high-risk dependency and policy

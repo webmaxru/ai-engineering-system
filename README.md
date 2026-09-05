@@ -5,14 +5,37 @@ delivery. It turns agent-assisted development into an inspectable control loop:
 
 > Agents propose; humans and policy accept.
 
-The lifecycle is **plan -> act -> evaluate**. Requirements, decisions,
+The lifecycle is **plan → act → evaluate**. GitHub is the **system of record
+and control plane**, and agent work is judged through the **contributor
+model**. Requirements, decisions,
 capabilities, evidence, and acceptance remain explicit at every stage.
+
+[`docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md`](docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md)
+is the non-negotiable architectural authority. The system may add a technical
+measure only where that guide leaves an implementation gap, and every such
+measure is recorded in
+[`docs/TECHNICAL-EXTENSIONS.md`](docs/TECHNICAL-EXTENSIONS.md).
 
 This repository is intentionally **not governed by the system it describes**.
 It contains the system specification and learning material, but no active agent
 hooks, custom agents, or GitHub Actions implementation. Every normative system
 change must first be implemented and tested in the executable reference:
 [`webmaxru/northstar-orders-api-demo`](https://github.com/webmaxru/northstar-orders-api-demo).
+
+## Conformance release gate
+
+`architecture-lock.json` is the release decision. A revision may be used for
+adoption only when its conformance status is `conformant`, its audited Northstar
+revision is `accepted`, no blocking reference change remains, and
+`tools\verify-architecture.ps1` passes against that exact Northstar commit.
+
+The current audit is **blocked**: the locked Northstar baseline contains a
+required workflow that GitHub rejects before jobs start, and required repairs
+are awaiting human acceptance. The design documents and local demo remain
+available for inspection, but the inert snapshot must not be copied into
+another repository until
+[`docs/GUIDE-CONFORMANCE.md`](docs/GUIDE-CONFORMANCE.md) records restored
+conformance.
 
 ## What the system provides
 
@@ -40,7 +63,10 @@ change must first be implemented and tested in the executable reference:
 
 | Resource | Purpose |
 | --- | --- |
-| [Learning guide](docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md) | Original end-to-end learning path |
+| [Learning guide](docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md) | Non-negotiable architectural authority |
+| [Guide conformance](docs/GUIDE-CONFORMANCE.md) | Requirement-by-requirement audit of the framework and reference |
+| [Technical extensions](docs/TECHNICAL-EXTENSIONS.md) | Audited register of compatible implementation choices not prescribed by the guide |
+| [Architecture lock](architecture-lock.json) | Audited guide hash and reference commit |
 | [Alignment assessment](docs/ALIGNMENT-ASSESSMENT.md) | Baseline gaps and implemented state |
 | [Goals and non-goals](docs/GOALS-AND-NON-GOALS.md) | Scope and design boundaries |
 | [Terminology](docs/TERMINOLOGY.md) | Canonical vocabulary |
@@ -58,6 +84,7 @@ change must first be implemented and tested in the executable reference:
 ```powershell
 git clone https://github.com/webmaxru/northstar-orders-api-demo.git
 Set-Location northstar-orders-api-demo
+git switch --detach <accepted-northstar-commit>
 npm ci
 npm run db:up
 npm run demo:system
@@ -76,3 +103,10 @@ A documentation-only change may remain local to this repository only when it
 does not alter behavior, terminology, controls, required evidence, or an
 adoption instruction. Every other change is incomplete until its Northstar
 implementation and evidence are linked.
+
+Validate the guide lock, extension register, non-self-governance boundary, and
+Northstar snapshot with:
+
+```powershell
+pwsh -File tools\verify-architecture.ps1
+```

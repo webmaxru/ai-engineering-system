@@ -4,10 +4,27 @@ This guide explains how to install and adapt the AI engineering system in an
 existing GitHub repository. It assumes the project already has source code,
 build and test commands, and a default branch on GitHub.
 
+The non-negotiable architecture is
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md).
+Use [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) to preserve its required
+concepts and named technologies. If an adaptation needs a mechanism the guide
+does not specify, document it using
+[`TECHNICAL-EXTENSIONS.md`](TECHNICAL-EXTENSIONS.md); do not silently replace a
+guide control.
+
+> **Release gate:** do not install from a moving default branch or from a
+> snapshot whose `architecture-lock.json` conformance status is not
+> `conformant`. Pin an immutable framework release commit, check out the exact
+> Northstar commit recorded by that release, and run the architecture verifier
+> before copying files. The current audit status is recorded in
+> [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md).
+
 Do not begin by copying the hook into `.github/hooks/`. The hook is an
 enforcement boundary: enabling it before the task contract, plan, commands, and
 paths are customized can block legitimate agent work. Build and test the
 control plane first, then activate the hook near the end of the bootstrap.
+This controlled bootstrap is registered as
+[EXT-019](TECHNICAL-EXTENSIONS.md#ext-019---controlled-bootstrap-and-deferred-activation).
 
 To run the completed Northstar proof of concept instead, use the
 [reference implementation walkthrough](REFERENCE-WALKTHROUGH.md).
@@ -56,23 +73,48 @@ application runtime.
 The first installation cannot be approved by controls that do not exist yet.
 Treat it as a high-risk bootstrap change with explicit human ownership.
 
-1. Clone the target repository and this repository as siblings.
-2. Create a dedicated bootstrap branch from the current default branch.
-3. Record the exact starting commit.
-4. Name the human owner who may install repository settings.
-5. Require an independent review before the bootstrap reaches the default
+1. Select an immutable released commit of this framework.
+2. Clone the target, framework, and Northstar reference repositories as
+   siblings.
+3. Check out the selected framework commit and the exact Northstar commit in
+   its architecture lock.
+4. Run the architecture verifier without a bypass.
+5. Create a dedicated bootstrap branch from the target's current default
    branch.
-6. Keep the native hook outside `.github/hooks/` until Step 16.
+6. Record the framework, reference, and target starting commits.
+7. Name the human owner who may install repository settings.
+8. Require an independent review before the bootstrap reaches the default
+   branch.
+9. Keep the native hook outside `.github/hooks/` until Step 16.
 
 Example:
 
 ```powershell
 gh repo clone <owner>/<project>
 gh repo clone webmaxru/ai-engineering-system
+$frameworkCommit = "<released-framework-commit>"
+git -C ai-engineering-system switch --detach $frameworkCommit
+
+$architectureLock = Get-Content -Raw `
+  ai-engineering-system\architecture-lock.json | ConvertFrom-Json
+if ($architectureLock.conformance.status -ne "conformant") {
+  throw "The selected framework revision is not approved for adoption."
+}
+
+gh repo clone webmaxru/northstar-orders-api-demo
+$referenceCommit = $architectureLock.auditedReference.commit
+git -C northstar-orders-api-demo switch --detach $referenceCommit
+pwsh -File ai-engineering-system\tools\verify-architecture.ps1 `
+  -NorthstarPath northstar-orders-api-demo
+
 Set-Location <project>
 git switch -c bootstrap/ai-engineering-system
 git rev-parse HEAD
 ```
+
+Store `$frameworkCommit`, `$referenceCommit`, and the printed target commit in
+the bootstrap change description. Never replace the framework commit with
+`main`, `HEAD`, or another moving ref.
 
 Use a staging directory that GitHub and Copilot do not activate:
 
@@ -199,7 +241,7 @@ The instructions should define:
 
 Keep these system invariants:
 
-- **plan -> act -> evaluate**;
+- **plan → act → evaluate**;
 - **agents propose; humans and policy accept**;
 - planning and review are read-only;
 - no trusted task means reads are allowed and writes are denied;
@@ -849,7 +891,7 @@ For each server:
 6. test unavailable and denied behavior.
 
 The reference `mcp.json` exposes only named GitHub Agentic Workflow tools. It
-does not prove that organization registry or allowlist settings are enabled.
+does not prove that organization registry or allow list settings are enabled.
 
 ## 15. Add Continuous AI only after deterministic CI
 
@@ -906,10 +948,15 @@ Do not add a temporary bypass to make the remaining work easier.
 - evidence missing/stale/cross-run/cross-commit rejection tests;
 - recovery budget tests;
 - instruction synchronization;
-- workflow static analysis;
+- workflow syntax parsing and static analysis;
 - secret and dependency scans;
 - the project's complete quality command;
 - the real acceptance test.
+
+A local YAML parser and workflow scanner are necessary but not sufficient.
+Before making a new workflow a required check, push the bootstrap pull request
+and confirm GitHub creates its expected jobs. A workflow-file failure with zero
+jobs is a failed bootstrap, not hosted evidence.
 
 ### Post-merge hosted verification plan
 

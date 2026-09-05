@@ -1,7 +1,12 @@
 # Alignment assessment
 
 This assessment compares the original Northstar repository with the system
-described by the learning guide and records the resulting reference state.
+described by the non-negotiable
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md)
+and records the resulting reference state.
+The current requirement-by-requirement audit is maintained in
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md); this document preserves the
+historical before-and-after assessment.
 
 ## Baseline assessment
 
@@ -10,7 +15,7 @@ building blocks, but it was not a complete AI engineering system.
 
 | Guide capability | Starting state | Implemented reference |
 | --- | --- | --- |
-| Plan -> act -> evaluate | Partial | Explicit phases, role handoffs, and evidence decisions |
+| Plan → act → evaluate | Partial | Explicit phases, role handoffs, and evidence decisions |
 | Issue task contract | Strong shape | Trusted provenance, digest, non-goals, validation, rollout, and stop conditions |
 | Pull request as state anchor | Partial | Canonical plan, approval, commits, checks, evidence, and decisions |
 | Machine-readable risk | Missing | Validated plan contract and deterministic risk floor |
@@ -49,7 +54,7 @@ The initial investigation established:
 
 ## Implemented reference state
 
-The Northstar reference now contains:
+The Northstar reference contains the intended implementation:
 
 - trusted live issue task contracts;
 - machine-readable plans and risk routing;
@@ -66,6 +71,14 @@ The Northstar reference now contains:
 - an agentic status workflow with read-only tools and staged safe output;
 - a protected maintenance path for changes to validation authority;
 - patched dependencies with no known audit vulnerabilities at validation time.
+
+The strict follow-up audit found one release-blocking defect not detected by
+that local evidence: GitHub rejects the required governed-change workflow
+before creating jobs because its database URL is invalid YAML. The current
+reference therefore remains blocked until
+`webmaxru/northstar-orders-api-demo#8` is implemented and accepted,
+terminology repair `webmaxru/northstar-orders-api-demo#7` is accepted, and the
+snapshot is refreshed.
 
 ## Validation boundary
 
@@ -94,5 +107,8 @@ evidence. A policy file describing them is not proof that they are active.
   output lifecycle point.
 - The trusted maintenance path requires one audited installation bootstrap
   before its default-branch workflow can govern later changes.
+- The currently locked governed-change workflow does not parse on GitHub;
+  `webmaxru/northstar-orders-api-demo#8` and
+  `webmaxru/northstar-orders-api-demo#9` track the required high-risk repair.
 - The experimental Responsible AI Agent Hooks adapter is partial and
   nonconformant because the host does not expose all required lifecycle points.

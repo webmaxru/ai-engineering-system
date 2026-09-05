@@ -1,5 +1,10 @@
 # Responsible AI Agent Hooks compatibility
 
+This comparison is the isolated gap-filling experiment registered as
+[EXT-016](TECHNICAL-EXTENSIONS.md#ext-016---responsible-ai-agent-hooks-comparison).
+It does not modify or replace the non-negotiable architecture in
+[`Developing-in-Agentic-AI-Systems-Learning-Paths.md`](Developing-in-Agentic-AI-Systems-Learning-Paths.md).
+
 ## Conclusion
 
 [Responsible AI Agent Hooks](https://responsibleai.github.io/agent-hooks/) is
