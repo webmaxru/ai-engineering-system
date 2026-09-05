@@ -1,0 +1,238 @@
+name: Publish Evidence
+
+on:
+  workflow_run:
+    workflows: ["Governed Change"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: >-
+      (github.event.workflow_run.event == 'pull_request' ||
+      github.event.workflow_run.event == 'pull_request_review')
+    runs-on: ubuntu-latest
+    environment: trusted-publisher
+    outputs:
+      authority_changed: ${{ steps.authority.outputs.changed }}
+      pull_request: ${{ steps.resolve.outputs.pull_request }}
+      report_decision: ${{ steps.decision.outputs.value }}
+    env:
+      PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+      NORTHSTAR_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      NORTHSTAR_RUN_ID: ${{ github.event.workflow_run.id }}
+      NORTHSTAR_TRUSTED_PUBLISHER_APP_ID: ${{ vars.TRUSTED_PUBLISHER_APP_ID }}
+      NORTHSTAR_TRUSTED_PUBLISHER_APP_LOGIN: ${{ vars.TRUSTED_PUBLISHER_APP_LOGIN }}
+      NORTHSTAR_DISPATCH_APP_ID: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_ID }}
+      NORTHSTAR_DISPATCH_APP_LOGIN: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_LOGIN }}
+    steps:
+      # workflow_run executes trusted default-branch code. Never check out or
+      # execute the pull-request branch in this write-capable job.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - id: publisher-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.TRUSTED_PUBLISHER_APP_ID }}
+          private-key: ${{ secrets.TRUSTED_PUBLISHER_APP_PRIVATE_KEY }}
+          permission-actions: read
+          permission-administration: read
+          permission-contents: read
+          permission-environments: read
+          permission-issues: write
+          permission-pull-requests: write
+          permission-organization-secrets: ${{ github.event.repository.owner.type == 'Organization' && 'read' || '' }}
+          permission-secrets: read
+          permission-statuses: write
+      - id: dispatcher-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_ID }}
+          private-key: ${{ secrets.SYSTEM_MAINTENANCE_DISPATCH_APP_PRIVATE_KEY }}
+          permission-actions: write
+      - run: npm ci
+      - id: resolve
+        name: Resolve the associated pull request
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA"
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: northstar-*
+          path: incoming-evidence
+          merge-multiple: true
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - run: node scripts/import-evidence-artifacts.mjs --from incoming-evidence
+      - env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: npm run contract:from-pr -- --pr "$PR_NUMBER"
+      - env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: node scripts/import-workflow-results.mjs --run "$NORTHSTAR_RUN_ID"
+      - name: Re-evaluate trusted plan, approval, scope, review, and repository controls
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: |
+          set +e
+
+          node scripts/check-plan.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          PLAN_STATUS=$?
+          if [ -f artifacts/plan.json ]; then
+            cp artifacts/plan.json artifacts/candidate-plan.json
+          fi
+          node scripts/evidence-record.mjs \
+            --id plan-contract \
+            --job plan-contract \
+            --category policy \
+            --status "$([ "$PLAN_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --artifact artifacts/candidate-plan.json
+
+          ISSUE=$(node -p "require('./artifacts/task-contract.json').source.issue")
+          node scripts/fetch-approved-plan.mjs \
+            --issue "$ISSUE" \
+            --expected-plan artifacts/candidate-plan.json
+          APPROVAL_STATUS=$?
+          node scripts/evidence-record.mjs \
+            --id plan-approval \
+            --job plan-approval \
+            --category approval \
+            --status "$([ "$APPROVAL_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --artifact artifacts/approved-plan.json
+
+          node scripts/check-scope.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          SCOPE_STATUS=$?
+          node scripts/evidence-record.mjs \
+            --id scope-policy \
+            --job scope-policy \
+            --category policy \
+            --status "$([ "$SCOPE_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --artifact artifacts/scope-report.json
+
+          node scripts/check-human-review.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          REVIEW_STATUS=$?
+          node scripts/evidence-record.mjs \
+            --id human-review \
+            --job human-review \
+            --category approval \
+            --status "$([ "$REVIEW_STATUS" -eq 0 ] && echo pass || echo fail)"
+
+          node scripts/check-validation-authority.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          AUTHORITY_STATUS=$?
+          node scripts/evidence-record.mjs \
+            --id validation-authority \
+            --job validation-authority \
+            --category policy \
+            --status "$([ "$AUTHORITY_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --artifact artifacts/validation-authority-report.json
+
+          npm run governance:online
+          CONTROLS_STATUS=$?
+          node scripts/evidence-record.mjs \
+            --id repository-controls \
+            --job repository-controls \
+            --category policy \
+            --status "$([ "$CONTROLS_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --artifact artifacts/repository-controls-report.json
+
+          exit 0
+      - id: authority
+        if: always()
+        name: Classify validation-authority changes
+        run: |
+          CHANGED=$(node -e "
+            try {
+              const report = require('./artifacts/validation-authority-report.json');
+              process.stdout.write(String(
+                report.schema === 'northstar/validation-authority-report/1' &&
+                report.headSha === process.env.NORTHSTAR_HEAD_SHA &&
+                report.changedAuthority.length > 0
+              ));
+            } catch {
+              process.stdout.write('unknown');
+            }
+          ")
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+      - name: Reassert immutable pull-request identity
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: |
+          node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA"
+          npm run contract:from-pr -- --pr "$PR_NUMBER"
+          node scripts/check-plan.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+      - id: report
+        continue-on-error: true
+        run: node scripts/build-execution-report.mjs --hosted --plan artifacts/approved-plan.json
+      - id: decision
+        if: always() && hashFiles('artifacts/report.json') != ''
+        run: |
+          VALUE=$(node -p "require('./artifacts/report.json').decision")
+          echo "value=$VALUE" >> "$GITHUB_OUTPUT"
+      - if: always() && hashFiles('artifacts/report.json') != ''
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: node scripts/publish-evidence.mjs --pr "$PR_NUMBER"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: northstar-trusted-execution-report
+          path: artifacts/report.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Bind maintenance evidence to trusted runs
+        if: always() && steps.authority.outputs.changed == 'true'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/maintenance-manifest.mjs
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.authority.outputs.changed == 'true'
+        with:
+          name: northstar-system-maintenance-evidence
+          path: |
+            artifacts/task-contract.json
+            artifacts/candidate-plan.json
+            artifacts/approved-plan.json
+            artifacts/unit-junit.xml
+            artifacts/acceptance-junit.xml
+            artifacts/dependency-audit.json
+            artifacts/governance-report.json
+            artifacts/repository-controls-report.json
+            artifacts/merge-report.json
+            artifacts/scope-report.json
+            artifacts/validation-authority-report.json
+            artifacts/maintenance-manifest.json
+            artifacts/checks
+            artifacts/codeql
+          if-no-files-found: warn
+          retention-days: 90
+      - if: always() && hashFiles('artifacts/report.json') != ''
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: node scripts/publish-acceptance-status.mjs
+      - name: Dispatch protected system-maintenance approval
+        if: >-
+          steps.authority.outputs.changed == 'true' &&
+          steps.decision.outputs.value == 'ready_for_review'
+        env:
+          GH_TOKEN: ${{ steps.dispatcher-token.outputs.token }}
+        run: |
+          test -n "$GH_TOKEN"
+          gh workflow run system-maintenance-approval.yml \
+            --ref "${{ github.event.repository.default_branch }}" \
+            -f pull-request="$PR_NUMBER" \
+            -f head-sha="$NORTHSTAR_HEAD_SHA" \
+            -f evidence-run-id="${{ github.run_id }}" \
+            -f source-run-id="$NORTHSTAR_RUN_ID"

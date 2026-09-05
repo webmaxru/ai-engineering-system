@@ -1,0 +1,36 @@
+name: Plan Gate
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref }}
+  cancel-in-progress: true
+
+jobs:
+  require-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/resolve-pr-task.mjs --pr ${{ github.event.pull_request.number }}
+          node scripts/check-plan.mjs --pr ${{ github.event.pull_request.number }}
+
+# This read-only workflow validates plan content. Recording the approval is an
+# explicit human safe output:
+#   npm run plan:record-approval -- --pr <n> --review <review-id>

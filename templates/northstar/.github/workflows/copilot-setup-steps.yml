@@ -1,0 +1,69 @@
+name: "Copilot Setup Steps"
+
+# Runs before the cloud agent starts. Declaring the toolchain here removes
+# environment discovery from the agent's reasoning loop: without it the agent
+# spends task time probing Node versions and guessing install commands.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Lowest permissions that let the steps clone and install. Copilot receives
+    # its own token for its own operations.
+    permissions:
+      contents: read
+
+    # Some acceptance criteria describe behavior across process boundaries and
+    # cannot be validated without a real durability boundary. Provide PostgreSQL
+    # as a service so the agent never has to install or guess at a database.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: northstar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d northstar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install the pinned Agentic Workflows compiler
+        uses: github/gh-aw-actions/setup-cli@ba6380cc6e5be5d21677bebe04d52fb48e3abec7 # v0.81.6
+        with:
+          version: v0.81.6
+
+      - name: Verify the toolchain is usable
+        run: |
+          npm run instructions:check
+          npm run governance:check
+          npm run typecheck
+          npm run build
+          npm run test:unit
+          npm run agentic:compile

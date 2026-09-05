@@ -1,0 +1,5 @@
+* text=auto
+
+# Preserve authoritative and generated snapshots byte-for-byte.
+docs/Developing-in-Agentic-AI-Systems-Learning-Paths.md -whitespace
+templates/northstar/** -whitespace

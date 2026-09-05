@@ -1,0 +1,150 @@
+name: Agent task
+description: Define a task contract an agent can execute and a gate can check
+title: "[Agent task] "
+labels: ["agent-task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue **is** the task contract. Nothing in the repository restates
+        it. The sections below follow the task contract described in Microsoft
+        Learn: **inputs, outputs, and success criteria**. If the task cannot be
+        made precise here, it must not be executed autonomously.
+
+  - type: input
+    id: task-id
+    attributes:
+      label: Task ID
+      description: Short identifier used by tooling, for example WI-1842.
+      placeholder: WI-1842
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What problem is being solved, in one or two sentences?
+    validations:
+      required: true
+
+  - type: textarea
+    id: authoritative-sources
+    attributes:
+      label: Authoritative sources
+      description: One path or link per line. Architecture documents and ADRs the agent must read.
+      placeholder: |
+        docs/architecture.md
+        docs/adr/007-durable-idempotency.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: allowed-scope
+    attributes:
+      label: Allowed scope
+      description: One glob per line. The agent may not write outside these paths.
+      placeholder: |
+        src/**
+        tests/**
+        migrations/**
+    validations:
+      required: true
+
+  - type: textarea
+    id: prohibited-scope
+    attributes:
+      label: Prohibited scope
+      description: >
+        One per line. A path or glob is enforced by the pre-tool hook and beats
+        the allowed scope, so prefer one where the rule is about files. A plain
+        sentence cannot be enforced by a path check and is reviewer guidance
+        only - it is surfaced to the agent and the reviewer, not blocked.
+      placeholder: |
+        src/api/openapi-schema.ts
+        **/*.deploy.yml
+        public API response fields
+    validations:
+      required: false
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: One per line.
+      placeholder: |
+        no new dependencies
+        no workflow or Actions changes without human approval
+    validations:
+      required: true
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: Work this task must not expand into. One per line.
+      placeholder: |
+        authentication redesign
+        deployment platform changes
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation-expectations
+    attributes:
+      label: Validation expectations
+      description: Required builds, tests, scans, reviews, and environments. One per line.
+      placeholder: |
+        npm run validate
+        PostgreSQL acceptance tests
+        dependency and CodeQL gates
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollout-expectations
+    attributes:
+      label: Rollout expectations
+      description: How the change is introduced, observed, and rolled back. One per line.
+      placeholder: |
+        merge through a protected pull request
+        no production deployment in this task
+        revert the branch if acceptance evidence regresses
+    validations:
+      required: true
+
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Outputs
+      description: What the agent produces. One per line.
+      placeholder: |
+        plan | A structured plan in the pull request description
+        changeset | A bounded changeset on an agent branch
+        evidence | Links to workflow runs and uploaded artifacts
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success criteria
+      description: >
+        One per line as `ID | statement | proving test`. The third field must
+        match the name of the test that proves it, so a gate can verify the
+        criterion instead of trusting a claim.
+      placeholder: |
+        AC1 | Same key and payload returns the original order | replays the original response across instances
+    validations:
+      required: true
+
+  - type: textarea
+    id: stop-conditions
+    attributes:
+      label: Stop conditions
+      description: When the agent must stop and escalate instead of continuing. One per line.
+      placeholder: |
+        a new dependency is required
+        the same required check fails twice with the same failure signature
+    validations:
+      required: true

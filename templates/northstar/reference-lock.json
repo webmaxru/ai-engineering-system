@@ -1,0 +1,607 @@
+{
+  "schema": "ai-engineering-system/reference-lock/1",
+  "sourceRepository": "webmaxru/northstar-orders-api-demo",
+  "sourceBranch": "main",
+  "sourceCommit": "703ac2911b32d49ddab369140b877f35cf5d4c32",
+  "generatedAt": "2026-09-05T14:56:21Z",
+  "hashNormalization": "UTF-8 text with CRLF normalized to LF",
+  "validation": {
+    "command": "npm run validate:all",
+    "status": "pass",
+    "unitTests": 210,
+    "acceptanceTests": 8,
+    "npmAuditVulnerabilities": 0,
+    "secretScanFiles": 150,
+    "agenticCompileErrors": 0,
+    "agenticCompileWarnings": 0,
+    "zizmorFindings": 0,
+    "hostedAcceptance": "not-verified"
+  },
+  "files": [
+    {
+      "sourcePath": ".gitattributes",
+      "templatePath": ".gitattributes",
+      "sha256": "96bbf72dad13735b1a6fc433435a97b7d649badc3f7368c37e768c822bd4fa7e"
+    },
+    {
+      "sourcePath": ".github/agents/dependency.agent.md",
+      "templatePath": ".github/agents/dependency.agent.md",
+      "sha256": "7e376b0faeb6436daf86bb4cfcb64bbe22de3fb0a3df14ebcbb4946236574aad"
+    },
+    {
+      "sourcePath": ".github/agents/implement.agent.md",
+      "templatePath": ".github/agents/implement.agent.md",
+      "sha256": "98c505561681eca57ffb082fa5fcf03ce80798c12688c8ae1fbbc3ab482c198e"
+    },
+    {
+      "sourcePath": ".github/agents/plan.agent.md",
+      "templatePath": ".github/agents/plan.agent.md",
+      "sha256": "168e5aba9212d30362572a0810ae65ffbd127a2bc3c07bab67906f28f973fca8"
+    },
+    {
+      "sourcePath": ".github/agents/risk-reviewer.agent.md",
+      "templatePath": ".github/agents/risk-reviewer.agent.md",
+      "sha256": "a71a578c87f194714854cd1ff6d3457d980f01433be11b353d1cf44fd7456277"
+    },
+    {
+      "sourcePath": ".github/agents/security-reviewer.agent.md",
+      "templatePath": ".github/agents/security-reviewer.agent.md",
+      "sha256": "1de5fa954233ef026fd7026a65696b86a5cb17e061b14d5d11c9a739e804ec5a"
+    },
+    {
+      "sourcePath": ".github/CODEOWNERS",
+      "templatePath": ".github/CODEOWNERS",
+      "sha256": "6579565416625e2ecbd8d62394a5890f3f5994b3de383a6c70fec44f5ce0cf4e"
+    },
+    {
+      "sourcePath": ".github/copilot-instructions.md",
+      "templatePath": ".github/copilot-instructions.md",
+      "sha256": "d83fe39bc5d5270545f91cec1d8f6280d5bd533918bdb4280e04588512222bad"
+    },
+    {
+      "sourcePath": ".github/governance/policy.json",
+      "templatePath": ".github/governance/policy.json",
+      "sha256": "7450109ed0c2cfd2ab7a47743fa55fd9b82d0a22ae4a59d8b2462dea263f0ea8"
+    },
+    {
+      "sourcePath": ".github/hooks/agent-boundary.json",
+      "templatePath": ".github/hooks/agent-boundary.json",
+      "sha256": "720fcd8d130f4e629fbc810faea02eec941fe5169fda983fb39986c1d69fcc59"
+    },
+    {
+      "sourcePath": ".github/instructions/migrations.instructions.md",
+      "templatePath": ".github/instructions/migrations.instructions.md",
+      "sha256": "ed0626f23a2b79817c8f9d86962367bdb613a4ebaaa998cf1fd3e462ece4b932"
+    },
+    {
+      "sourcePath": ".github/instructions/services.instructions.md",
+      "templatePath": ".github/instructions/services.instructions.md",
+      "sha256": "04d97ebe0237c0143e130da63592ee6ded5e5c25bdc4da4995ff37853b6b96d4"
+    },
+    {
+      "sourcePath": ".github/instructions/tests.instructions.md",
+      "templatePath": ".github/instructions/tests.instructions.md",
+      "sha256": "376cac7d1d28b32645170dcd0d343bb2d0f6922bf7e4e9f4c70b9c1e87e1140d"
+    },
+    {
+      "sourcePath": ".github/instructions/workflows.instructions.md",
+      "templatePath": ".github/instructions/workflows.instructions.md",
+      "sha256": "3eefb1c3ea01dbf4805abd1e996339a803f7997282d354de89fa4214caf448e9"
+    },
+    {
+      "sourcePath": ".github/ISSUE_TEMPLATE/agent-task.yml",
+      "templatePath": ".github/ISSUE_TEMPLATE/agent-task.yml",
+      "sha256": "a94647111a4e5115cf944420b90242d75a2950e8d97b65501575bcad21b6f926"
+    },
+    {
+      "sourcePath": ".github/ISSUE_TEMPLATE/bug.yml",
+      "templatePath": ".github/ISSUE_TEMPLATE/bug.yml",
+      "sha256": "d5cf81ae4be3f0059e3b2dc91cf046ca941207ab57610724bc530518e12d5c2a"
+    },
+    {
+      "sourcePath": ".github/mcp.json",
+      "templatePath": ".github/mcp.json",
+      "sha256": "f7f97a26e2338b63d660be9686153f5ed94cd14d3196de5fd8cc64aa18a8e9c7"
+    },
+    {
+      "sourcePath": ".github/prompts/implement.prompt.md",
+      "templatePath": ".github/prompts/implement.prompt.md",
+      "sha256": "1b2b0297851efa4c564a29809fa5684b7327c2121d3614c1b93afa3582dfdcc9"
+    },
+    {
+      "sourcePath": ".github/prompts/plan.prompt.md",
+      "templatePath": ".github/prompts/plan.prompt.md",
+      "sha256": "24ebfef57916b323a0e764aba74e32c8e410d77d3ea31f8b50beb4c981376637"
+    },
+    {
+      "sourcePath": ".github/prompts/review-evidence.prompt.md",
+      "templatePath": ".github/prompts/review-evidence.prompt.md",
+      "sha256": "759f18d4ef73364fecf1b26b07bebebf82157de97cb881266a0177bc25d5eb9e"
+    },
+    {
+      "sourcePath": ".github/pull_request_template.md",
+      "templatePath": ".github/pull_request_template.md",
+      "sha256": "6f75f936a82645e0b0f9644be14e5c00fe9e5f5f1fb400718e2e205d65cd61e4"
+    },
+    {
+      "sourcePath": ".github/workflows/copilot-setup-steps.yml",
+      "templatePath": ".github/workflows/copilot-setup-steps.yml",
+      "sha256": "0f028f7539ae68282e9e1e639ace5ef1f83168fa62078914f4500cb7e6b98078"
+    },
+    {
+      "sourcePath": ".github/workflows/daily-repository-status.lock.yml",
+      "templatePath": ".github/workflows/daily-repository-status.lock.yml",
+      "sha256": "36cb74da750bc7c8a8d9c5fc6b2ef2fd18ed6c1cb4df3a966124ae76cef17f93"
+    },
+    {
+      "sourcePath": ".github/workflows/daily-repository-status.md",
+      "templatePath": ".github/workflows/daily-repository-status.md",
+      "sha256": "8f43980252c1cc98fa672862ba07e0965e7e12b315a9fe1ded373817fc6dc001"
+    },
+    {
+      "sourcePath": ".github/workflows/governance-review.yml",
+      "templatePath": ".github/workflows/governance-review.yml",
+      "sha256": "ff7cb1ff2b06ed63e0890b40b7256bcf4eba0dca337213d5651c200965b4cdd1"
+    },
+    {
+      "sourcePath": ".github/workflows/governed-change.yml",
+      "templatePath": ".github/workflows/governed-change.yml",
+      "sha256": "0601282cbba92e64aa8b1dd8fded9ccfdb11401ab199f87cfeb27404ed866cbd"
+    },
+    {
+      "sourcePath": ".github/workflows/plan-gate.yml",
+      "templatePath": ".github/workflows/plan-gate.yml",
+      "sha256": "1fca19328fcb62d5b8d2805064ae4543bda42d508d781652473c900a3db1e8e3"
+    },
+    {
+      "sourcePath": ".github/workflows/production-gate.yml",
+      "templatePath": ".github/workflows/production-gate.yml",
+      "sha256": "72041f48695ce8dff74f806b98ce080216f7a040a9883d80b8aeecc98e6ca3cc"
+    },
+    {
+      "sourcePath": ".github/workflows/publish-evidence.yml",
+      "templatePath": ".github/workflows/publish-evidence.yml",
+      "sha256": "634b8c769c26cbc1fa4e96662b11a0c881bc5bdfab5629f68b00744028462394"
+    },
+    {
+      "sourcePath": ".github/workflows/system-maintenance-approval.yml",
+      "templatePath": ".github/workflows/system-maintenance-approval.yml",
+      "sha256": "cc222373e092f46c7d40d7f89989c96a6801a69fac448de5c8badcc32d47f494"
+    },
+    {
+      "sourcePath": "AGENTS.md",
+      "templatePath": "AGENTS.snapshot.md",
+      "sha256": "26f9c7ec05a83d3c14d639ec2d8cb37d99617fb454d639469890a0d3aba41b48"
+    },
+    {
+      "sourcePath": "docs/adr/007-durable-idempotency.md",
+      "templatePath": "docs/adr/007-durable-idempotency.md",
+      "sha256": "e1b3c645b6b562c6595f42f405347e0435f2912a53f73540abe29177afcdc87c"
+    },
+    {
+      "sourcePath": "docs/architecture.md",
+      "templatePath": "docs/architecture.md",
+      "sha256": "37ac670ee5adebe9d33796abe55e10b1ca7237121aec347ae2c4fe8bcbc9212b"
+    },
+    {
+      "sourcePath": "docs/RECOVERY-POLICY.md",
+      "templatePath": "docs/RECOVERY-POLICY.md",
+      "sha256": "5cdb22ee650f04ffca05deb6e59f3981e6db4ce7a0edc339417e6c9030a3be24"
+    },
+    {
+      "sourcePath": "scripts/agent-stop.d.mts",
+      "templatePath": "scripts/agent-stop.d.mts",
+      "sha256": "845259714d5007f81b5ba947c17cb6f02e26765d8da78f951473b5a63910f8ef"
+    },
+    {
+      "sourcePath": "scripts/agent-stop.mjs",
+      "templatePath": "scripts/agent-stop.mjs",
+      "sha256": "7455594dd87e838b144dc1da545741e8d390dba04e84b1dfb81afe4cd1a562ec"
+    },
+    {
+      "sourcePath": "scripts/audit-hook.d.mts",
+      "templatePath": "scripts/audit-hook.d.mts",
+      "sha256": "b35333ed6f154441bad35e005af9966f347c7862a46066845652fc1b67d29cb4"
+    },
+    {
+      "sourcePath": "scripts/audit-hook.mjs",
+      "templatePath": "scripts/audit-hook.mjs",
+      "sha256": "c77dca9a5b13cadbdd99d29a1fc1fa4ef127501f8d396ede7e557c64affb5bb3"
+    },
+    {
+      "sourcePath": "scripts/authorize-tool.d.mts",
+      "templatePath": "scripts/authorize-tool.d.mts",
+      "sha256": "dbd46a0c8e0d5009c8383b1cf0200aa7e1717ae1f72d4fcfb9703295bc2eb232"
+    },
+    {
+      "sourcePath": "scripts/authorize-tool.mjs",
+      "templatePath": "scripts/authorize-tool.mjs",
+      "sha256": "920bce87d3a5418fb9f2e2010bde3adda8c481ac55dbe3bc2b31283980bdc7f1"
+    },
+    {
+      "sourcePath": "scripts/build-execution-report.d.mts",
+      "templatePath": "scripts/build-execution-report.d.mts",
+      "sha256": "4f3c9ef37032e9ab917835d13f5016b6092b452e22685702d5d0644e9641e854"
+    },
+    {
+      "sourcePath": "scripts/build-execution-report.mjs",
+      "templatePath": "scripts/build-execution-report.mjs",
+      "sha256": "5bf14efe032617cd1c009ed17f5e38625faaa8bc215b3187180db56e3cf36380"
+    },
+    {
+      "sourcePath": "scripts/check-human-review.mjs",
+      "templatePath": "scripts/check-human-review.mjs",
+      "sha256": "5c7a6e8c38b1440719c6396be8523755caff5f1ec39a34a8c318669de3781122"
+    },
+    {
+      "sourcePath": "scripts/check-merge.d.mts",
+      "templatePath": "scripts/check-merge.d.mts",
+      "sha256": "bd6c77a3e6bfd814c7087e49ee8c7592756ea55d4b3da3a5d36450d2d3fd561d"
+    },
+    {
+      "sourcePath": "scripts/check-merge.mjs",
+      "templatePath": "scripts/check-merge.mjs",
+      "sha256": "0b193d6a5be59924cf42508973ae56eebe2aa7523ceae8ea725c529f1ff68b07"
+    },
+    {
+      "sourcePath": "scripts/check-plan.d.mts",
+      "templatePath": "scripts/check-plan.d.mts",
+      "sha256": "0ed5ab9b62af3b360c203bf06f1ba34d016e197c6a6bc8163dac7a53cbd899d4"
+    },
+    {
+      "sourcePath": "scripts/check-plan.mjs",
+      "templatePath": "scripts/check-plan.mjs",
+      "sha256": "0660184b4ef77656a99b98257ed546bbf14e9e6c3239fe2d0dd9bab6d0154f55"
+    },
+    {
+      "sourcePath": "scripts/check-sarif.mjs",
+      "templatePath": "scripts/check-sarif.mjs",
+      "sha256": "d66c11ca1de9425e57627371b333f12ccc8caaa31554645135e59b47b6fa65d6"
+    },
+    {
+      "sourcePath": "scripts/check-scope.d.mts",
+      "templatePath": "scripts/check-scope.d.mts",
+      "sha256": "58b0c712da3e7b41f900d04517b646482b7424387510195816fed3a39438fa9a"
+    },
+    {
+      "sourcePath": "scripts/check-scope.mjs",
+      "templatePath": "scripts/check-scope.mjs",
+      "sha256": "f80ea5b3d8e09678eddd12938157f99751cb9f6dad9e67dadf1edff2bf3bfbc8"
+    },
+    {
+      "sourcePath": "scripts/check-validation-authority.d.mts",
+      "templatePath": "scripts/check-validation-authority.d.mts",
+      "sha256": "61016dab63d39532c6df7b8ad7307f656d1cf9c7e2654cc912c0cc97e1696e93"
+    },
+    {
+      "sourcePath": "scripts/check-validation-authority.mjs",
+      "templatePath": "scripts/check-validation-authority.mjs",
+      "sha256": "8f69f97b53b6d3a493e9090f2fdce9611fbe0bb47a0bee68cc2aad112b30b0ab"
+    },
+    {
+      "sourcePath": "scripts/evidence-record.d.mts",
+      "templatePath": "scripts/evidence-record.d.mts",
+      "sha256": "47f19a7f58c2bc2532d5912f53a121f0524c0233f192e20724def4f27fdd140d"
+    },
+    {
+      "sourcePath": "scripts/evidence-record.mjs",
+      "templatePath": "scripts/evidence-record.mjs",
+      "sha256": "95bc3abcc7a059b6d12ff560c25e0471be73e343e1877d39cf0fda420b1d9838"
+    },
+    {
+      "sourcePath": "scripts/fetch-approved-plan.mjs",
+      "templatePath": "scripts/fetch-approved-plan.mjs",
+      "sha256": "029d17a1474f231ed88bcfc958244a0e1f9efbe07c6de5e504ae9cf2cd795042"
+    },
+    {
+      "sourcePath": "scripts/fetch-task-contract.mjs",
+      "templatePath": "scripts/fetch-task-contract.mjs",
+      "sha256": "402baf06ec5af82345d8482ddd78c25755ca96688c57c51ba89c5a1b7c0092cb"
+    },
+    {
+      "sourcePath": "scripts/governance-audit.d.mts",
+      "templatePath": "scripts/governance-audit.d.mts",
+      "sha256": "301278f2329139c9e42aeec576a1dea40065fdc86f3c2fb25b76cf5992595ec2"
+    },
+    {
+      "sourcePath": "scripts/governance-audit.mjs",
+      "templatePath": "scripts/governance-audit.mjs",
+      "sha256": "b8e392b2e10f66004627cd6ee745df39e83dd9031772dd3a233fde74bdb6c96e"
+    },
+    {
+      "sourcePath": "scripts/import-evidence-artifacts.d.mts",
+      "templatePath": "scripts/import-evidence-artifacts.d.mts",
+      "sha256": "b89712c43d75514c72913bf95d8b4dbe6642a81b1ac32b74ee9d30bd8b97a668"
+    },
+    {
+      "sourcePath": "scripts/import-evidence-artifacts.mjs",
+      "templatePath": "scripts/import-evidence-artifacts.mjs",
+      "sha256": "69ebbf20dcb1480b5e277cf0684d2cb1f50cf9b1ee3472db9794fa66cecf6bc8"
+    },
+    {
+      "sourcePath": "scripts/import-workflow-results.mjs",
+      "templatePath": "scripts/import-workflow-results.mjs",
+      "sha256": "c3ad1be89fffc0d59b4036ab861894b167d674e67d92a13e2ded2dd85ef18b21"
+    },
+    {
+      "sourcePath": "scripts/maintenance-manifest.mjs",
+      "templatePath": "scripts/maintenance-manifest.mjs",
+      "sha256": "3fab8672992c89b879a9c8ae16f5f965ea5800ab50f0a5e43016ad8821d0a8fa"
+    },
+    {
+      "sourcePath": "scripts/plan-approval.d.mts",
+      "templatePath": "scripts/plan-approval.d.mts",
+      "sha256": "4f0ef8d0939439dad8dca1c1d0958774c77bfaa72971855fe7f438c7fcbbe344"
+    },
+    {
+      "sourcePath": "scripts/plan-approval.mjs",
+      "templatePath": "scripts/plan-approval.mjs",
+      "sha256": "a7dfc9e0ae475e9e3ea05cd4dde2e391605bdea31d7292cc346a15c432a03865"
+    },
+    {
+      "sourcePath": "scripts/plan-contract.d.mts",
+      "templatePath": "scripts/plan-contract.d.mts",
+      "sha256": "d1e59aa76f7294b6644aeb2021f4b8b732e487917e05bc2fbb129789501b46a9"
+    },
+    {
+      "sourcePath": "scripts/plan-contract.mjs",
+      "templatePath": "scripts/plan-contract.mjs",
+      "sha256": "4b9fd93660ec71499b607cea9ef942a613980cd51ecf4a2cded58a30470fba20"
+    },
+    {
+      "sourcePath": "scripts/plan-stop.mjs",
+      "templatePath": "scripts/plan-stop.mjs",
+      "sha256": "a9737b68b9d5dbb2226eb48441a4f808a0acf7cc86346bf0555bd090c02b3d7f"
+    },
+    {
+      "sourcePath": "scripts/publish-acceptance-status.mjs",
+      "templatePath": "scripts/publish-acceptance-status.mjs",
+      "sha256": "e3c76d790925a8530a3a56058d9646a9008e3f28ae7b34cfbcd1b1427c0ab860"
+    },
+    {
+      "sourcePath": "scripts/publish-evidence.d.mts",
+      "templatePath": "scripts/publish-evidence.d.mts",
+      "sha256": "f21a37b8b9424e8b9eb433bb09130c3980e3c125961336670da5e857c63a1698"
+    },
+    {
+      "sourcePath": "scripts/publish-evidence.mjs",
+      "templatePath": "scripts/publish-evidence.mjs",
+      "sha256": "af121dd172de01d01b6b81d14e10bc3cad3442967af610c6475f314fadff708a"
+    },
+    {
+      "sourcePath": "scripts/publish-plan.d.mts",
+      "templatePath": "scripts/publish-plan.d.mts",
+      "sha256": "473fc36bdcbb6d0644a4dff30d87d824a4dc7debce9fe80c144961de0cfef750"
+    },
+    {
+      "sourcePath": "scripts/publish-plan.mjs",
+      "templatePath": "scripts/publish-plan.mjs",
+      "sha256": "20116a6f2e62c7ceadb470b7dc718f4dc0c2f4acb4240e1e7c37f8209f13292e"
+    },
+    {
+      "sourcePath": "scripts/repair-budget.d.mts",
+      "templatePath": "scripts/repair-budget.d.mts",
+      "sha256": "cf8093efe60ba07887612a98671d75a698071a72edf1db6161a060e90dfdd095"
+    },
+    {
+      "sourcePath": "scripts/repair-budget.mjs",
+      "templatePath": "scripts/repair-budget.mjs",
+      "sha256": "0a59341299e8a11d72ced9e39526077470bbcf90d3912c3024de2a5ca9fee30e"
+    },
+    {
+      "sourcePath": "scripts/resolve-pr-task.d.mts",
+      "templatePath": "scripts/resolve-pr-task.d.mts",
+      "sha256": "1a936f1cf0777d96497de3292d9455d0d7e257051a38ec704a9b8c04c8c2a289"
+    },
+    {
+      "sourcePath": "scripts/resolve-pr-task.mjs",
+      "templatePath": "scripts/resolve-pr-task.mjs",
+      "sha256": "6f2ddd9fac1f3daecb6c9b0af5ae64fd1e227adbbb4c935f585aae3296349bc5"
+    },
+    {
+      "sourcePath": "scripts/resolve-task.d.mts",
+      "templatePath": "scripts/resolve-task.d.mts",
+      "sha256": "b6b268520f89363f1862c38b93a447980851c2fab92ff19bc960ad199c969a2c"
+    },
+    {
+      "sourcePath": "scripts/resolve-task.mjs",
+      "templatePath": "scripts/resolve-task.mjs",
+      "sha256": "c1d4518bb031d1f2d6c2b45a0d7714d56a343beb0db14d9e0a39a9e953cbb744"
+    },
+    {
+      "sourcePath": "scripts/resolve-workflow-pr.d.mts",
+      "templatePath": "scripts/resolve-workflow-pr.d.mts",
+      "sha256": "3c509fc666b4f8eef158b0188205bf81e5a7e026e75c9e600f4d3612ee43dc6c"
+    },
+    {
+      "sourcePath": "scripts/resolve-workflow-pr.mjs",
+      "templatePath": "scripts/resolve-workflow-pr.mjs",
+      "sha256": "3fd31133e1b120d3a7caedb1809cbe1dce4d667e9448ef21150ae7700be2fafb"
+    },
+    {
+      "sourcePath": "scripts/risk-policy.d.mts",
+      "templatePath": "scripts/risk-policy.d.mts",
+      "sha256": "641e14cadd0b4ef723374c1d75a29f243d96e493f151445c7992a57cdb9d0e5c"
+    },
+    {
+      "sourcePath": "scripts/risk-policy.mjs",
+      "templatePath": "scripts/risk-policy.mjs",
+      "sha256": "139f97aeb28f0f1b37e100ed34bf3743dd238781df5e2bacd795b8db8b50a4fd"
+    },
+    {
+      "sourcePath": "scripts/run-zizmor.mjs",
+      "templatePath": "scripts/run-zizmor.mjs",
+      "sha256": "43578f038760798433fa7d7dccf2c1f701290979f4e29635f2df326b899af317"
+    },
+    {
+      "sourcePath": "scripts/secret-scan.d.mts",
+      "templatePath": "scripts/secret-scan.d.mts",
+      "sha256": "406329467c5505a9d2f3cd7c4a5d8beedd4fd765d0a27db9a5840b3a973f69f8"
+    },
+    {
+      "sourcePath": "scripts/secret-scan.mjs",
+      "templatePath": "scripts/secret-scan.mjs",
+      "sha256": "0791b381d65e055d5a0f8a63c87072e7ed88d39b14390bad23e791cbfbef4f6c"
+    },
+    {
+      "sourcePath": "scripts/session-start.d.mts",
+      "templatePath": "scripts/session-start.d.mts",
+      "sha256": "fa6afe465c07c15a92c29604d4ebfd14081f867e277b66d2b74adecd97a2f10f"
+    },
+    {
+      "sourcePath": "scripts/session-start.mjs",
+      "templatePath": "scripts/session-start.mjs",
+      "sha256": "b14829bca33f8e2b8fcb00e8b1c3a9945e5353c5a957d8ead016fc26a14732c4"
+    },
+    {
+      "sourcePath": "scripts/sync-agent-instructions.mjs",
+      "templatePath": "scripts/sync-agent-instructions.mjs",
+      "sha256": "3d11eb0cafd8c36acc8c88e93092be3c95a8634183e1d787e24c36796f4a2ece"
+    },
+    {
+      "sourcePath": "scripts/system-demo.mjs",
+      "templatePath": "scripts/system-demo.mjs",
+      "sha256": "0dda73950bc5eb4830e2fa50e814ec5c15280ec3ec8d473d8f3c3efb08ccdd18"
+    },
+    {
+      "sourcePath": "scripts/task-contract.d.mts",
+      "templatePath": "scripts/task-contract.d.mts",
+      "sha256": "2e63a543bdc2bffb61592926908d20be6993588b7edc18c1a31fc4f0d90d933c"
+    },
+    {
+      "sourcePath": "scripts/task-contract.mjs",
+      "templatePath": "scripts/task-contract.mjs",
+      "sha256": "81792c2a645bec69365281b3b9516f70b2194ba6a8d86ac86abfaebe5ccdde4a"
+    },
+    {
+      "sourcePath": "scripts/verify-maintenance-runs.d.mts",
+      "templatePath": "scripts/verify-maintenance-runs.d.mts",
+      "sha256": "48dbe5a64cb739a91bdf8f55892586dcdf1315132efd86a8a9fcf5c65279f37d"
+    },
+    {
+      "sourcePath": "scripts/verify-maintenance-runs.mjs",
+      "templatePath": "scripts/verify-maintenance-runs.mjs",
+      "sha256": "3d12b62d8553128f02189e76a284e85fb2cc21945b8fb18d758c6ba7f7a8725b"
+    },
+    {
+      "sourcePath": "tests/fixtures/attempts.sample.json",
+      "templatePath": "tests/fixtures/attempts.sample.json",
+      "sha256": "b9057fb94b0c59112f0584e89ba88cb2eaf60180de88d1259482a9b19d8540bd"
+    },
+    {
+      "sourcePath": "tests/fixtures/untrusted-issue-comment.md",
+      "templatePath": "tests/fixtures/untrusted-issue-comment.md",
+      "sha256": "1b46bd3628e43deeb7d6d382556aac18189b8ab217f8c3d5d37a5efaa4e55071"
+    },
+    {
+      "sourcePath": "tests/fixtures/WI-1842.issue.md",
+      "templatePath": "tests/fixtures/WI-1842.issue.md",
+      "sha256": "1f61274740403de0bc8260b82a377023893ae273ba9872f8d6031b8abfae7b59"
+    },
+    {
+      "sourcePath": "tests/fixtures/WI-1842.plan.md",
+      "templatePath": "tests/fixtures/WI-1842.plan.md",
+      "sha256": "092106f2d027d2f443ef1b92b6c9d069789cc57b28f37e3e64d195d595e74eac"
+    },
+    {
+      "sourcePath": "tests/unit/agent-stop.test.ts",
+      "templatePath": "tests/unit/agent-stop.test.ts",
+      "sha256": "ba8d932c5dde0015ac3f08caa3e46f30777202f311c5a87751e2c844da4d4461"
+    },
+    {
+      "sourcePath": "tests/unit/audit-hook.test.ts",
+      "templatePath": "tests/unit/audit-hook.test.ts",
+      "sha256": "882b5810317e13158f83f719d712b408b1484acdbc2711e887b77cb552acea7b"
+    },
+    {
+      "sourcePath": "tests/unit/check-scope.test.ts",
+      "templatePath": "tests/unit/check-scope.test.ts",
+      "sha256": "89c5200bc0e71a5a3083fa84e29f7733d1f66e4f8b67876555b24a6270bbda52"
+    },
+    {
+      "sourcePath": "tests/unit/context-architecture.test.ts",
+      "templatePath": "tests/unit/context-architecture.test.ts",
+      "sha256": "9d386fe7828ba79573e65fb1d633a21c03b81c1a12c32a3697fef46c3476bbc4"
+    },
+    {
+      "sourcePath": "tests/unit/execution-report.test.ts",
+      "templatePath": "tests/unit/execution-report.test.ts",
+      "sha256": "2051c6a72528c64bdb101a3efbf4f16015ac399f7b7b8195162cdb02749f5de7"
+    },
+    {
+      "sourcePath": "tests/unit/governance-audit.test.ts",
+      "templatePath": "tests/unit/governance-audit.test.ts",
+      "sha256": "69416271dbbaf80321ba192c055035929dcb5b9217094fb0b4cb8737e5c95a9c"
+    },
+    {
+      "sourcePath": "tests/unit/import-evidence-artifacts.test.ts",
+      "templatePath": "tests/unit/import-evidence-artifacts.test.ts",
+      "sha256": "b0ea71fa310d947725594230dd59edd42da1fbd26d9d59db076924d0a596d916"
+    },
+    {
+      "sourcePath": "tests/unit/plan-approval.test.ts",
+      "templatePath": "tests/unit/plan-approval.test.ts",
+      "sha256": "058ec03edb2ffc3740cdd3dc27ce7769e1e5c830b663b7fd4a9b0f4e7f938e4d"
+    },
+    {
+      "sourcePath": "tests/unit/plan-contract.test.ts",
+      "templatePath": "tests/unit/plan-contract.test.ts",
+      "sha256": "86b00727b3832771db4ecb4cf40b7e22a69be73ad6118d8140c6c9ffbf02fcca"
+    },
+    {
+      "sourcePath": "tests/unit/publish-evidence.test.ts",
+      "templatePath": "tests/unit/publish-evidence.test.ts",
+      "sha256": "d72704c340ccd2ea29918aea6270da060eb501018f15533b089f405b165f6632"
+    },
+    {
+      "sourcePath": "tests/unit/publish-plan.test.ts",
+      "templatePath": "tests/unit/publish-plan.test.ts",
+      "sha256": "4a78fdc1292a8e7626160128c3c3178ccf5e8bc8960d98b515a4898f3cb2360f"
+    },
+    {
+      "sourcePath": "tests/unit/repair-budget.test.ts",
+      "templatePath": "tests/unit/repair-budget.test.ts",
+      "sha256": "fbb04a57fc441c6e61b64d4eac6c2ea3cfa7f90a05b39440165a747d2ba60fe3"
+    },
+    {
+      "sourcePath": "tests/unit/resolve-task.test.ts",
+      "templatePath": "tests/unit/resolve-task.test.ts",
+      "sha256": "164d3e3177ea55bce123e06b3b9a19daf05b1374916455fdec0f1db76a3cc162"
+    },
+    {
+      "sourcePath": "tests/unit/resolve-workflow-pr.test.ts",
+      "templatePath": "tests/unit/resolve-workflow-pr.test.ts",
+      "sha256": "5cf28316405c5838d6a053fa0f95634d82ea2e538b5b55f71280db63987c2172"
+    },
+    {
+      "sourcePath": "tests/unit/risk-policy.test.ts",
+      "templatePath": "tests/unit/risk-policy.test.ts",
+      "sha256": "8009d73aab1069c23ea1b0ca94391f18cb24771f5a2e3a50c10f14e4931b6b81"
+    },
+    {
+      "sourcePath": "tests/unit/secret-scan.test.ts",
+      "templatePath": "tests/unit/secret-scan.test.ts",
+      "sha256": "0b5acf462d47137e4117d7b6474648d0ba5e1f3349bf263486a80f2ef696b2bb"
+    },
+    {
+      "sourcePath": "tests/unit/task-contract.test.ts",
+      "templatePath": "tests/unit/task-contract.test.ts",
+      "sha256": "c754d51c7921e977e30695b8b38cbc12e06fcf7a1f9e4f69d8af06c75062f9cf"
+    },
+    {
+      "sourcePath": "tests/unit/tool-authorization.test.ts",
+      "templatePath": "tests/unit/tool-authorization.test.ts",
+      "sha256": "20fedb887ef544d02c99fe8edc8187bc06024ab168d5dc33f0c9bb7f3ded68bb"
+    },
+    {
+      "sourcePath": "tests/unit/validation-authority.test.ts",
+      "templatePath": "tests/unit/validation-authority.test.ts",
+      "sha256": "1cfa8332c3b70218ddbc534713af60d3377feba9dd8eda9375e7d2ab442f3b41"
+    },
+    {
+      "sourcePath": "tests/unit/verify-maintenance-runs.test.ts",
+      "templatePath": "tests/unit/verify-maintenance-runs.test.ts",
+      "sha256": "a0bc1d5c28342d77dc4c8e2a77d7ae2f216fdfb6638979145d39a2156f7e680d"
+    }
+  ]
+}

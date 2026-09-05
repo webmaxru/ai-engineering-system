@@ -1,0 +1,239 @@
+{
+  "schema": "northstar/governance-policy/1",
+  "principle": "agents propose; humans and policy accept",
+  "riskLevels": [
+    "low",
+    "medium",
+    "high",
+    "critical"
+  ],
+  "pathRisk": [
+    {
+      "pattern": ".github/workflows/**",
+      "risk": "high",
+      "reason": "Workflow changes alter the repository control plane."
+    },
+    {
+      "pattern": ".github/hooks/**",
+      "risk": "high",
+      "reason": "Hook changes alter pre-action enforcement."
+    },
+    {
+      "pattern": ".github/agents/**",
+      "risk": "high",
+      "reason": "Agent definitions change role and tool boundaries."
+    },
+    {
+      "pattern": ".github/instructions/**",
+      "risk": "high",
+      "reason": "Durable instructions affect every matching task."
+    },
+    {
+      "pattern": ".github/governance/**",
+      "risk": "high",
+      "reason": "Governance policy changes can weaken required controls."
+    },
+    {
+      "pattern": "infra/**",
+      "risk": "high",
+      "reason": "Infrastructure changes have broad operational impact."
+    },
+    {
+      "pattern": "security/**",
+      "risk": "high",
+      "reason": "Security controls require explicit ownership review."
+    },
+    {
+      "pattern": "migrations/**",
+      "risk": "high",
+      "reason": "Database changes can be hard to reverse."
+    },
+    {
+      "pattern": "package.json",
+      "risk": "high",
+      "reason": "This manifest controls both dependencies and validation commands."
+    },
+    {
+      "pattern": "package-lock.json",
+      "risk": "high",
+      "reason": "The lockfile controls the executable validation supply chain."
+    },
+    {
+      "pattern": "scripts/**",
+      "risk": "high",
+      "reason": "Repository scripts implement task, policy, and evidence enforcement."
+    },
+    {
+      "pattern": "eslint.config.js",
+      "risk": "high",
+      "reason": "Validation configuration can silently weaken required checks."
+    },
+    {
+      "pattern": "tsconfig.json",
+      "risk": "high",
+      "reason": "Validation configuration can silently weaken required checks."
+    },
+    {
+      "pattern": "tsconfig.build.json",
+      "risk": "high",
+      "reason": "Validation configuration can silently weaken required checks."
+    },
+    {
+      "pattern": "vitest.config.ts",
+      "risk": "high",
+      "reason": "Validation configuration can silently weaken required checks."
+    },
+    {
+      "pattern": "docs/**",
+      "risk": "low",
+      "reason": "Documentation-only changes are normally reversible."
+    },
+    {
+      "pattern": "**",
+      "risk": "medium",
+      "reason": "Application changes require a pull request and objective checks."
+    }
+  ],
+  "operationRisk": {
+    "production-deployment": "critical",
+    "production-secret-access": "critical",
+    "workflow-change": "high",
+    "infrastructure-change": "high",
+    "security-change": "high",
+    "dependency-change": "medium"
+  },
+  "requiredChecks": {
+    "low": [
+      "plan-contract",
+      "scope-policy",
+      "quality",
+      "secret-scan",
+      "merge-validation",
+      "evidence"
+    ],
+    "medium": [
+      "plan-contract",
+      "scope-policy",
+      "quality",
+      "acceptance",
+      "dependency-review",
+      "secret-scan",
+      "merge-validation",
+      "human-review",
+      "evidence"
+    ],
+    "high": [
+      "plan-contract",
+      "plan-approval",
+      "scope-policy",
+      "quality",
+      "acceptance",
+      "dependency-review",
+      "codeql",
+      "secret-scan",
+      "merge-validation",
+      "governance-policy",
+      "validation-authority",
+      "repository-controls",
+      "human-review",
+      "evidence"
+    ],
+    "critical": [
+      "plan-contract",
+      "plan-approval",
+      "scope-policy",
+      "quality",
+      "acceptance",
+      "dependency-review",
+      "codeql",
+      "secret-scan",
+      "merge-validation",
+      "governance-policy",
+      "validation-authority",
+      "repository-controls",
+      "human-review",
+      "production-environment",
+      "evidence"
+    ]
+  },
+  "humanApproval": {
+    "low": 0,
+    "medium": 1,
+    "high": 1,
+    "critical": 1,
+    "requireLatestHeadFor": [
+      "medium",
+      "high",
+      "critical"
+    ],
+    "requirePlanOnlyApprovalFor": [
+      "high",
+      "critical"
+    ],
+    "requireCodeOwnerReviewFor": [
+      "high",
+      "critical"
+    ]
+  },
+  "requiredStatusChecks": [
+    "plan-contract",
+    "scope-policy",
+    "quality",
+    "acceptance",
+    "dependency-review",
+    "secret-scan",
+    "codeql",
+    "merge-validation",
+    "governance-policy",
+    "trusted-acceptance"
+  ],
+  "evidenceRetentionDays": 90,
+  "reviewCadence": {
+    "failedRunsAndPolicyViolations": "weekly",
+    "workflowPermissionsAndSecretScopes": "monthly",
+    "rulesetsCodeOwnersEnvironmentsRetentionAndOwnership": "quarterly"
+  },
+  "ownership": {
+    "agents": "@webmaxru",
+    "workflows": "@webmaxru",
+    "hooks": "@webmaxru",
+    "security": "@webmaxru",
+    "retirementReview": "@webmaxru"
+  },
+  "environmentReviewers": {
+    "production": [
+      {
+        "type": "User",
+        "name": "webmaxru"
+      }
+    ],
+    "systemMaintenance": [
+      {
+        "type": "User",
+        "name": "webmaxru"
+      }
+    ]
+  },
+  "trustedPublisherApp": {
+    "loginVariable": "TRUSTED_PUBLISHER_APP_LOGIN",
+    "appIdVariable": "TRUSTED_PUBLISHER_APP_ID",
+    "privateKeySecret": "TRUSTED_PUBLISHER_APP_PRIVATE_KEY"
+  },
+  "systemMaintenanceDispatcherApp": {
+    "loginVariable": "SYSTEM_MAINTENANCE_DISPATCH_APP_LOGIN",
+    "appIdVariable": "SYSTEM_MAINTENANCE_DISPATCH_APP_ID",
+    "privateKeySecret": "SYSTEM_MAINTENANCE_DISPATCH_APP_PRIVATE_KEY"
+  },
+  "externalControls": {
+    "requiredPullRequest": true,
+    "requiredStatusChecks": true,
+    "requiredCodeOwnerReview": true,
+    "restrictDirectPushes": true,
+    "blockForcePushes": true,
+    "blockBranchDeletion": true,
+    "secretScanning": true,
+    "pushProtection": true,
+    "productionEnvironmentReviewers": true,
+    "systemMaintenanceEnvironmentReviewers": true
+  }
+}

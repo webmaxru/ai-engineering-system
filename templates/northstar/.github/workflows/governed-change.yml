@@ -1,0 +1,540 @@
+name: Governed Change
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  pull_request_review:
+    types: [submitted, dismissed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  NORTHSTAR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+jobs:
+  plan-contract:
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    outputs:
+      issue: ${{ steps.resolve.outputs.issue }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run contract:from-pr -- --pr "$PR_NUMBER"
+      - id: plan
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run plan:gate -- --pr "$PR_NUMBER"
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id plan-contract
+          --category policy
+          --status "${{ steps.plan.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/plan.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-plan-context
+          path: |
+            artifacts/task-contract.json
+            artifacts/plan.json
+            artifacts/checks/plan-contract.json
+          if-no-files-found: warn
+          retention-days: 90
+      - if: steps.plan.outcome != 'success'
+        run: exit 1
+
+  plan-approval:
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    needs: plan-contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v7
+        with:
+          name: northstar-plan-context
+          path: .
+      - id: approval
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          node scripts/fetch-approved-plan.mjs
+          --issue "${{ needs.plan-contract.outputs.issue }}"
+          --expected-plan artifacts/plan.json
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id plan-approval
+          --category approval
+          --status "${{ steps.approval.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/plan.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-plan-approval
+          path: |
+            artifacts/approved-plan.json
+            artifacts/checks/plan-approval.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.approval.outcome != 'success'
+        run: exit 1
+
+  scope-policy:
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    needs: plan-contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v7
+        with:
+          name: northstar-plan-context
+          path: .
+      - id: scope
+        continue-on-error: true
+        run: npm run scope:check -- --base "${{ github.event.pull_request.base.sha }}"
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id scope-policy
+          --category policy
+          --status "${{ steps.scope.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/scope-report.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-scope
+          path: |
+            artifacts/scope-report.json
+            artifacts/checks/scope-policy.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.scope.outcome != 'success'
+        run: exit 1
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: quality
+        continue-on-error: true
+        run: |
+          npm run instructions:check
+          npm run governance:check
+          npm run lint
+          npm run typecheck
+          npm run build
+          npm run test:unit:ci
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id quality
+          --category execution
+          --status "${{ steps.quality.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/unit-junit.xml
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-quality
+          path: |
+            artifacts/unit-junit.xml
+            artifacts/governance-report.json
+            artifacts/checks/quality.json
+          if-no-files-found: warn
+          retention-days: 90
+      - if: steps.quality.outcome != 'success'
+        run: exit 1
+
+  acceptance:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: northstar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d northstar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ******localhost:5432/northstar
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: acceptance
+        continue-on-error: true
+        run: npm run test:acceptance:ci
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id acceptance
+          --category execution
+          --status "${{ steps.acceptance.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/acceptance-junit.xml
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-acceptance
+          path: |
+            artifacts/acceptance-junit.xml
+            artifacts/checks/acceptance.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.acceptance.outcome != 'success'
+        run: exit 1
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: mkdir -p artifacts
+      - id: audit
+        continue-on-error: true
+        run: npm audit --audit-level=high --json > artifacts/dependency-audit.json
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id dependency-review
+          --category security
+          --status "${{ steps.audit.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/dependency-audit.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-dependency
+          path: |
+            artifacts/dependency-audit.json
+            artifacts/checks/dependency-review.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.audit.outcome != 'success'
+        run: exit 1
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - id: scan
+        continue-on-error: true
+        run: npm run security:secrets
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id secret-scan
+          --category security
+          --status "${{ steps.scan.outcome == 'success' && 'pass' || 'fail' }}"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-secret
+          path: artifacts/checks/secret-scan.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.scan.outcome != 'success'
+        run: exit 1
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+      - id: analyze
+        continue-on-error: true
+        uses: github/codeql-action/analyze@v4
+        with:
+          upload: never
+          upload-database: false
+          output: artifacts/codeql
+      - id: gate
+        if: steps.analyze.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/check-sarif.mjs artifacts/codeql
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id codeql
+          --category security
+          --status "${{ steps.analyze.outcome == 'success' && steps.gate.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/codeql
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-codeql
+          path: |
+            artifacts/codeql
+            artifacts/checks/codeql.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.analyze.outcome != 'success' || steps.gate.outcome != 'success'
+        run: exit 1
+
+  merge-validation:
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: git fetch origin "${{ github.event.pull_request.base.ref }}"
+      - id: merge
+        continue-on-error: true
+        run: node scripts/check-merge.mjs --base "${{ github.event.pull_request.base.sha }}"
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id merge-validation
+          --category policy
+          --status "${{ steps.merge.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/merge-report.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-merge
+          path: |
+            artifacts/merge-report.json
+            artifacts/checks/merge-validation.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.merge.outcome != 'success'
+        run: exit 1
+
+  governance-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - id: governance
+        continue-on-error: true
+        run: npm run governance:check
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id governance-policy
+          --category policy
+          --status "${{ steps.governance.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/governance-report.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-governance
+          path: |
+            artifacts/governance-report.json
+            artifacts/checks/governance-policy.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.governance.outcome != 'success'
+        run: exit 1
+
+  repository-controls:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - id: controls
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run governance:online
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id repository-controls
+          --category policy
+          --status "${{ steps.controls.outcome == 'success' && 'pass' || 'fail' }}"
+          --artifact artifacts/repository-controls-report.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-repository-controls
+          path: |
+            artifacts/repository-controls-report.json
+            artifacts/checks/repository-controls.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.controls.outcome != 'success'
+        run: exit 1
+
+  human-review:
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    needs: plan-contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@v7
+        with:
+          name: northstar-plan-context
+          path: .
+      - id: review
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-human-review.mjs --pr "$PR_NUMBER"
+      - if: always()
+        run: >-
+          node scripts/evidence-record.mjs
+          --id human-review
+          --category approval
+          --status "${{ steps.review.outcome == 'success' && 'pass' || 'fail' }}"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-check-review
+          path: artifacts/checks/human-review.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.review.outcome != 'success'
+        run: exit 1
+
+  evidence:
+    if: always() && (github.event_name == 'pull_request' || github.event_name == 'pull_request_review')
+    needs:
+      - plan-contract
+      - plan-approval
+      - scope-policy
+      - quality
+      - acceptance
+      - dependency-review
+      - secret-scan
+      - codeql
+      - merge-validation
+      - governance-policy
+      - repository-controls
+      - human-review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.NORTHSTAR_HEAD_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: northstar-*
+          path: .
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run contract:from-pr -- --pr "$PR_NUMBER"
+      - id: report
+        continue-on-error: true
+        run: node scripts/build-execution-report.mjs --hosted --plan artifacts/approved-plan.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: northstar-execution-report
+          path: artifacts/report.json
+          if-no-files-found: error
+          retention-days: 90
+      - if: steps.report.outcome != 'success'
+        run: exit 1

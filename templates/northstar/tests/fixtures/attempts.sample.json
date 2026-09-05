@@ -1,0 +1,10 @@
+[
+  {
+    "check": "acceptance",
+    "message": "AssertionError: expected 2 to be 1 // creates exactly one order under concurrent cross-instance retries at /home/runner/work/repo/tests/idempotency.acceptance.test.ts in 812ms (run 4a91c02)"
+  },
+  {
+    "check": "acceptance",
+    "message": "AssertionError: expected 2 to be 1 // creates exactly one order under concurrent cross-instance retries at /tmp/build-99/tests/idempotency.acceptance.test.ts in 1204ms (run 7fd31ab)"
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "$comment": "Use the PascalCase compatibility event names once. Copilot CLI and cloud agent accept these names and emit the VS Code-compatible payload shape; registering both cases would execute the same control twice. Commands invoke node directly so stdin reaches the policy unchanged. Post-tool and session-end records are payload-free and session-local; GitHub Actions remains the durable acceptance authority.",
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node scripts/session-start.mjs",
+        "timeout": 20
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "node scripts/resolve-task.mjs",
+        "timeout": 20
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "node scripts/authorize-tool.mjs",
+        "timeout": 10
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "node scripts/audit-hook.mjs",
+        "timeout": 10
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "type": "command",
+        "command": "node scripts/audit-hook.mjs",
+        "timeout": 10
+      }
+    ],
+    "SessionEnd": [
+      {
+        "type": "command",
+        "command": "node scripts/audit-hook.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}

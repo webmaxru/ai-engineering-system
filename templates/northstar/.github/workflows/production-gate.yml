@@ -1,0 +1,40 @@
+name: Production Gate Demonstration
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-sha:
+        description: Exact reviewed commit SHA to promote
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.release-sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm pack --dry-run
+
+  approval-boundary:
+    needs: package
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: >-
+          echo "The protected production environment is the human authorization
+          boundary. This reference workflow performs no external deployment."
