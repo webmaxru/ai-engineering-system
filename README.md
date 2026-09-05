@@ -45,7 +45,8 @@ change must first be implemented and tested in the executable reference:
 | [Goals and non-goals](docs/GOALS-AND-NON-GOALS.md) | Scope and design boundaries |
 | [Terminology](docs/TERMINOLOGY.md) | Canonical vocabulary |
 | [Architecture](docs/ARCHITECTURE.md) | Control loop, trust model, and technology mapping |
-| [Quickstart](docs/QUICKSTART.md) | Run the proof of concept and adopt the pattern |
+| [Adoption quickstart](docs/QUICKSTART.md) | Apply the system to any existing GitHub project |
+| [Reference walkthrough](docs/REFERENCE-WALKTHROUGH.md) | Run and inspect the Northstar proof of concept |
 | [End-to-end demo](docs/END-TO-END-DEMO.md) | Reproduce the complete local control loop |
 | [Reference implementation](docs/REFERENCE-IMPLEMENTATION.md) | Executable artifact map and validation contract |
 | [Maintaining the system](docs/MAINTAINING-THE-SYSTEM.md) | Cross-repository change and evidence workflow |
