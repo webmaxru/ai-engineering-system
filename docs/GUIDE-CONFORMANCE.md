@@ -70,11 +70,15 @@ could not verify active task/session authority and used workspace branch
 `copilot/agentimplementaes-surface-evidence`, not PR #27's
 `agent/implement/aes-parallel-isolation`. The later session
 `0621d3a5-e662-47f5-b737-bdca4dbe01c4` selected the custom `plan` agent and
-the exact base branch at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`, but
-stopped before planning because `artifacts/task-contract.json` was absent and
-no task was resolved. No plan, source change, or PR resulted. This is evidence
-of a cloud task-contract bootstrap failure, not of a permission denial or a
-successful cloud execution. No parallel cloud proof is established.
+the exact base branch at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. After
+the issue body was supplied, it produced a chat-only plan proposal; its
+`contractDigest` is an unresolved sentinel because no task-contract artifact
+was available and the planner had no shell. The branch remains at the base;
+no commit or PR resulted. The plan is not publishable or approved until its
+contract digest is bound and the plan-only state is independently reviewed.
+This is evidence of a cloud task-contract bootstrap failure, not of a
+permission denial or successful cloud execution. No parallel cloud proof is
+established.
 The system-maintenance items are reopened, but none of these statuses accepts
 their plans or implementations.
 

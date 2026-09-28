@@ -44,17 +44,20 @@ then label the local application rehearsal as a separate proof.
 [webmaxru/northstar-orders-api-demo#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14)
 and PR #18 were reopened on 2026-09-28 to resume conformance remediation.
 They remain unmerged and unaccepted; reopening is not a repair or acceptance
-decision. A later issue #16 GitHub.com canary returned `CANARY-FAIL` because
-the active task contract/session identity was unavailable and the workspace
-branch did not match the approved implementation. The latest attempt used
-`/plan 16`, the custom `plan` agent, and base
+decision. An earlier issue #16 GitHub.com canary returned `CANARY-FAIL`
+because the active task contract/session identity was unavailable and the
+workspace branch did not match the approved implementation. The latest
+attempt used `/plan 16`, the custom `plan` agent, and base
 `agent/implement/aes-surface-evidence` at
-`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`, but stopped before planning
-because `artifacts/task-contract.json` was absent. It reported no task
-resolution and made no plan, source changes, or PR. The WI-1842 cloud
-demonstration therefore remains blocked at task-contract bootstrap. The run
-reported no permission denial; fixture output cannot substitute for a
-successful immutable-head cloud session and trusted acceptance.
+`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. After the issue body was
+supplied, it produced a chat-only `Plan ready for review` proposal, but its
+`contractDigest` remains an unresolved sentinel because no task-contract
+artifact was resolved and the planner had no shell. The branch remains at the
+base; no commit, source change, or PR resulted. The WI-1842 cloud
+demonstration remains blocked until task authority and a digest-bound,
+publishable plan are established. The run reported no permission denial;
+fixture output cannot substitute for a successful immutable-head cloud session
+and trusted acceptance.
 
 ## Current follow-up state (2026-09-28)
 
@@ -68,14 +71,16 @@ scope closures have not changed that conclusion:
 | Local isolation candidate | Reopened PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) passed local `validate` (500 unit tests), PostgreSQL acceptance (10/10), scope and merge checks against PR #18's head. Full `validate:all` exits 1 on 84 Zizmor findings and hosted evidence/repository-controls fail. |
 | Historical local CLI canaries | Two read-only canaries for issue #16 matched task/contract/plan/base/session/owner identities. They are not an implementation or acceptance run for WI-1842; issue #16 is reopened. |
 | Historical GitHub.com cloud attempt | PR [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) was closed after using the default `main` base and producing zero changed files. It does not prove cloud isolation. |
-| Current GitHub.com cloud canaries | Session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5` produced an unapproved proposal on `copilot/plan-16`, based on `main` at `b65c2de5…`, not the approved `17e7a5c` base. Session [5724baed-e173-4722-95ae-077e90c39c6a](https://github.com/webmaxru/northstar-orders-api-demo/tasks/5724baed-e173-4722-95ae-077e90c39c6a) used a mismatched workspace branch. Latest session [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4) used `/plan 16`, custom agent `plan`, and the exact base branch at `17e7a5c…`, but stopped because `artifacts/task-contract.json` was absent. No plan, source changes, or PR resulted. |
+| Current GitHub.com cloud canaries | Session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5` produced an unapproved proposal on `copilot/plan-16`, based on `main` at `b65c2de5…`, not the approved `17e7a5c` base. Session [5724baed-e173-4722-95ae-077e90c39c6a](https://github.com/webmaxru/northstar-orders-api-demo/tasks/5724baed-e173-4722-95ae-077e90c39c6a) used a mismatched workspace branch. Latest session [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4) used `/plan 16`, custom agent `plan`, and the exact base branch at `17e7a5c…`. After the issue body was supplied, it generated a chat-only plan proposal with an unresolved `contractDigest`; the branch remains at base and no commit/PR resulted. |
 | VS Code | No Local or Copilot Agent Host canary was completed. |
 
 The latest GitHub.com Agents run proves that the custom agent and base-branch
 selectors can be set correctly, but the task-contract bootstrap still did not
-resolve issue #16. Do not use the generated unapproved plan proposal or a
-session on `main` as task evidence. No successful cloud plan → act → evaluate
-sequence or `ready_for_acceptance` decision has been recorded.
+resolve issue #16. Its chat-only plan is not a publishable or approved plan
+until the canonical contract digest is bound. Do not use it for implementation
+or use the earlier session on `main` as task evidence. No successful cloud
+plan → act → evaluate sequence or `ready_for_acceptance` decision has been
+recorded.
 
 The currently open demo tasks are WI-1842 (#4) and WI-1843 (#17); PR #19 is
 the draft WI-1843 candidate. Maintenance work is reopened for conformance

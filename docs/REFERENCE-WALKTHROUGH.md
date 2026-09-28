@@ -33,9 +33,12 @@ Use the exact commands, prerequisites, expected responses and cleanup in
 
 Latest GitHub.com session
 [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4)
-used the custom `plan` agent and the exact approved base branch, but the
-planner stopped because `artifacts/task-contract.json` was absent. It produced
-no plan, source changes, or PR; cloud task-contract bootstrap remains blocked.
+used the custom `plan` agent and the exact approved base branch. After the
+issue body was supplied, it generated a chat-only proposal, but the plan's
+`contractDigest` remains an unresolved sentinel because the task-contract
+artifact was not resolved and the planner had no shell. The branch remains at
+the base; no commit, source change, or PR resulted, so the proposal is not
+publishable and cloud task-contract bootstrap remains blocked.
 
 The runbook's local `ready_for_review` output must not be presented as
 `ready_for_acceptance`. Reopened PR #27's historical local validation (500

@@ -101,9 +101,12 @@ Latest GitHub.com canary session
 [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4)
 used `/plan 16`, the custom `plan` agent, and the correct base
 `agent/implement/aes-surface-evidence` at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`.
-It stopped before planning because `artifacts/task-contract.json` was absent;
-no plan, source change, or PR resulted. This confirms the task-contract
-bootstrap remains blocked, not that repository permissions were denied.
+After the issue body was supplied, it generated a chat-only plan proposal, but
+its `contractDigest` remains an unresolved sentinel because
+`artifacts/task-contract.json` was not resolved and the planner had no shell.
+The branch remains at the base; no commit, source change, or PR resulted.
+This confirms task-contract bootstrap is still incomplete, not that repository
+permissions were denied.
 
 Issues #14, #16, #20, #22 and #24 and their plan/implementation PRs have been
 reopened for remediation. Their earlier closures were scope cancellations,
