@@ -139,7 +139,7 @@ files or a renamed hook.
 
 | Demonstration | Current status |
 | --- | --- |
-| [WI-1842](END-TO-END-DEMO.md) | Local application and fixture rehearsal plus an actual cloud planner stop; PR #13 and PR #18 are closed historical attempts, and PR #29 was a closed wrong-base/no-change attempt—not a cloud delivery |
+| [WI-1842](END-TO-END-DEMO.md) | Local application and fixture rehearsal plus an actual cloud planner stop; PR #13 and PR #29 are closed historical attempts. Controller PR #18 is reopened but unmerged/unaccepted—not a cloud delivery |
 | [Add `GET /orders/:id`](NEW-ENDPOINT-DEMO.md) | Draft PR #19 is rebased onto `17e7a5c`; exact-head review, hosted `human-review`, local validation and PostgreSQL acceptance (12/12) pass, while full Zizmor, hosted repository-controls, and cross-surface proof remain outstanding |
 
 The [technical extensions register](TECHNICAL-EXTENSIONS.md) identifies which

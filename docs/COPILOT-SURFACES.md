@@ -29,18 +29,18 @@ canary. VS Code's selected Local versus Copilot Agent Host harness matters.
 
 | Surface | Current evidence | Result |
 | --- | --- | --- |
-| Copilot CLI | Historical issue #16 canaries in separate worktrees matched the task, contract, approved plan, base, session, and workspace-owner identities. No source changes were made by these read-only canaries. Issue #16 is now closed by owner scope direction. | Partial pass for identity binding only; they do not prove write authorization, Stop behavior, recovery, or full host parity. |
-| Copilot CLI validation | Closed PR #27 at `fc59deefc31213b2c596bd0384008f77a9955c4f`: `npm run validate` passed 500 unit tests and 79 offline governance checks; `npm run test:acceptance` passed 10/10; scope (66 paths, zero violations) and merge checks passed against base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. | Historical local evidence only. `npm run validate:all` exits 1 at Zizmor: 84 findings (64 errors, 20 notes); hosted evidence and repository-controls failed. |
+| Copilot CLI | Historical issue #16 canaries in separate worktrees matched the task, contract, approved plan, base, session, and workspace-owner identities. No source changes were made by these read-only canaries. Issue #16 has since been reopened. | Partial pass for identity binding only; they do not prove write authorization, Stop behavior, recovery, or full host parity. |
+| Copilot CLI validation | Reopened PR #27 at `fc59deefc31213b2c596bd0384008f77a9955c4f`: `npm run validate` passed 500 unit tests and 79 offline governance checks; `npm run test:acceptance` passed 10/10; scope (66 paths, zero violations) and merge checks passed against base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. | Local evidence only. `npm run validate:all` exits 1 at Zizmor: 84 findings (64 errors, 20 notes); hosted evidence and repository-controls fail. |
 | VS Code | The running VS Code window did not expose an actionable accessibility tree or screenshot, and no live Local/Agent Host session was completed. | Unverified. |
-| Copilot cloud | WI-1842 planner PR #13 was closed as a stale, zero-file rehearsal after the cached task contract was absent. The issue #16 attempt PR #29 was closed after using `main` and producing zero changed files. | Neither is an AC9 canary; no successful cloud isolation run is proven. |
-| GitHub.com agent UI | The repository Agents page displayed “Unable to load tasks” with a stale-cache/account-switch warning during this check; no new task was started. | Platform/UI retrieval failure, not a successful or failed agent execution. |
-| Hosted candidate gates | PR #19 at `cf762216…` remains draft with exact-head approval and passing `human-review`; `repository-controls` fails. PRs #27 and #28 were closed by owner scope direction; #27 had failing hosted `evidence`/`repository-controls`, and #28 had a passing `evidence` check but failing `repository-controls`. | No candidate has `ready_for_acceptance`; closures and approvals do not bypass failed trusted-control/evidence gates. |
+| Copilot cloud | The closed WI-1842 planner PR #13 stopped because the cached task contract was absent. Historical PR #29 used `main` and produced zero changed files. Session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5` produced an unapproved proposal on `copilot/plan-16`, based on `main` at `b65c2de5…`, not the approved `17e7a5c` base. | Neither proves cloud isolation or accepted task execution; the proposal is unapproved and is not a release artifact. |
+| GitHub.com agent UI | The canary session [5724baed-e173-4722-95ae-077e90c39c6a](https://github.com/webmaxru/northstar-orders-api-demo/tasks/5724baed-e173-4722-95ae-077e90c39c6a) returned `CANARY-FAIL`: PR/plan metadata matched, but active task/session authority was unavailable and the workspace branch `copilot/agentimplementaes-surface-evidence` did not match PR #27's branch. No changes or PR were made. | No successful cloud binding or cross-surface proof; `/plan 16` was placed at the end of the prompt, so the task contract did not activate. |
+| Hosted candidate gates | PR #19 at `cf762216…` remains draft with exact-head approval and passing `human-review`; `repository-controls` fails. PRs #27 and #28 are reopened; #27 has failing hosted `evidence`/`repository-controls`, and #28's prior `evidence` pass does not clear its `repository-controls` failure. Refreshed plan PR #21 is at `6795e32…`; `plan-contract`/`require-plan` pass, but `human-review`, `plan-approval`, `evidence`, and `repository-controls` fail. | No candidate has `ready_for_acceptance`; reopening or prior approval does not bypass failed trusted-control/evidence gates. |
 
-PR #27's `npm run validate:all` failure is historical: issue #20 and its plan
-were closed by owner scope direction without scanner fixes. Issue #22 and its
-plan were also closed without a ruleset change. No permissions, secrets,
-rulesets, or protected environment settings were changed to make these checks
-pass.
+PR #27's `npm run validate:all` failure remains current for that exact head:
+issue #20 and its refreshed plan are reopened, but no scanner findings were
+fixed. Issue #22 and its plan are also reopened; no ruleset setting was
+changed. No permissions, secrets, or protected environment settings were
+changed to make any check pass.
 
 ## Host differences that need explicit adaptation
 

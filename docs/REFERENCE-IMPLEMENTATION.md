@@ -14,10 +14,10 @@ the guide concrete without being prescribed by it are recorded in
 
 The locked Northstar baseline `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c` is
 **known defective**. Earlier terminology and workflow fixes are merged. On
-2026-09-28 the owner closed system-maintenance issues #14, #16, #20, #22 and
-#24 and their associated plan/implementation PRs to retain demo-only open
-work. These are cancellations, not accepted fixes; no maintenance PR was
-merged, and no repository setting was changed.
+2026-09-28 the owner reopened system-maintenance issues #14, #16, #20, #22 and
+#24 and their associated plan/implementation PRs to resume conformance
+remediation. Their earlier closures were cancellations, not accepted fixes;
+no maintenance PR has been merged, and no repository setting was changed.
 
 Demo issue #4 (WI-1842) and issue #17 (WI-1843) remain open; PR #19 remains a
 draft demo candidate. Its exact-head review and hosted `human-review` pass,
@@ -26,6 +26,13 @@ and local application/PostgreSQL checks pass, but the full Zizmor run reports
 not an accepted release; see [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md)
 for the exact refs and blockers.
 Northstar remains an inspectable proof of concept, not an adoption source.
+
+The reopened scanner-remediation plan PR #21 is refreshed at head
+`6795e32beba33e7ac109bf020ae8f3b377042cc4`, bound to base
+`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; local plan validation and hosted
+`plan-contract`/`require-plan` pass. Fresh independent review and plan approval,
+hosted evidence, and `repository-controls` remain unresolved. Issue #20 remains
+blocked by issue #22; no scanner finding has been fixed.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
