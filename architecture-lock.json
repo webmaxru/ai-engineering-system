@@ -6,24 +6,43 @@
   },
   "auditedReference": {
     "repository": "webmaxru/northstar-orders-api-demo",
-    "commit": "703ac2911b32d49ddab369140b877f35cf5d4c32",
+    "commit": "b65c2de5c8224342c72c37eeed7ef9f965ad8a2c",
     "status": "known-defective"
   },
   "conformance": {
     "status": "blocked",
     "blockingReferenceChanges": [
       {
-        "id": "canonical-terminology",
-        "issue": 6,
-        "pullRequest": 7,
-        "branch": "agent/implement/aes-terminology",
-        "commit": "82ae863bda42b7bed536296a77fe0d415b6686fc",
-        "state": "pending-human-acceptance"
+        "id": "surface-bootstrap-and-evidence-integrity",
+        "issue": 14,
+        "planPullRequest": 15,
+        "implementationPullRequest": 18,
+        "state": "pending-hosted-evidence"
       },
       {
-        "id": "governed-workflow-syntax",
-        "issue": 8,
-        "planPullRequest": 9,
+        "id": "parallel-task-and-acceptance-isolation",
+        "issue": 16,
+        "planPullRequest": 26,
+        "implementationPullRequest": 27,
+        "state": "pending-hosted-evidence"
+      },
+      {
+        "id": "stacked-trusted-acceptance-bootstrap",
+        "issue": 24,
+        "planPullRequest": 25,
+        "implementationPullRequest": 28,
+        "state": "pending-hosted-evidence"
+      },
+      {
+        "id": "repository-controls-migration",
+        "issue": 22,
+        "planPullRequest": 23,
+        "state": "pending-implementation"
+      },
+      {
+        "id": "workflow-scanner-remediation",
+        "issue": 20,
+        "planPullRequest": 21,
         "state": "pending-plan-approval"
       }
     ]
@@ -34,8 +53,12 @@
     "README.md",
     "docs/ARCHITECTURE.md",
     "docs/AGENT-HOOKS-COMPATIBILITY.md",
+    "docs/AUDIT-2026-09-23.md",
     "docs/ALIGNMENT-ASSESSMENT.md",
     "docs/END-TO-END-DEMO.md",
+    "docs/COPILOT-SURFACES.md",
+    "docs/FULL-INSTALLATION.md",
+    "docs/NEW-ENDPOINT-DEMO.md",
     "docs/GOALS-AND-NON-GOALS.md",
     "docs/GUIDE-CONFORMANCE.md",
     "docs/MAINTAINING-THE-SYSTEM.md",
@@ -134,7 +157,7 @@
     {
       "id": "EXT-017",
       "mechanisms": ["guide conformance ledger", "architecture lock", "extension coverage manifest"],
-      "evidencePaths": ["docs/GUIDE-CONFORMANCE.md", "tools/verify-architecture.ps1"]
+      "evidencePaths": ["docs/GUIDE-CONFORMANCE.md", "tools/verify-architecture.ps1", "tools/verify-architecture.test.mjs"]
     },
     {
       "id": "EXT-018",
@@ -144,7 +167,12 @@
     {
       "id": "EXT-019",
       "mechanisms": ["controlled bootstrap", "deferred hook activation", "local staging exclusion"],
-      "evidencePaths": ["docs/QUICKSTART.md"]
+      "evidencePaths": ["docs/FULL-INSTALLATION.md"]
+    },
+    {
+      "id": "EXT-020",
+      "mechanisms": ["non-normative documentation publishing", "generated documentation routes"],
+      "evidencePaths": ["docs-site/scripts/sync-docs.mjs", "docs-site/scripts/sync-docs.test.mjs"]
     }
   ]
 }

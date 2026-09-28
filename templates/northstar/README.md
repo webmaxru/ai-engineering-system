@@ -35,8 +35,10 @@ configuration remain in Northstar.
 
 ## Adoption warning
 
-`reference-lock.json` currently marks this snapshot `known-defective`. GitHub
-rejects its required governed-change workflow before jobs start. Use it only
+`reference-lock.json` marks this snapshot `known-defective` at
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`. The workflow starts, but task
+bootstrap, host compatibility, evidence integrity and scanner defects remain;
+hosted acceptance is unverified. Use it only
 for inspection until the lock points to an accepted repaired Northstar commit.
 
 Do not copy the directory wholesale and assume the result is safe. The files

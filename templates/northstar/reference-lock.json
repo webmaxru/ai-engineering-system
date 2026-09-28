@@ -2,24 +2,34 @@
   "schema": "ai-engineering-system/reference-lock/1",
   "sourceRepository": "webmaxru/northstar-orders-api-demo",
   "sourceBranch": "main",
-  "sourceCommit": "703ac2911b32d49ddab369140b877f35cf5d4c32",
+  "sourceCommit": "b65c2de5c8224342c72c37eeed7ef9f965ad8a2c",
   "releaseStatus": "known-defective",
   "knownDefects": [
-    "GitHub rejects .github/workflows/governed-change.yml before creating jobs because DATABASE_URL begins with an invalid YAML alias scalar."
+    "Cloud WI-1842 rehearsal #13 cannot resolve the live task contract; cloud branch identity is incompatible with the exact local branch gate.",
+    "Evidence validation accepts missing artifacts; base SHA and run attempt are not checked; malformed SARIF can pass.",
+    "Governance Review has no GH_TOKEN; Daily Repository Status fails with model configuration error.",
+    "Complete validation exits zero while the workflow scanner reports errors. Repairs require approved high-risk plan #14."
   ],
-  "generatedAt": "2026-09-05T14:56:21Z",
+  "generatedAt": "2026-09-23T12:11:17Z",
   "hashNormalization": "UTF-8 text with CRLF normalized to LF",
   "validation": {
     "command": "npm run validate:all",
-    "status": "pass",
-    "unitTests": 210,
+    "status": "fail",
+    "commandExitCode": 0,
+    "explanation": "Quality and PostgreSQL tests passed, but Poutine emitted five errors without failing the command. Not a clean full-validation result.",
+    "unitTests": 220,
     "acceptanceTests": 8,
-    "npmAuditVulnerabilities": 0,
-    "secretScanFiles": 150,
+    "acceptanceBoundary": "two service objects and Fastify inject in one process over real PostgreSQL",
+    "npmAuditVulnerabilities": 2,
+    "npmAuditSeverity": "moderate",
+    "secretScanFiles": 146,
     "agenticCompileErrors": 0,
     "agenticCompileWarnings": 0,
+    "poutineErrors": 5,
     "zizmorFindings": 0,
-    "hostedAcceptance": "failed-workflow-parse"
+    "zizmorSuppressed": 81,
+    "hostedAcceptance": "not-verified",
+    "cloudRehearsal": "https://github.com/webmaxru/northstar-orders-api-demo/pull/13/agent-sessions/8a97154e-ae9e-4a15-8594-624452117a04"
   },
   "files": [
     {
@@ -60,7 +70,7 @@
     {
       "sourcePath": ".github/copilot-instructions.md",
       "templatePath": ".github/copilot-instructions.md",
-      "sha256": "d83fe39bc5d5270545f91cec1d8f6280d5bd533918bdb4280e04588512222bad"
+      "sha256": "822fb3eab72148426f571a6e5178d67e32ecbfe342a77eda8a7f96ecfa569162"
     },
     {
       "sourcePath": ".github/governance/policy.json",
@@ -150,7 +160,7 @@
     {
       "sourcePath": ".github/workflows/governed-change.yml",
       "templatePath": ".github/workflows/governed-change.yml",
-      "sha256": "0601282cbba92e64aa8b1dd8fded9ccfdb11401ab199f87cfeb27404ed866cbd"
+      "sha256": "c53cbb83f8c0aff2af457a868b2a8f25f9047d60b0b3661399a6b6a5858ef60d"
     },
     {
       "sourcePath": ".github/workflows/plan-gate.yml",
@@ -175,7 +185,7 @@
     {
       "sourcePath": "AGENTS.md",
       "templatePath": "AGENTS.snapshot.md",
-      "sha256": "26f9c7ec05a83d3c14d639ec2d8cb37d99617fb454d639469890a0d3aba41b48"
+      "sha256": "aa803bad4e315dd9724ba0f95dec2c743eab038e47aa9a81e27a85589e5d7c46"
     },
     {
       "sourcePath": "docs/adr/007-durable-idempotency.md",
@@ -305,12 +315,12 @@
     {
       "sourcePath": "scripts/governance-audit.d.mts",
       "templatePath": "scripts/governance-audit.d.mts",
-      "sha256": "301278f2329139c9e42aeec576a1dea40065fdc86f3c2fb25b76cf5992595ec2"
+      "sha256": "92e4d0bec6a550ca9aee1c497930923619646c0df917cf29d1a0cb8ace05749c"
     },
     {
       "sourcePath": "scripts/governance-audit.mjs",
       "templatePath": "scripts/governance-audit.mjs",
-      "sha256": "b8e392b2e10f66004627cd6ee745df39e83dd9031772dd3a233fde74bdb6c96e"
+      "sha256": "0c20f6cf84b61cc0149343778fd7df0c1619cf09cdb62d6375385b28ee5c7dd3"
     },
     {
       "sourcePath": "scripts/import-evidence-artifacts.d.mts",
@@ -320,7 +330,7 @@
     {
       "sourcePath": "scripts/import-evidence-artifacts.mjs",
       "templatePath": "scripts/import-evidence-artifacts.mjs",
-      "sha256": "69ebbf20dcb1480b5e277cf0684d2cb1f50cf9b1ee3472db9794fa66cecf6bc8"
+      "sha256": "a451bd31f3e63fb94af7872485284b0cbe020d2a24d7812fcf25c2d6cd02edc8"
     },
     {
       "sourcePath": "scripts/import-workflow-results.mjs",
@@ -525,7 +535,7 @@
     {
       "sourcePath": "tests/unit/context-architecture.test.ts",
       "templatePath": "tests/unit/context-architecture.test.ts",
-      "sha256": "9d386fe7828ba79573e65fb1d633a21c03b81c1a12c32a3697fef46c3476bbc4"
+      "sha256": "ba9252c221b469e1c9cf744d24e8aabd2dfacdac15b06fd3184d1d6d39beafcb"
     },
     {
       "sourcePath": "tests/unit/execution-report.test.ts",
@@ -535,12 +545,12 @@
     {
       "sourcePath": "tests/unit/governance-audit.test.ts",
       "templatePath": "tests/unit/governance-audit.test.ts",
-      "sha256": "69416271dbbaf80321ba192c055035929dcb5b9217094fb0b4cb8737e5c95a9c"
+      "sha256": "09847c877437d50e0cbf2f843426be6bdfd0d6e791383c75baaa699febc24445"
     },
     {
       "sourcePath": "tests/unit/import-evidence-artifacts.test.ts",
       "templatePath": "tests/unit/import-evidence-artifacts.test.ts",
-      "sha256": "b0ea71fa310d947725594230dd59edd42da1fbd26d9d59db076924d0a596d916"
+      "sha256": "b14e8c7bd5a48c30b0563db8e15d9a08f45a4b97e2f1a707e98e74e684d4885e"
     },
     {
       "sourcePath": "tests/unit/plan-approval.test.ts",

@@ -88,7 +88,7 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: northstar-plan-context
-          path: .
+          path: artifacts
       - id: approval
         continue-on-error: true
         env:
@@ -122,6 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -135,10 +136,15 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: northstar-plan-context
-          path: .
+          path: artifacts
       - id: scope
         continue-on-error: true
-        run: npm run scope:check -- --base "${{ github.event.pull_request.base.sha }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          npm run scope:check --
+          --pr "$PR_NUMBER"
+          --expected-head "$NORTHSTAR_HEAD_SHA"
       - if: always()
         run: >-
           node scripts/evidence-record.mjs
@@ -173,7 +179,7 @@ jobs:
         continue-on-error: true
         run: |
           npm run instructions:check
-          npm run governance:check
+          npm run governance:check -- --out artifacts/quality-governance-report.json
           npm run lint
           npm run typecheck
           npm run build
@@ -191,7 +197,7 @@ jobs:
           name: northstar-check-quality
           path: |
             artifacts/unit-junit.xml
-            artifacts/governance-report.json
+            artifacts/quality-governance-report.json
             artifacts/checks/quality.json
           if-no-files-found: warn
           retention-days: 90
@@ -215,7 +221,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: ******localhost:5432/northstar
+      DATABASE_URL: "${{ format('postgresql://{0}:{1}@localhost:5432/{2}', 'postgres', 'postgres', 'northstar') }}"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -304,7 +310,7 @@ jobs:
         if: always()
         with:
           name: northstar-check-secret
-          path: artifacts/checks/secret-scan.json
+          path: artifacts/**/secret-scan.json
           if-no-files-found: error
           retention-days: 90
       - if: steps.scan.outcome != 'success'
@@ -471,7 +477,7 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: northstar-plan-context
-          path: .
+          path: artifacts
       - id: review
         continue-on-error: true
         env:
@@ -487,7 +493,7 @@ jobs:
         if: always()
         with:
           name: northstar-check-review
-          path: artifacts/checks/human-review.json
+          path: artifacts/**/human-review.json
           if-no-files-found: error
           retention-days: 90
       - if: steps.review.outcome != 'success'
@@ -509,6 +515,10 @@ jobs:
       - repository-controls
       - human-review
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -521,7 +531,7 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           pattern: northstar-*
-          path: .
+          path: artifacts
           merge-multiple: true
       - env:
           GH_TOKEN: ${{ github.token }}

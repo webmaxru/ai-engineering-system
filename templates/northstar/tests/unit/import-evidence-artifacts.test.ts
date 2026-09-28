@@ -51,6 +51,18 @@ describe("isolated evidence import", () => {
     );
   });
 
+  it("ignores non-authoritative reports recomputed by trusted publication", () => {
+    const source = temp();
+    const destination = temp();
+    writeFileSync(join(source, "quality-governance-report.json"), "{}");
+    writeFileSync(join(source, "report.json"), "{}");
+    writeFileSync(join(source, "unit-junit.xml"), "<testsuites />");
+
+    expect(importEvidenceArtifacts(source, destination)).toEqual([
+      "artifacts/unit-junit.xml",
+    ]);
+  });
+
   it("restores trusted maintenance evidence without allowing source files", () => {
     const source = temp();
     const destination = temp();

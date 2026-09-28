@@ -12,14 +12,22 @@ the guide concrete without being prescribed by it are recorded in
 
 ## Current release status
 
-The locked Northstar baseline is **known defective**: GitHub rejects
-`.github/workflows/governed-change.yml` before creating jobs. The terminology
-repair in `webmaxru/northstar-orders-api-demo#7` and the high-risk workflow
-repair tracked by `webmaxru/northstar-orders-api-demo#8` and
-`webmaxru/northstar-orders-api-demo#9` are not yet accepted on `main`. Until
-they are accepted, validated, and captured in a refreshed lock, Northstar is
-an inspectable proof of concept but not an adoption source. See
-[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact blockers.
+The locked Northstar baseline `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c` is
+**known defective**. Earlier terminology and workflow fixes are merged.
+Repair, parallel isolation, trusted acceptance, repository-control migration,
+and scanner-remediation candidates are tracked by issues
+[#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14),
+[#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16),
+[#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24),
+[#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and
+[#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20).
+PR #18 is independently reviewed but fails hosted evidence/repository-control
+gates. PR #27 passes focused local and PostgreSQL validation but fails those
+hosted gates and the full local Zizmor stage. PR #28 has a passing evidence
+check but still needs implementation review and repository-controls. These
+are candidate results, not an accepted release; see
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact refs and blockers.
+Northstar remains an inspectable proof of concept, not an adoption source.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
@@ -72,11 +80,14 @@ The locked baseline's local validation reported:
 - Agentic Workflow compilation and workflow static analysis;
 - a final `ready_for_review` execution report.
 
-That local result did not detect the hosted workflow parser failure and is
-therefore insufficient for the current release. Workflow changes additionally
-require a real GitHub run that creates the expected jobs.
+The baseline full command passed 220 unit and 8 PostgreSQL tests but printed
+five Poutine errors while exiting zero. Two moderate dependency findings
+remain. Additional probes exposed false-positive evidence readiness.
+See [AUDIT-2026-09-23.md](AUDIT-2026-09-23.md); local output is not sufficient
+for this release. Workflow changes require actual hosted jobs and independent
+acceptance, not merely a successful parser or unit suite.
 
-### Hosted integration validated
+### Hosted acceptance evidence required
 
 Only live GitHub evidence can prove:
 
@@ -100,7 +111,9 @@ npm run validate:all
 ```
 
 Focused tests must also cover the changed behavior. A change involving process
-boundaries must include `npm run test:acceptance` against PostgreSQL. A change
+boundaries must include PostgreSQL evidence through independently running
+processes; the current `npm run test:acceptance` suite alone uses in-process
+services and Fastify injection and does not establish that boundary. A change
 to workflows or validation authority must additionally follow Northstar's
 protected system-maintenance path and provide hosted evidence when that
 configuration is available.

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const siteDirectory = path.resolve(scriptDirectory, '..');
+// CUSTOMIZE: source and generated roots together; never point output at authored docs.
 const sourceDirectory = path.resolve(siteDirectory, '..', 'docs');
 const generatedDirectory = path.join(
   siteDirectory,
@@ -59,17 +60,18 @@ function titleFromContent(content, filePath) {
 
 function slugFromFilePath(filePath) {
   return path
-    .basename(filePath, path.extname(filePath))
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .relative('.', filePath)
+    .slice(0, -path.extname(filePath).length)
+    .split(path.sep)
+    .map((segment) => segment.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
+    .join('/');
 }
 
 function removeLeadingHeading(content) {
   return content.replace(/^#\s+.+(?:\r?\n){1,2}/, '');
 }
 
-function rewriteLocalMarkdownLinks(content, slugByFileName) {
+function rewriteLocalMarkdownLinks(content, sourceFile, slugByFilePath) {
   return content.replace(
     /\]\((?!https?:\/\/|mailto:|#)([^)\s]+)\)/g,
     (match, destination) => {
@@ -78,14 +80,15 @@ function rewriteLocalMarkdownLinks(content, slugByFileName) {
         return match;
       }
 
-      const normalizedFileName = path.basename(fileName).toLowerCase();
-      const slug = slugByFileName.get(normalizedFileName);
+      const destinationPath = path.resolve(path.dirname(sourceFile), fileName);
+      const slug = slugByFilePath.get(destinationPath);
       if (!slug) {
         return match;
       }
 
       const suffix = fragment ? `#${fragment}` : '';
-      return `](../${slug}/${suffix})`;
+      const relativeRoute = path.posix.relative(slugFromFilePath(sourceFile), slug) || '.';
+      return `](${relativeRoute}/${suffix})`;
     },
   );
 }
@@ -99,34 +102,48 @@ function relativeFileKey(filePath) {
   return path.normalize(filePath).replaceAll(path.sep, '/').toLowerCase();
 }
 
-export async function syncDocs({ logger = console } = {}) {
-  const sourceFiles = await collectMarkdownFiles(sourceDirectory);
-  const slugByFileName = new Map(
+export async function syncDocs({
+  logger = console,
+  source = sourceDirectory,
+  destination = generatedDirectory,
+} = {}) {
+  const relativeOutput = path.relative(source, destination);
+  const relativeSource = path.relative(destination, source);
+  const within = (relative) => !relative || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
+  if (within(relativeOutput) || within(relativeSource)) {
+    throw new Error('Authored and generated documentation roots must not overlap.');
+  }
+  const sourceFiles = await collectMarkdownFiles(source);
+  const slugByFilePath = new Map(
     sourceFiles.map((filePath) => [
-      path.basename(filePath).toLowerCase(),
+      path.resolve(filePath),
       slugFromFilePath(filePath),
     ]),
   );
+  if (new Set(slugByFilePath.values()).size !== sourceFiles.length) {
+    throw new Error('Documentation file paths produce duplicate page routes.');
+  }
 
-  await mkdir(generatedDirectory, { recursive: true });
+  await mkdir(destination, { recursive: true });
 
-  const existingFiles = await collectMarkdownFiles(generatedDirectory);
+  const existingFiles = await collectMarkdownFiles(destination);
   const sourceFileSet = new Set(sourceFiles.map(relativeFileKey));
 
   for (const existingFile of existingFiles) {
     if (!sourceFileSet.has(relativeFileKey(existingFile))) {
-      await rm(path.join(generatedDirectory, existingFile));
+      await rm(path.join(destination, existingFile));
     }
   }
 
   for (const sourceFile of sourceFiles) {
-    const sourcePath = path.join(sourceDirectory, sourceFile);
-    const targetPath = path.join(generatedDirectory, sourceFile);
+    const sourcePath = path.join(source, sourceFile);
+    const targetPath = path.join(destination, sourceFile);
     const sourceContent = await readFile(sourcePath, 'utf8');
     const title = titleFromContent(sourceContent, sourceFile);
     const rewrittenContent = rewriteLocalMarkdownLinks(
       sourceContent,
-      slugByFileName,
+      sourceFile,
+      slugByFilePath,
     );
 
     await mkdir(path.dirname(targetPath), { recursive: true });
@@ -169,6 +186,9 @@ export function repositoryDocsIntegration() {
                         .then(() => syncDocs({ logger }))
                         .then(() => {
                           server.ws.send({ type: 'full-reload', path: '*' });
+                        })
+                        .catch((error) => {
+                          logger.error(`Documentation synchronization failed: ${error.message}`);
                         });
                     }, 100);
                   };

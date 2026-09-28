@@ -10,13 +10,13 @@ and cannot override it.
 
 | Item | Audited value |
 | --- | --- |
-| Audit date | 2026-09-05 |
+| Audit date | 2026-09-23 |
 | Canonical-text guide SHA-256 | `c247b45ed53bb7b901954611c3bc03a37294d9adfb02a6542d71522f694f62be` |
-| Framework baseline | `webmaxru/ai-engineering-system@c022f617d6dad67a610e93f29f017d345d5b7edb` plus the alignment changes documented here |
-| Audited reference baseline | `webmaxru/northstar-orders-api-demo@703ac2911b32d49ddab369140b877f35cf5d4c32`; known defective because GitHub rejects `governed-change.yml` before jobs start |
-| Validated reference repair | [`webmaxru/northstar-orders-api-demo#7`](https://github.com/webmaxru/northstar-orders-api-demo/pull/7) at `82ae863bda42b7bed536296a77fe0d415b6686fc`; local decision `ready_for_review`, human acceptance pending |
-| Required workflow repair | Issue [`webmaxru/northstar-orders-api-demo#8`](https://github.com/webmaxru/northstar-orders-api-demo/issues/8); Plan Gate-passing plan in [`webmaxru/northstar-orders-api-demo#9`](https://github.com/webmaxru/northstar-orders-api-demo/pull/9), human plan approval and implementation pending |
-| Current conformance decision | **Blocked** until both required reference repairs are accepted on Northstar `main`, the snapshot is refreshed, and hosted GitHub starts the repaired workflow |
+| Framework baseline | `webmaxru/ai-engineering-system@9c8be3c` plus this audit and non-normative bookkeeping repairs |
+| Audited reference baseline | `webmaxru/northstar-orders-api-demo@b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; current `main`, known defective |
+| Earlier repairs | Terminology, workflow syntax and artifact handoff merged in `webmaxru/northstar-orders-api-demo#7`, `webmaxru/northstar-orders-api-demo#10`, and `webmaxru/northstar-orders-api-demo#12` |
+| Current reference work | Issues [#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14), [#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16), [#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24), [#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20); candidate PRs exist, but no accepted reference release exists |
+| Current conformance decision | **Blocked** by task bootstrap/host compatibility, evidence integrity, scanner/recovery defects and missing hosted acceptance |
 | Experimental comparison | `reference/ai-engineering-system-agent-hooks@cbb22f1e90f8edcce8e019c4c867af8daebe7605` |
 
 A change to the guide content or hash invalidates this conclusion until the
@@ -28,23 +28,37 @@ pending. Run `pwsh -File tools/verify-architecture.ps1` to check the guide,
 extension coverage, non-self-governance boundary, one-way Northstar reference,
 snapshot, and conformance decision.
 
-The baseline reference contains the intended control-plane design, but it is
-not an acceptable release: GitHub rejects the required governed-change
-workflow because its `DATABASE_URL` value is invalid YAML. The strict audit
-also found that its active instructions did not consistently name
-**contributor model**, **MCP allow list**, and the paired **system of record and
-control plane**. Pull request
-[`webmaxru/northstar-orders-api-demo#7`](https://github.com/webmaxru/northstar-orders-api-demo/pull/7)
-repairs those terms and adds focused tests. Its local evidence proves all three
-criteria with 212 unit tests and 8 PostgreSQL acceptance tests, but the change
-is not described as accepted until a human review and hosted checks apply to
-the immutable commit.
+The earlier parser/terminology blockers are resolved in the inspected source;
+the workflow now creates jobs. This does not imply release acceptance.
+The [current audit](AUDIT-2026-09-23.md) records 220 passing unit tests, eight
+passing PostgreSQL acceptance tests, additional separate-process application
+proof, five Poutine errors despite exit zero, and two moderate dependency
+findings. A real cloud planner stopped before producing a plan because live
+task authority was absent. A missing-artifact probe exposed a false-positive
+readiness decision.
 
-`webmaxru/northstar-orders-api-demo#8` and plan-only
-`webmaxru/northstar-orders-api-demo#9` isolate the workflow repair as a
-separate high-risk validation-authority change. The framework snapshot must not be
-copied into another project until that repair is implemented, accepted, and
-included in the locked Northstar commit.
+The 117-file snapshot matches the exact audited revision for inspection. It is
+**not approved for adoption**. Approved plans and candidate implementations
+now exist in Northstar, but hosted acceptance, trusted publication and the
+required issue chain remain incomplete. The current candidate evidence is
+summarized below and does not change the locked `main` baseline.
+
+## Current candidate status (2026-09-28)
+
+| Work | Current evidence | Remaining gate |
+| --- | --- | --- |
+| Repair and combined-mode controller: issue #14, PR #18 | Head `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; independent review exists; candidate adds adjacent `CUSTOMIZE`/`$comment` markers for identified adoption settings; hosted acceptance tests pass | Hosted repository-controls and evidence do not establish `ready_for_acceptance`; the markers remain on an unaccepted candidate |
+| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Plan approved; head `fc59deefc31213b2c596bd0384008f77a9955c4f`; 500 unit tests, 10 PostgreSQL acceptance tests, scope and merge checks pass against `17e7a5c5…`; two separate-worktree CLI identity canaries passed | Full `validate:all` fails on 84 Zizmor findings (64 errors, 20 notes); hosted repository-controls/evidence remain blocked; cloud attempt #29 used `main`, produced zero changes, and does not prove AC9 |
+| Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | Plan approval is current; candidate head `0260fe99fdd48672d83f83d45849ac9487d38fe2` is based on `17e7a5c5…`; hosted evidence check passes | Candidate remains draft; `human-review` and `repository-controls` fail, so trusted acceptance is not established; issue #24 is blocked by issue #16 |
+| Repository controls: issue #22, plan PR #23 | Plan is approved for base `17e7a5c5…` | Implementation is blocked by issue #24; no ruleset setting was changed |
+| Workflow scanner: issue #20, plan PR #21 | A prior plan approval exists for base `2e3cd083…` | Parent base advanced to `17e7a5c5…`; refresh/reapprove before implementation; no suppressions or scanner fixes are claimed |
+| Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; issue and plan bind to base `17e7a5c5…`; `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted `repository-controls` fails and independent implementation review is pending; no VS Code/cloud run |
+
+The local CLI canaries establish only that two separately owned worktrees
+loaded matching task, contract, plan, base, session and owner identities. They
+do not prove every VS Code lifecycle hook, a successful cloud task, or hosted
+acceptance. The cloud attempt is recorded as a blocked negative result, not a
+pass.
 
 ## Interpretation rules
 
@@ -86,23 +100,23 @@ Status values in this audit:
 
 | Guide basis | Guide architecture and terminology | Framework and Northstar implementation | Status | Extension |
 | --- | --- | --- | --- | --- |
-| Unit 1 and Unit 3, lines 34-58 and 138-210 | **plan → act → evaluate** is a visible loop; evaluation uses system signals rather than confidence | The architecture, task/plan flow, implementation branch, fan-out checks, execution report, and demo expose all three phases and repeat through bounded recovery | Conformant | EXT-006, EXT-010 |
+| Unit 1 and Unit 3, lines 34-58 and 138-210 | **plan → act → evaluate** is a visible loop; evaluation uses system signals rather than confidence | Design exposes the phases; missing-artifact and stale-report paths undermine trustworthy evaluation | Design aligned; execution **blocked** | EXT-006, EXT-010 |
 | Unit 4, lines 212-288 | GitHub is the **system of record and control plane** | Issues, pull requests, commits, reviews, workflows, checks, CODEOWNERS, rulesets, and environments own durable state and enforcement; conversations are not authority | Conformant; hosted enforcement not verified | EXT-013, EXT-018 |
 | Unit 5 and Unit 6, lines 307-430 | Humans remain accountable and agent work is evaluated through the **contributor model** | Agents may plan, implement, and review, but cannot accept their own output; pull requests are evaluated for intent, scope, evidence, ownership, policy, and fallback | Conformant; live review evidence not verified | EXT-006, EXT-007 |
 | Unit 2, lines 508-533 and 2296-2326 | Agents have narrow SDLC responsibilities and bounded scopes | Planner, implementer, dependency, security-reviewer, and risk-reviewer roles have distinct tools, instructions, and handoffs | Conformant | EXT-004 |
-| Unit 3 and Unit 5, lines 553-624 and 3454-3598 | A **task contract** defines inputs, outputs, scope, constraints, and observable **success criteria** | A trusted live `agent-task` issue is parsed into a versioned contract; success criteria map to stable tests and evidence | Conformant + extension | EXT-001 |
-| Unit 4 and Unit 5, lines 635-867 | Planning, execution, and validation are separated; use a **plan-first workflow** or **plan + execution workflow** based on risk; planning is read-only | Northstar uses plan-first with plan-only approval for high/critical work and permits plan + execution for lower risk; the planning agent has read/search only | Choice applied | EXT-001, EXT-003 |
-| Unit 2 and Unit 4, lines 3835-3967 and 4165-4223 | **Risk-based autonomy** is required; the guide recommends low, medium, high, and critical classifications and stronger controls at higher-impact boundaries | Northstar adopts the four-level model. Path and operation policy determines required checks and approvals; production, secrets, workflows, infrastructure, migrations, and validation controls receive higher gates | Required concept conformant; recommended model adopted + extension | EXT-002 |
+| Unit 3 and Unit 5, lines 553-624 and 3454-3598 | A **task contract** defines inputs, outputs, scope, constraints, and observable **success criteria** | Live issue parser works when explicitly invoked; actual cloud bootstrap missed authority and local task switching exposed stale context | Host bootstrap **blocked** | EXT-001 |
+| Unit 4 and Unit 5, lines 635-867 | Planning, execution, and validation are separated; use a **plan-first workflow** or **plan + execution workflow** based on risk; planning is read-only | Read-only planning preserved; implementation authorizer requires approved plan/branch even at lower risk, so advertised plan + execution is not proved | Choice advertised but incompletely implemented | EXT-001, EXT-003 |
+| Unit 2 and Unit 4, lines 3835-3967 and 4165-4223 | **Risk-based autonomy** is required; the guide recommends low, medium, high, and critical classifications and stronger controls at higher-impact boundaries | Four-level model exists; catch-all medium rule masks low-risk documentation paths | Recommended model adopted; classifier **blocked** | EXT-002 |
 | Unit 4, Unit 5, and Unit 7, lines 244-278, 1196-1200, and 3998-4307 | Required reviews, required checks, CODEOWNERS, rulesets or branch protection, environments, explicit permissions, and **least privilege** constrain work | Source policy, workflows, CODEOWNERS, role toolsets, protected-environment design, and GitHub App permission boundaries implement the model | Conformant; hosted settings not verified | EXT-004, EXT-008, EXT-009 |
-| Unit 7 and Unit 4, lines 1145-1183, 1748-1836, 2893-2907, and 4048-4070 | Hooks provide pre-action blocking, post-action/error logging, and human escalation; custom agents declare tools, instructions, and handoffs | Native hooks cover session/task resolution, `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, session end, and role-specific stop gates; agent frontmatter declares tools and handoffs | Conformant + extension | EXT-004, EXT-005 |
-| Unit 6, Unit 7, and workflow units, lines 916-1100, 1334-1441, 1915-1980, and 2365-2591 | GitHub Actions expose triggers, contexts, outputs, permissions, concurrency, orchestration, logs, and artifacts | The intended deterministic workflows use explicit permissions, event guards, fan-out/fan-in, artifact handoffs, and workflow/branch concurrency, but the locked `governed-change.yml` is rejected by GitHub before jobs start | **Blocked** pending `webmaxru/northstar-orders-api-demo#8` and `webmaxru/northstar-orders-api-demo#9` | EXT-006, EXT-011 |
-| Unit 5, Unit 6, and Unit 7, lines 340-373, 1016-1094, 2708-2816, and 4338-4392 | Meaningful actions produce attributable, run- and commit-linked **workflow outputs and artifacts**; missing evidence is failure | Producer evidence is bound to immutable state and strict fan-in fails on absent or mismatched results; pull requests and reports record decisions and handoffs | Conformant + extension | EXT-005, EXT-006 |
-| Memory and continuity units, lines 3088-3439 | Issues, pull requests, documents, workflow outputs, logs, and artifacts form external memory and a durable **source of truth** | Task state is reloaded from the live issue, approved plan, pull request, commit, run, and evidence; fixtures and chat cannot authorize work | Conformant + extension | EXT-001, EXT-018 |
-| Security units, lines 259-278, 402-413, 1127-1145, and 4038-4048 | Code scanning, dependency signals, secret scanning, push protection, protected secrets, and environment approvals remain blocking signals | CodeQL/SARIF, dependency audit, secret checks, environment design, and fail-closed evidence are present; source never treats a green unit suite as complete security evidence | Conformant; hosted security settings not verified | EXT-008, EXT-015 |
+| Unit 7 and Unit 4, lines 1145-1183, 1748-1836, 2893-2907, and 4048-4070 | Hooks provide pre-action blocking, post-action/error logging, and human escalation; custom agents declare tools, instructions, and handoffs | Native wiring exists; host payload/branch incompatibility, failure-event classification and raw diagnostic echo remain | **Blocked**; see surface matrix | EXT-004, EXT-005 |
+| Unit 6, Unit 7, and workflow units, lines 916-1100, 1334-1441, 1915-1980, and 2365-2591 | GitHub Actions expose triggers, contexts, outputs, permissions, concurrency, orchestration, logs, and artifacts | Repaired workflow creates jobs; examined run fails repository-controls, human-review, plan-approval and evidence | Jobs demonstrated; acceptance **blocked** | EXT-006, EXT-011 |
+| Unit 5, Unit 6, and Unit 7, lines 340-373, 1016-1094, 2708-2816, and 4338-4392 | Meaningful actions produce attributable, run- and commit-linked **workflow outputs and artifacts**; missing evidence is failure | Envelopes exist but absent artifact/null digest can produce readiness; base/attempt and stale Stop report checks are incomplete | **Blocked**, not strict fan-in | EXT-005, EXT-006 |
+| Memory and continuity units, lines 3088-3439 | Issues, pull requests, documents, workflow outputs, logs, and artifacts form external memory and a durable **source of truth** | Fixture trust stays false; live resolution and cache freshness across hosts are not reliable | Design aligned; bootstrap **blocked** | EXT-001, EXT-018 |
+| Security units, lines 259-278, 402-413, 1127-1145, and 4038-4048 | Code scanning, dependency signals, secret scanning, push protection, protected secrets, and environment approvals remain blocking signals | SARIF `{}` passes; read errors can skip scan inputs; workflow scanner errors do not propagate; hosted settings unverified | **Blocked** | EXT-008, EXT-015 |
 | MCP units, lines 1103-1145 and 1447-1691 | MCP servers expand capability and must be governed through registries and organization/enterprise **allow lists** with bounded tools and protected credentials | Policy requires approved registries and an MCP allow list; Northstar's local gh-aw adapter exposes named tools only and stores no credentials | Conformant in source; hosted registry/allow list policy not verified | EXT-014 |
-| Agentic Workflow units, lines 1260-1274, 1349-1441, and 2365-2591 | GitHub Agentic Workflows express bounded intent in Markdown, compile to a lock workflow, use explicit triggers/tools/permissions/safe outputs, and augment rather than replace CI/CD | Daily Repository Status uses Markdown frontmatter, a pinned compiled lock, read-only GitHub tools, one AI-credit budget, and staged safe output; deterministic CI remains authoritative | Conformant; hosted execution not verified | EXT-011 |
-| Reliability units, lines 1052-1076, 1183-1200, 2047-2108, 2834-2881, and 4432-4447 | Recovery uses **bounded retries**, rollback, and human escalation; policy and security failures are not retried away | Failures are classified, identical required failures stop after two occurrences, all attempts are capped, and rollback/escalation are recorded | Conformant + extension | EXT-010 |
-| Governance units, lines 3822-3967 and 4412-4457 | Governance is continuous; the guide recommends weekly review of failures, monthly review of permissions and secret scopes, and quarterly review of rules, ownership, environments, retention, and evidence | Northstar adopts that cadence in desired policy; a scheduled governance workflow and live audit implement the review | Recommended / adopted; recurring hosted runs not verified | EXT-009 |
+| Agentic Workflow units, lines 1260-1274, 1349-1441, and 2365-2591 | GitHub Agentic Workflows express bounded intent in Markdown, compile to a lock workflow, use explicit triggers/tools/permissions/safe outputs, and augment rather than replace CI/CD | Source uses bounded staged output; examined hosted agent failed on model availability | Source aligned; hosted operation **blocked** | EXT-011 |
+| Reliability units, lines 1052-1076, 1183-1200, 2047-2108, 2834-2881, and 4432-4447 | Recovery uses **bounded retries**, rollback, and human escalation; policy and security failures are not retried away | Failure-signature helper tested in isolation, not integrated into Stop-loop persistence/enforcement | Integration **blocked** | EXT-010 |
+| Governance units, lines 3822-3967 and 4412-4457 | Governance is continuous; the guide recommends weekly review of failures, monthly review of permissions and secret scopes, and quarterly review of rules, ownership, environments, retention, and evidence | Cadence adopted; actual hosted audit could not authenticate and returned unavailable, not ready | Recommended / adopted; live audit **blocked** | EXT-009 |
 
 ## Named technology disposition
 
@@ -111,10 +125,10 @@ Status values in this audit:
 | GitHub Issues, branches, commits, pull requests, reviews | Implemented |
 | Required checks, CODEOWNERS, rulesets or branch protection | Source policy implemented; live enforcement not verified |
 | Protected environments and required reviewers | Source workflows and policy implemented; live configuration not verified |
-| GitHub Actions triggers, contexts, outputs, permissions, concurrency, artifacts | Intended design implemented, but the required governed-change workflow is currently blocked by invalid YAML |
-| CodeQL/SARIF, dependency signals, secret scanning, push protection | CodeQL/SARIF and dependency/source checks implemented; hosted secret scanning and push protection not verified |
-| GitHub Copilot agents, Copilot CLI hooks, prompts, instructions, handoffs | Implemented |
-| GitHub Agentic Workflows / Continuous AI / `gh-aw` | Implemented and locally compiled/audited; hosted execution not verified |
+| GitHub Actions triggers, contexts, outputs, permissions, concurrency, artifacts | Real jobs started; required acceptance checks failed |
+| CodeQL/SARIF, dependency signals, secret scanning, push protection | Source present; malformed SARIF/read-error gaps; two moderate dependencies; hosted settings not verified |
+| GitHub Copilot agents, Copilot CLI hooks, prompts, instructions, handoffs | Partially exercised; see [COPILOT-SURFACES.md](COPILOT-SURFACES.md) |
+| GitHub Agentic Workflows / Continuous AI / `gh-aw` | Compiles; scanner errors and hosted model failure prevent operational claim |
 | MCP servers, registry, MCP allow list, GitHub MCP server | Policy and bounded tools implemented; organization/enterprise registry and allow list settings not verified |
 | `GITHUB_TOKEN` and GitHub App tokens | Explicitly scoped in workflows; live App installation and permission state not verified |
 | Personal access tokens | Not used by the canonical reference |
@@ -184,10 +198,14 @@ guide-supported choices by risk, distinguishes adopted recommendations, and
 keeps conditional technologies conditional. No guide requirement is
 intentionally replaced.
 
-The current release is nevertheless **not conformant** because the locked
-Northstar snapshot contains a required workflow that GitHub cannot parse, and
-the terminology repair has not received human acceptance. The architecture
-lock therefore fails closed. Conformance may be restored only after both
-repairs are accepted on Northstar `main`, the inert snapshot and locks are
-refreshed to that exact commit, complete local validation passes, and a hosted
-pull-request run proves that governed-change jobs start.
+The current release is nevertheless **not conformant**. The earlier workflow
+syntax and terminology blockers were repaired in merged Northstar PRs #7, #10
+and #12; they are no longer the release blocker. The locked `main` revision
+still has task/bootstrap, evidence-integrity, risk-routing, recovery and
+scanner defects, while the newer repair and isolation candidates have not
+produced trusted hosted acceptance. The architecture lock therefore
+correctly fails closed. Conformance may be restored only after the dependent
+Northstar changes are accepted, exact evidence is published for an immutable
+accepted commit, the inert snapshot and locks are refreshed to that commit,
+and `pwsh -File tools/verify-architecture.ps1` passes without bypassing its
+release gate.

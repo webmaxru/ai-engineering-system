@@ -18,7 +18,8 @@ measure is recorded in
 
 This repository is intentionally **not governed by the system it describes**.
 It contains the system specification and learning material, but no active agent
-hooks, custom agents, or GitHub Actions implementation. Every normative system
+hooks, custom agents, or system-enforcement workflows. Its ordinary
+documentation-publishing workflow is not self-governance. Every normative system
 change must first be implemented and tested in the executable reference:
 [`webmaxru/northstar-orders-api-demo`](https://github.com/webmaxru/northstar-orders-api-demo).
 
@@ -29,15 +30,30 @@ adoption only when its conformance status is `conformant`, its audited Northstar
 revision is `accepted`, no blocking reference change remains, and
 `tools\verify-architecture.ps1` passes against that exact Northstar commit.
 
-The current audit is **blocked**: the locked Northstar baseline contains a
-required workflow that GitHub rejects before jobs start, and required repairs
-are awaiting human acceptance. The design documents and local demo remain
+The current audit is **blocked**. The audited Northstar baseline is still
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; later repair candidates exist, but
+none is an accepted release. Issues
+[#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14),
+[#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16),
+[#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24),
+[#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and
+[#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20) track
+the remaining implementation, isolation, trusted-acceptance, repository
+control, and scanner work. Two local CLI identity canaries pass, but the
+GitHub.com cloud attempt in
+[PR #29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) used
+the default `main` base and produced no changes. Cloud isolation and the VS
+Code canary remain unverified. The design documents and local demos remain
 available for inspection, but the inert snapshot must not be copied into
 another repository until
 [`docs/GUIDE-CONFORMANCE.md`](docs/GUIDE-CONFORMANCE.md) records restored
 conformance.
 
 ## What the system provides
+
+These are the architectural capabilities, not a claim that every current
+implementation path is correct. See the [measured audit](docs/AUDIT-2026-09-23.md)
+for defects and host-specific evidence.
 
 - GitHub issues as task contracts with inputs, outputs, success criteria,
   constraints, non-goals, validation, rollout, and stop conditions.
@@ -72,9 +88,14 @@ conformance.
 | [Goals and non-goals](docs/GOALS-AND-NON-GOALS.md) | Scope and design boundaries |
 | [Terminology](docs/TERMINOLOGY.md) | Canonical vocabulary |
 | [Architecture](docs/ARCHITECTURE.md) | Control loop, trust model, and technology mapping |
-| [Adoption quickstart](docs/QUICKSTART.md) | Apply the system to any existing GitHub project |
+| [Adoption quickstart](docs/QUICKSTART.md) | Select independent guide practices or the integrated control-plane bundle |
+| [Full installation reference](docs/FULL-INSTALLATION.md) | Detailed integrated recipe; current adoption release is blocked |
+| [Current audit](docs/AUDIT-2026-09-23.md) | Exact revisions, all-script assessment, defects and measured evidence |
+| [Copilot surfaces](docs/COPILOT-SURFACES.md) | CLI, VS Code and cloud-agent observations and remaining canaries |
+| [Technical session presentation](From-agents-to-engineering-systems.pptx) | Validated against the framework and Northstar source excerpts; hosted and cross-surface limits remain explicit |
 | [Reference walkthrough](docs/REFERENCE-WALKTHROUGH.md) | Run and inspect the Northstar proof of concept |
-| [End-to-end demo](docs/END-TO-END-DEMO.md) | Reproduce the complete local control loop |
+| [WI-1842 demo](docs/END-TO-END-DEMO.md) | Local rehearsal and the actual blocked cloud run |
+| [New endpoint demo](docs/NEW-ENDPOINT-DEMO.md) | Draft `GET /orders/:id` candidate, local PostgreSQL evidence, and current acceptance limits |
 | [Reference implementation](docs/REFERENCE-IMPLEMENTATION.md) | Executable artifact map and validation contract |
 | [Maintaining the system](docs/MAINTAINING-THE-SYSTEM.md) | Cross-repository change and evidence workflow |
 | [Agent Hooks compatibility](docs/AGENT-HOOKS-COMPATIBILITY.md) | Responsible AI Agent Hooks assessment |

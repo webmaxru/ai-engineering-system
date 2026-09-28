@@ -54,6 +54,37 @@ architecture-review responsibility.
 | EXT-017 | Guide conformance and extension ledger | Framework maintenance | Active |
 | EXT-018 | Single-source agent instructions | Reference context control | Active |
 | EXT-019 | Controlled bootstrap and deferred activation | Adoption process | Active |
+| EXT-020 | Documentation generation and publishing | Framework bookkeeping | Active; non-normative |
+
+**"Active" means present in source, not proved conformant.** At Northstar
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`, the following gaps block release.
+They are implementation defects, not compatible extensions to the guide:
+
+| Mechanisms | Current limitation / evidence |
+| --- | --- |
+| `EXT-001`, `EXT-018`, `EXT-019` | Missing cloud task cache and stale local task context; no completed cross-surface bootstrap |
+| `EXT-002`, `EXT-003`, `EXT-004` | Catch-all risk precedence, approved-plan requirement at every risk, local-only branch rule, incomplete host payload/path normalization |
+| `EXT-005` | Failure event may log success; malformed-input diagnostic echoes raw payload |
+| `EXT-006`, `EXT-007` | Missing artifact/null digest can pass; stale Stop report and incomplete base/attempt binding; hosted acceptance absent |
+| `EXT-009` | Missing live authentication; audit requires both alternative branch controls and optional capability files |
+| `EXT-010` | Tested helper is not integrated into actual Stop-loop retry accounting |
+| `EXT-011`, `EXT-015` | Five Poutine errors despite exit zero; unpinned zizmor image; malformed SARIF and unreadable scan inputs mishandled |
+| `EXT-012` | Existing acceptance suite is in-process; additional audit-only separate-process proof is not a committed regression |
+
+Evidence, guide citations and repair ownership:
+[AUDIT-2026-09-23.md](AUDIT-2026-09-23.md) and
+[webmaxru/northstar-orders-api-demo#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14),
+[webmaxru/northstar-orders-api-demo#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16),
+[webmaxru/northstar-orders-api-demo#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24),
+[webmaxru/northstar-orders-api-demo#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and
+[webmaxru/northstar-orders-api-demo#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20).
+Descriptions below state intended mechanisms; this limitation table qualifies
+their implementation claims until independently accepted repairs exist.
+
+Later pull-request candidates and their local/hosted evidence are summarized
+in [GUIDE-CONFORMANCE.md](GUIDE-CONFORMANCE.md). A passing local test or
+reviewed candidate does not change the baseline classification or prove that
+an extension is accepted in the hosted system.
 
 ## EXT-001 - Versioned contracts and digest binding
 
@@ -123,7 +154,8 @@ request and a separate `agent/implement/<task-id>` branch created from the
 approved base SHA. Lower-risk work may use the guide's plan + execution
 mode when policy allows it.
 
-**Compatibility.** Both guide-defined workflow modes remain available.
+**Compatibility target.** Both guide-defined workflow modes must remain available;
+the current all-risk authorizer requirement does not prove the lower-risk mode.
 Separating publication from planning preserves the required read-only planning
 boundary.
 
@@ -198,9 +230,9 @@ scheme with raw payload logging.
 fan-in, and human/platform acceptance, but does not prescribe one evidence
 schema or local-versus-hosted decision vocabulary.
 
-**Implementation.** Every producer emits a versioned evidence envelope bound
+**Intended implementation.** Every producer emits a versioned evidence envelope bound
 to repository, pull request, base SHA, head SHA, workflow, run, job, actor, and
-artifact digest. Strict fan-in rejects missing, failed, skipped, duplicate,
+artifact digest. Strict fan-in must reject missing, failed, skipped, duplicate,
 stale, cross-run, or cross-commit evidence. `ready_for_review` means local
 proof is complete; `ready_for_acceptance` additionally requires current hosted
 review and policy evidence.
@@ -365,7 +397,8 @@ application domain or distributed-systems test workload.
 **Implementation.** The reference is a TypeScript/Fastify Orders API whose
 idempotency behavior must hold across two stateless service instances.
 PostgreSQL supplies shared durability and advisory-lock-based concurrency
-control. Raw idempotency keys and request payloads are not persisted or logged.
+control. Idempotency records retain hashes rather than raw keys or serialized
+request payloads; ordinary order business fields are persisted in `orders`.
 
 **Compatibility.** This workload makes the guide's requirement for
 system-grounded evaluation concrete. It is an example, not a universal
@@ -499,6 +532,9 @@ coverage manifest maps each extension to named mechanisms and evidence paths.
 The local `tools/verify-architecture.ps1` check detects guide drift, registry
 and coverage mismatches, unknown extension references, active framework
 controls, reference-snapshot drift, and blocked reference changes.
+It permits only the existing ordinary `docs.yml` publisher, not enforcement
+or agentic workflows, and enumerates tracked/unignored Markdown through Git
+instead of scanning installed dependencies or generated pages.
 
 **Compatibility.** The ledger cannot override the guide. It exists only to
 make provenance and gap-filling decisions inspectable.
@@ -514,10 +550,12 @@ new full audit. Do not silently preserve a conclusion derived from a different
 guide version.
 
 **Evidence.** This is non-normative framework bookkeeping rather than a
-runtime Northstar feature. Its evidence is `AGENTS.md`, `architecture-lock.json`,
-`tools/verify-architecture.ps1`, `docs/GUIDE-CONFORMANCE.md`, this register,
-and the exact Northstar commit and evidence recorded by the conformance
-assessment.
+runtime Northstar feature. Seven tests in `tools/verify-architecture.test.mjs`
+cover positive synthetic fixtures and forbidden active paths; they do not
+certify the real release. The reference verifier matches 117 files at exact
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`. The required accepted-reference
+condition remains unmet: this audited revision is known defective, so real
+architecture verification must still fail. See `docs/GUIDE-CONFORMANCE.md`.
 
 ## EXT-018 - Single-source agent instructions
 
@@ -569,5 +607,37 @@ reference revisions must be immutable and verified before files are copied.
 staging directory. Do not preserve a hidden disable switch or rename active
 controls as a normal development technique.
 
-**Evidence.** `docs/QUICKSTART.md`, the installed Northstar control plane, and
-the post-installation canary workflow described by the quickstart.
+**Evidence.** `docs/FULL-INSTALLATION.md` preserves the integrated recipe;
+`docs/QUICKSTART.md` is the feature-selection entry point. The installed
+Northstar control plane exists, but a successful cross-surface installation
+canary is not established. Release remains blocked.
+
+## EXT-020 - Documentation generation and publishing
+
+**Guide gap.** The guide does not prescribe a publishing stack or URL layout
+for the separate framework's learning documents.
+
+**Implementation.** Non-normative framework bookkeeping: Astro/Starlight
+generates pages from canonical `docs/` Markdown; the existing ordinary
+`docs.yml` workflow publishes the site. Relative document paths determine
+routes; generated output is separate from authored sources. Synchronization
+rejects overlapping roots and route collisions before removing stale
+generated Markdown, and reports watcher failures explicitly.
+
+**Compatibility.** Publishing neither governs this repository through the
+system under design nor changes Northstar behavior. The modular quickstart is
+navigation over guide practices, not independent activation of coupled scripts.
+
+**Trust and operational effects.** Rendered pages are not a second source of
+authority, and a successful site build does not establish architecture
+conformance. Repository/base URL, branding, and source/output paths are marked
+`CUSTOMIZE`; trust boundaries and collision checks are not optional settings.
+
+**Rollback.** Revert generator/configuration changes and rebuild from the
+unchanged canonical Markdown. Do not edit generated copies as authority.
+
+**Evidence.** Four tests in `docs-site/scripts/sync-docs.test.mjs`, the
+production Astro build, and the framework verifier tests. Reference identity:
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`, which is **not an accepted
+release**. The accepted-reference requirement for a conformant framework
+remains outstanding; this bookkeeping does not supply substitute evidence.

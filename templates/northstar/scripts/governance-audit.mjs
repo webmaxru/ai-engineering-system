@@ -163,6 +163,108 @@ export function strictRequiredContexts(protection, rulesets) {
   return contexts;
 }
 
+export function governedAcceptanceDatabaseUrlIsSafe(workflow) {
+  const databaseUrlLines =
+    String(workflow).match(/^\s*DATABASE_URL:\s*.+$/gm) ?? [];
+  if (databaseUrlLines.length !== 1) return false;
+
+  const expected =
+    "DATABASE_URL: \"${{ format('postgresql://{0}:{1}@localhost:5432/{2}', 'postgres', 'postgres', 'northstar') }}\"";
+  return (
+    databaseUrlLines[0].trim() === expected &&
+    !/^\s*DATABASE_URL:\s*\*+/m.test(workflow)
+  );
+}
+
+export function governedArtifactsTargetExpectedDirectory(workflow) {
+  const downloadSteps =
+    String(workflow).match(
+      /^ {6}- uses: actions\/download-artifact@[^\r\n]+\r?\n(?: {8,}[^\r\n]*(?:\r?\n|$))*/gm,
+    ) ?? [];
+  return (
+    downloadSteps.length === 4 &&
+    downloadSteps.every((step) =>
+      /^\s{10}path:\s*artifacts\s*$/m.test(step),
+    )
+  );
+}
+
+export function governedSingleCheckArtifactsPreserveDirectory(workflow) {
+  const text = String(workflow);
+  return [
+    ["northstar-check-secret", "secret-scan"],
+    ["northstar-check-review", "human-review"],
+  ].every(([artifact, check]) =>
+    new RegExp(
+      `name: ${artifact}\\r?\\n\\s+path: artifacts/\\*\\*/${check}\\.json`,
+    ).test(text),
+  );
+}
+
+export function governedEvidenceTaskLookupPermissionsAreSafe(workflow) {
+  const evidenceJob = /^ {2}evidence:\r?\n([\s\S]*)$/m.exec(
+    String(workflow),
+  )?.[1];
+  const permissionBlock = evidenceJob
+    ? /^ {4}permissions:\r?\n((?: {6}[^\r\n]+\r?\n)+)/m.exec(evidenceJob)?.[1]
+    : null;
+  if (!permissionBlock) return false;
+
+  const permissions = permissionBlock
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return exactStringSet(permissions, [
+    "contents: read",
+    "issues: read",
+    "pull-requests: read",
+  ]);
+}
+
+export function governedScopeUsesPullRequestContext(workflow) {
+  const scopeJob = /^ {2}scope-policy:\r?\n([\s\S]*?)(?=^ {2}quality:\r?$)/m.exec(
+    String(workflow),
+  )?.[1];
+  const permissionBlock = scopeJob
+    ? /^ {4}permissions:\r?\n((?: {6}[^\r\n]+\r?\n)+)/m.exec(scopeJob)?.[1]
+    : null;
+  if (!scopeJob || !permissionBlock) return false;
+
+  const permissions = permissionBlock
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return (
+    exactStringSet(permissions, ["contents: read", "pull-requests: read"]) &&
+    /env:\r?\n {10}GH_TOKEN: \$\{\{ github\.token \}\}/m.test(scopeJob) &&
+    /npm run scope:check --\s+--pr "\$PR_NUMBER"\s+--expected-head "\$NORTHSTAR_HEAD_SHA"/m.test(
+      scopeJob,
+    )
+  );
+}
+
+export function governedMergedArtifactsHaveUniquePaths(workflow) {
+  const text = String(workflow);
+  const qualityJob = /^ {2}quality:\r?\n([\s\S]*?)(?=^ {2}acceptance:\r?$)/m.exec(
+    text,
+  )?.[1];
+  const governanceJob =
+    /^ {2}governance-policy:\r?\n([\s\S]*?)(?=^ {2}repository-controls:\r?$)/m.exec(
+      text,
+    )?.[1];
+  return (
+    Boolean(qualityJob) &&
+    Boolean(governanceJob) &&
+    qualityJob.includes(
+      "npm run governance:check -- --out artifacts/quality-governance-report.json",
+    ) &&
+    qualityJob.includes("artifacts/quality-governance-report.json") &&
+    !qualityJob.includes("artifacts/governance-report.json") &&
+    governanceJob.includes("artifacts/governance-report.json") &&
+    !governanceJob.includes("artifacts/quality-governance-report.json")
+  );
+}
+
 export function auditSourceTree() {
   const checks = [];
   const tracked = execFileSync("git", ["ls-files"], {
@@ -241,6 +343,36 @@ export function auditSourceTree() {
         /group:\s*\$\{\{\s*github\.workflow\s*\}\}-/.test(workflow),
         "workflow:concurrency",
         "Concurrency is scoped by workflow and branch.",
+      ),
+      check(
+        governedAcceptanceDatabaseUrlIsSafe(workflow),
+        "workflow:acceptance-database-url",
+        "Acceptance uses the declared ephemeral PostgreSQL service without a YAML alias scalar.",
+      ),
+      check(
+        governedArtifactsTargetExpectedDirectory(workflow),
+        "workflow:artifact-handoff",
+        "Downloaded evidence is restored under the artifacts directory consumed by policy scripts.",
+      ),
+      check(
+        governedSingleCheckArtifactsPreserveDirectory(workflow),
+        "workflow:single-check-artifact-layout",
+        "Single-file check artifacts preserve their checks directory during upload.",
+      ),
+      check(
+        governedEvidenceTaskLookupPermissionsAreSafe(workflow),
+        "workflow:evidence-task-lookup",
+        "The evidence job has only the read permissions needed to resolve the pull request and linked issue.",
+      ),
+      check(
+        governedScopeUsesPullRequestContext(workflow),
+        "workflow:scope-pull-request-context",
+        "Hosted scope validation uses immutable pull-request metadata instead of a detached checkout branch.",
+      ),
+      check(
+        governedMergedArtifactsHaveUniquePaths(workflow),
+        "workflow:merged-artifact-paths",
+        "Independently generated reports use unique paths before artifact fan-in.",
       ),
     );
     for (const job of [
