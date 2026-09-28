@@ -29,20 +29,18 @@ canary. VS Code's selected Local versus Copilot Agent Host harness matters.
 
 | Surface | Current evidence | Result |
 | --- | --- | --- |
-| Copilot CLI | Two issue #16 canaries in separate worktrees matched the live task, contract, approved plan, base, session, and workspace-owner identities. No source changes were made by these read-only canaries. | Partial pass for identity binding only; they do not prove write authorization, Stop behavior, recovery, or full host parity. |
-| Copilot CLI validation | Candidate PR #27 at `fc59deefc31213b2c596bd0384008f77a9955c4f`: `npm run validate` passed 500 unit tests and 79 offline governance checks; `npm run test:acceptance` passed 10/10; scope (66 paths, zero violations) and merge checks passed against base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. | Local evidence passes for those commands only. `npm run validate:all` exits 1 at Zizmor: 84 findings (64 errors, 20 notes); Poutine reports zero findings. |
+| Copilot CLI | Historical issue #16 canaries in separate worktrees matched the task, contract, approved plan, base, session, and workspace-owner identities. No source changes were made by these read-only canaries. Issue #16 is now closed by owner scope direction. | Partial pass for identity binding only; they do not prove write authorization, Stop behavior, recovery, or full host parity. |
+| Copilot CLI validation | Closed PR #27 at `fc59deefc31213b2c596bd0384008f77a9955c4f`: `npm run validate` passed 500 unit tests and 79 offline governance checks; `npm run test:acceptance` passed 10/10; scope (66 paths, zero violations) and merge checks passed against base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. | Historical local evidence only. `npm run validate:all` exits 1 at Zizmor: 84 findings (64 errors, 20 notes); hosted evidence and repository-controls failed. |
 | VS Code | The running VS Code window did not expose an actionable accessibility tree or screenshot, and no live Local/Agent Host session was completed. | Unverified. |
-| Copilot cloud | Historical WI-1842 planner PR #13 stopped because the live task contract was absent. The later issue #16 run produced draft PR #29 on `main` with zero changed files, not on its approved base `17e7a5c5…`. | Not an AC9 canary; cloud isolation remains unproven. |
+| Copilot cloud | WI-1842 planner PR #13 was closed as a stale, zero-file rehearsal after the cached task contract was absent. The issue #16 attempt PR #29 was closed after using `main` and producing zero changed files. | Neither is an AC9 canary; no successful cloud isolation run is proven. |
 | GitHub.com agent UI | The repository Agents page displayed “Unable to load tasks” with a stale-cache/account-switch warning during this check; no new task was started. | Platform/UI retrieval failure, not a successful or failed agent execution. |
-| Hosted candidate gates | PR #27 is approved as a review but remains draft; its current `acceptance` checks pass while `evidence` and `repository-controls` fail. PR #28 also remains draft with `human-review` and `repository-controls` failing. | No candidate has `ready_for_acceptance`; do not merge or treat review approval as hosted acceptance. |
+| Hosted candidate gates | PR #19 at `cf762216…` remains draft with exact-head approval and passing `human-review`; `repository-controls` fails. PRs #27 and #28 were closed by owner scope direction; #27 had failing hosted `evidence`/`repository-controls`, and #28 had a passing `evidence` check but failing `repository-controls`. | No candidate has `ready_for_acceptance`; closures and approvals do not bypass failed trusted-control/evidence gates. |
 
-PR #27's `npm run validate:all` failure is owned by the scanner-remediation
-work tracked in
-[webmaxru/northstar-orders-api-demo#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20);
-the approved issue #20 plan is stale against the current dependency chain and
-must be refreshed before implementation. The repository-controls failure is
-tracked by issue #22. No permissions, secrets, rulesets, or protected
-environment settings were changed to make these checks pass.
+PR #27's `npm run validate:all` failure is historical: issue #20 and its plan
+were closed by owner scope direction without scanner fixes. Issue #22 and its
+plan were also closed without a ruleset change. No permissions, secrets,
+rulesets, or protected environment settings were changed to make these checks
+pass.
 
 ## Host differences that need explicit adaptation
 
