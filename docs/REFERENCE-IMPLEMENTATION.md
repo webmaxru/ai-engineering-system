@@ -30,9 +30,10 @@ Northstar remains an inspectable proof of concept, not an adoption source.
 The reopened scanner-remediation plan PR #21 is refreshed at head
 `6795e32beba33e7ac109bf020ae8f3b377042cc4`, bound to base
 `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; local plan validation and hosted
-`plan-contract`/`require-plan` pass. Fresh independent review and plan approval,
-hosted evidence, and `repository-controls` remain unresolved. Issue #20 remains
-blocked by issue #22; no scanner finding has been fixed.
+`plan-contract`/`require-plan` pass. The exact-head review, `plan-approval`,
+and `human-review` checks now pass; hosted evidence and `repository-controls`
+remain unresolved. Issue #20 remains blocked by issue #22; no scanner finding
+has been fixed.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless

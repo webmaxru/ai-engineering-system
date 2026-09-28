@@ -89,13 +89,21 @@ accepted, and the snapshot is refreshed for inspection, not adoption.
 
 | Candidate | Verified local evidence | Remaining blocker |
 | --- | --- | --- |
-| PR #18, issue #14, head `17e7a5c5…` (reopened) | Prior independent review; hosted acceptance tests passed; candidate annotated identified customization seams | Unmerged; `evidence` and `repository-controls` failed. Fresh approval of the refreshed PR #15 plan is pending |
+| PR #18, issue #14, head `17e7a5c5…` (reopened) | Prior independent review; hosted acceptance tests passed; candidate annotated identified customization seams; PR #15 has an exact-head native approval and passing `human-review` | PR #15 `plan-approval`, `scope-policy`, `evidence`, and `repository-controls` fail; PR #18 remains unmerged and unaccepted |
 | PR #27, issue #16, head `fc59deef…` (reopened) | Exact-head implementation approval; 500 unit tests, 10 PostgreSQL acceptance tests, 66-path scope check and merge check passed against base `17e7a5c5…`; two read-only CLI identity canaries passed | Full `validate:all` fails on 84 Zizmor findings; hosted evidence and repository-controls fail. GitHub.com canary `5724baed…` returned `CANARY-FAIL` because active task/session authority was unavailable and workspace branch binding mismatched |
 | PR #28, issue #24, head `0260fe99…` (reopened) | `vibeprogrammer` approved the exact head; hosted `human-review` and `evidence` checks passed | `repository-controls` failed; trusted acceptance was not established |
-| PR #21, issue #20, head `6795e32…` (reopened plan) | Refreshed plan binds contract digest `df654e26…`, plan digest `76a25183…`, and base `17e7a5c…`; plan-contract and require-plan pass | Fresh review/plan approval, hosted evidence and repository-controls remain blocked; implementation remains blocked by issue #22 |
+| PR #21, issue #20, head `6795e32…` (reopened plan) | Refreshed plan binds contract digest `df654e26…`, plan digest `76a25183…`, and base `17e7a5c…`; exact-head review, `plan-approval`, `human-review`, `plan-contract`, and `require-plan` pass | Hosted evidence and repository-controls remain blocked; implementation remains blocked by issue #22 |
 | PR #19, issue #17, head `cf762216…` | Issue/plan base is `17e7a5c…`; `vibeprogrammer` approved the exact head and hosted `human-review` passes; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted `repository-controls` fails; no successful issue #17 VS Code/cloud run |
 | PR #13, issue #4 WI-1842 rehearsal (closed) | The planner stopped because the cached task contract was absent; no files changed and no plan was produced | Historical blocker only; not a successful cloud run |
 | PR #29, issue #16 cloud attempt (closed) | GitHub.com run created a draft PR | Wrong `main` base and zero changed files; not cloud isolation evidence |
+
+Latest GitHub.com canary session
+[0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4)
+used `/plan 16`, the custom `plan` agent, and the correct base
+`agent/implement/aes-surface-evidence` at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`.
+It stopped before planning because `artifacts/task-contract.json` was absent;
+no plan, source change, or PR resulted. This confirms the task-contract
+bootstrap remains blocked, not that repository permissions were denied.
 
 Issues #14, #16, #20, #22 and #24 and their plan/implementation PRs have been
 reopened for remediation. Their earlier closures were scope cancellations,

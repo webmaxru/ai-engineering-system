@@ -50,11 +50,11 @@ baseline.
 
 | Work | Current evidence | Remaining gate |
 | --- | --- | --- |
-| Repair and combined-mode controller: issue #14, PRs #15/#18 | PR #18 remains at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; prior independent review exists and hosted acceptance tests passed | Issue and PRs are reopened; fresh independent approval of the refreshed PR #15 plan is pending, while hosted `repository-controls` and evidence fail. Unmerged and unaccepted |
-| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Plan PR #26 head `4ec24cc6137256b9d771f466ef4363919cc5461c` has exact-head approval; PR #27 head `fc59deefc31213b2c596bd0384008f77a9955c4f` has exact-head implementation approval; local validation passed (500 unit, 10 PostgreSQL acceptance, scope/merge) | Issue and PRs are reopened; full `validate:all` fails on 84 Zizmor findings and hosted evidence/controls fail. GitHub.com canary session `5724baed-e173-4722-95ae-077e90c39c6a` returned `CANARY-FAIL`: no active task contract was available and the workspace branch did not match PR #27. No cloud isolation pass |
+| Repair and combined-mode controller: issue #14, PRs #15/#18 | PR #18 remains at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; prior independent review exists and hosted acceptance tests passed; PR #15 head `c6f5958a5117443ffaf1065bff7f0104a1ca8382` has an exact-head native approval and passing `human-review` | PR #15 `plan-approval`, `scope-policy`, `evidence`, and `repository-controls` fail; PR #18 remains unmerged and unaccepted |
+| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Plan PR #26 head `4ec24cc6137256b9d771f466ef4363919cc5461c` has exact-head approval; PR #27 head `fc59deefc31213b2c596bd0384008f77a9955c4f` has exact-head implementation approval; local validation passed (500 unit, 10 PostgreSQL acceptance, scope/merge) | Issue and PRs are reopened; full `validate:all` fails on 84 Zizmor findings and hosted evidence/controls fail. Earlier GitHub.com session `5724baed-e173-4722-95ae-077e90c39c6a` used the wrong workspace branch. Latest session `0621d3a5-e662-47f5-b737-bdca4dbe01c4` used `/plan 16`, custom agent `plan`, and the exact `agent/implement/aes-surface-evidence` base at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`, but stopped because `artifacts/task-contract.json` was absent. No cloud plan or isolation pass |
 | Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | PR #28 head `0260fe99fdd48672d83f83d45849ac9487d38fe2` has exact-head approval; hosted `human-review` and `evidence` passed | Issue and PRs are reopened; `repository-controls` fails, so trusted acceptance is not established |
 | Repository controls: issue #22, plan PR #23 | Plan work is bound to base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f` | Issue and PR are reopened; the #24 preflight remains blocked. No ruleset setting was changed |
-| Workflow scanner: issue #20, plan PR #21 | Refreshed plan head `6795e32beba33e7ac109bf020ae8f3b377042cc4` is based on `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; contract digest `df654e265c20e6390e31b6e3d3939c20ef2202584241942f57df282684245f76`, plan digest `76a25183507e0702bcdd14db89577d4c59a9f508030fba7804692a6b781172e3` | Plan-contract and require-plan pass, but fresh review/plan approval and hosted evidence/repository-controls remain blocked; implementation stays blocked by issue #22 |
+| Workflow scanner: issue #20, plan PR #21 | Refreshed plan head `6795e32beba33e7ac109bf020ae8f3b377042cc4` is based on `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; contract digest `df654e265c20e6390e31b6e3d3939c20ef2202584241942f57df282684245f76`, plan digest `76a25183507e0702bcdd14db89577d4c59a9f508030fba7804692a6b781172e3`; exact-head review, `plan-approval`, and `human-review` pass | Hosted `evidence` and `repository-controls` fail; implementation stays blocked by issue #22 |
 | WI-1842 rehearsal: issue #4, PR #13 | The issue remains as the plan-first demo task; PR #13 recorded the planner stopping because the cached task contract was absent | PR #13 is a closed stale, zero-file rehearsal; it does not prove a successful cloud run. Historical PR #29 is also closed after using the wrong base and making no changes |
 | Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; exact-head approval and hosted `human-review` pass; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | PR #19 remains draft; full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes), hosted `repository-controls` fails, and no successful issue #17 cloud run is proven |
 
@@ -64,12 +64,17 @@ do not prove every VS Code lifecycle hook or hosted acceptance. The separate
 GitHub.com `/plan 16` session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5`
 produced an unapproved proposal on `copilot/plan-16`, which is based on `main`
 at `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`, not the approved `17e7a5c`
-base. It is not valid base-binding evidence. The canary session
+base. It is not valid base-binding evidence. Session
 `5724baed-e173-4722-95ae-077e90c39c6a` confirmed issue/plan/PR metadata but
-could not verify active task/session authority; its workspace branch was
+could not verify active task/session authority and used workspace branch
 `copilot/agentimplementaes-surface-evidence`, not PR #27's
-`agent/implement/aes-parallel-isolation`. It made no changes and returned
-`CANARY-FAIL`. No successful cloud execution or parallel proof is established.
+`agent/implement/aes-parallel-isolation`. The later session
+`0621d3a5-e662-47f5-b737-bdca4dbe01c4` selected the custom `plan` agent and
+the exact base branch at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`, but
+stopped before planning because `artifacts/task-contract.json` was absent and
+no task was resolved. No plan, source change, or PR resulted. This is evidence
+of a cloud task-contract bootstrap failure, not of a permission denial or a
+successful cloud execution. No parallel cloud proof is established.
 The system-maintenance items are reopened, but none of these statuses accepts
 their plans or implementations.
 

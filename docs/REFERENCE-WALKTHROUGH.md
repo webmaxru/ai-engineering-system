@@ -31,6 +31,12 @@ Use the exact commands, prerequisites, expected responses and cleanup in
 | Historical issue #16 cloud attempt, PR #29 (closed) | GitHub.com run created a draft PR on `main` with zero changed files | The approved `17e7a5c…` base, independent cloud isolation, or a successful agent outcome |
 | Current issue #16 cloud canaries | Session `d1dd79e9…` produced an unapproved proposal on a branch based on `main`; session `5724baed…` returned `CANARY-FAIL` because task/session authority was unavailable and workspace branch binding mismatched | No successful cloud binding or parallel-isolation proof |
 
+Latest GitHub.com session
+[0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4)
+used the custom `plan` agent and the exact approved base branch, but the
+planner stopped because `artifacts/task-contract.json` was absent. It produced
+no plan, source changes, or PR; cloud task-contract bootstrap remains blocked.
+
 The runbook's local `ready_for_review` output must not be presented as
 `ready_for_acceptance`. Reopened PR #27's historical local validation (500
 unit tests, 10 PostgreSQL acceptance tests, scope, and merge checks) did not
