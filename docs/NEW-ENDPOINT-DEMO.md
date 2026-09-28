@@ -24,6 +24,9 @@ machine plan digest is
 `11bfe6ae20df762202c9e0554fc62b257371f139ca380dec2a2ac8aeea5ffcaf`. Both bind the implementation to
 `agent/implement/aes-surface-evidence` at
 `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. PR #19 remains draft.
+Parent PR #18 was closed by the owner on 2026-09-28 as system-maintenance
+scope cleanup; it remains unmerged and unaccepted. This closure did not change
+PR #19's bound base or clear its hosted blockers.
 
 On the rebased source tree, `npm run validate` passed 470 unit tests and 79
 offline governance checks; `npm run test:acceptance` passed 12/12 with

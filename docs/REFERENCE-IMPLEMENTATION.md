@@ -13,20 +13,18 @@ the guide concrete without being prescribed by it are recorded in
 ## Current release status
 
 The locked Northstar baseline `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c` is
-**known defective**. Earlier terminology and workflow fixes are merged.
-Repair, parallel isolation, trusted acceptance, repository-control migration,
-and scanner-remediation candidates are tracked by issues
-[#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14),
-[#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16),
-[#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24),
-[#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and
-[#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20).
-PR #18 is independently reviewed but fails hosted evidence/repository-control
-gates. PR #27 passes focused local and PostgreSQL validation but fails those
-hosted gates and the full local Zizmor stage. PRs #19 and #28 have approved
-exact-head reviews and passing `human-review` checks, but still fail
-`repository-controls`. These are candidate results, not an accepted release; see
-[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact refs and blockers.
+**known defective**. Earlier terminology and workflow fixes are merged. On
+2026-09-28 the owner closed system-maintenance issues #14, #16, #20, #22 and
+#24 and their associated plan/implementation PRs to retain demo-only open
+work. These are cancellations, not accepted fixes; no maintenance PR was
+merged, and no repository setting was changed.
+
+Demo issue #4 (WI-1842) and issue #17 (WI-1843) remain open; PR #19 remains a
+draft demo candidate. Its exact-head review and hosted `human-review` pass,
+and local application/PostgreSQL checks pass, but the full Zizmor run reports
+86 findings and hosted `repository-controls` fails. The demo candidates are
+not an accepted release; see [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md)
+for the exact refs and blockers.
 Northstar remains an inspectable proof of concept, not an adoption source.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency

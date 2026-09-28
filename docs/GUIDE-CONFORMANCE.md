@@ -15,8 +15,8 @@ and cannot override it.
 | Framework baseline | `webmaxru/ai-engineering-system@9c8be3c` plus this audit and non-normative bookkeeping repairs |
 | Audited reference baseline | `webmaxru/northstar-orders-api-demo@b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; current `main`, known defective |
 | Earlier repairs | Terminology, workflow syntax and artifact handoff merged in `webmaxru/northstar-orders-api-demo#7`, `webmaxru/northstar-orders-api-demo#10`, and `webmaxru/northstar-orders-api-demo#12` |
-| Current reference work | Issues [#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14), [#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16), [#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24), [#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20); candidate PRs exist, but no accepted reference release exists |
-| Current conformance decision | **Blocked** by task bootstrap/host compatibility, evidence integrity, scanner/recovery defects and missing hosted acceptance |
+| Current reference work | On 2026-09-28, the owner closed system-maintenance issues [#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14), [#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16), [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20), [#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and [#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24) and their maintenance PRs to retain demo-only open work. Demo issues [#4](https://github.com/webmaxru/northstar-orders-api-demo/issues/4), [#17](https://github.com/webmaxru/northstar-orders-api-demo/issues/17), and draft PR [#19](https://github.com/webmaxru/northstar-orders-api-demo/pull/19) remain open. The closures are scope cancellations, not accepted fixes. |
+| Current conformance decision | **Blocked**: the locked baseline remains defective; maintenance candidates were closed unmerged, and hosted acceptance/trusted publication remain unestablished |
 | Experimental comparison | `reference/ai-engineering-system-agent-hooks@cbb22f1e90f8edcce8e019c4c867af8daebe7605` |
 
 A change to the guide content or hash invalidates this conclusion until the
@@ -38,27 +38,30 @@ task authority was absent. A missing-artifact probe exposed a false-positive
 readiness decision.
 
 The 117-file snapshot matches the exact audited revision for inspection. It is
-**not approved for adoption**. Approved plans and candidate implementations
-now exist in Northstar, but hosted acceptance, trusted publication and the
-required issue chain remain incomplete. The current candidate evidence is
-summarized below and does not change the locked `main` baseline.
+**not approved for adoption**. The owner closed the system-maintenance
+workstreams to retain demo-only open work; none of their plans or implementations
+was merged or accepted. The remaining demo tasks do not repair the locked
+baseline, and hosted acceptance and trusted publication remain unestablished.
+The historical candidate evidence below does not change the locked `main`
+baseline.
 
-## Current candidate status (2026-09-28)
+## Demo and closed-maintenance status (2026-09-28)
 
 | Work | Current evidence | Remaining gate |
 | --- | --- | --- |
-| Repair and combined-mode controller: issue #14, PR #18 | Head `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; independent review exists; candidate adds adjacent `CUSTOMIZE`/`$comment` markers for identified adoption settings; hosted acceptance tests pass | Hosted repository-controls and evidence do not establish `ready_for_acceptance`; the markers remain on an unaccepted candidate |
-| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Plan approved; head `fc59deefc31213b2c596bd0384008f77a9955c4f`; 500 unit tests, 10 PostgreSQL acceptance tests, scope and merge checks pass against `17e7a5c5…`; two separate-worktree CLI identity canaries passed | Full `validate:all` fails on 84 Zizmor findings (64 errors, 20 notes); hosted repository-controls/evidence remain blocked; cloud attempt #29 used `main`, produced zero changes, and does not prove AC9 |
-| Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | Plan approval is current; exact implementation head `0260fe99fdd48672d83f83d45849ac9487d38fe2` received a `vibeprogrammer` APPROVED review; hosted `human-review` and `evidence` pass | Candidate remains draft; `repository-controls` fails, so trusted acceptance is not established; issue #24 remains blocked by issue #16 |
-| Repository controls: issue #22, plan PR #23 | Plan is approved for base `17e7a5c5…` | Implementation is blocked by issue #24; no ruleset setting was changed |
-| Workflow scanner: issue #20, plan PR #21 | A prior plan approval exists for base `2e3cd083…` | Parent base advanced to `17e7a5c5…`; refresh/reapprove before implementation; no suppressions or scanner fixes are claimed |
-| Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; issue and plan bind to base `17e7a5c5…`; `vibeprogrammer` APPROVED this exact head and hosted `human-review` passes; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted `repository-controls` fails; no VS Code/cloud run |
+| Repair and combined-mode controller: issue #14, PR #18 | Historical head `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; independent review exists; hosted acceptance tests passed | Issue and PR were closed by the owner for scope on 2026-09-28; `repository-controls` and evidence failed; unmerged and unaccepted |
+| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Historical head `fc59deefc31213b2c596bd0384008f77a9955c4f`; 500 unit tests, 10 PostgreSQL acceptance tests, scope/merge checks and two read-only CLI identity canaries passed | Issue and PRs were closed by the owner for scope; full `validate:all` fails on 84 Zizmor findings; hosted evidence/controls fail; AC9 cloud isolation was not proved |
+| Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | Historical head `0260fe99fdd48672d83f83d45849ac9487d38fe2` received exact-head approval; hosted `human-review` and `evidence` passed | Issue and PRs were closed by the owner for scope; `repository-controls` failed, so trusted acceptance was not established |
+| Repository controls: issue #22, plan PR #23 | Plan approval existed for base `17e7a5c5…` | Issue and PR were closed by the owner for scope; no ruleset setting was changed |
+| Workflow scanner: issue #20, plan PR #21 | Prior plan approval existed for base `2e3cd083…` | Issue and PR were closed by the owner for scope; the base was stale and no scanner findings were fixed |
+| WI-1842 rehearsal: issue #4, PR #13 | The issue remains as the plan-first demo task; PR #13 recorded the planner stopping because the cached task contract was absent | PR #13 was closed as a stale, zero-file rehearsal; it does not prove a successful cloud run |
+| Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; exact-head approval and hosted `human-review` pass; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | PR #19 remains draft; full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes), hosted `repository-controls` fails, and no VS Code/cloud run is proven |
 
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
 do not prove every VS Code lifecycle hook, a successful cloud task, or hosted
-acceptance. The cloud attempt is recorded as a blocked negative result, not a
-pass.
+acceptance. The system-maintenance closures do not change these findings. The
+cloud attempt is recorded as a blocked negative result, not a pass.
 
 ## Interpretation rules
 
