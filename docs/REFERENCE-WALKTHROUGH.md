@@ -36,9 +36,13 @@ Latest GitHub.com session
 used the custom `plan` agent and the exact approved base branch. After the
 issue body was supplied, it generated a chat-only proposal, but the plan's
 `contractDigest` remains an unresolved sentinel because the task-contract
-artifact was not resolved and the planner had no shell. The branch remains at
-the base; no commit, source change, or PR resulted, so the proposal is not
-publishable and cloud task-contract bootstrap remains blocked.
+artifact was not resolved and the planner had no shell. A separate local
+resolver fetched the issue with body digest
+`2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`, which
+matches approved plan PR #26. The branch remains at the base; no commit,
+source change, or PR resulted, so the proposal is not publishable and cloud
+task-contract bootstrap remains blocked. Its assertion that PR #26 approval
+is stale conflicts with current GitHub evidence and needs human reconciliation.
 
 The runbook's local `ready_for_review` output must not be presented as
 `ready_for_acceptance`. Reopened PR #27's historical local validation (500

@@ -79,6 +79,16 @@ contract digest is bound and the plan-only state is independently reviewed.
 This is evidence of a cloud task-contract bootstrap failure, not of a
 permission denial or successful cloud execution. No parallel cloud proof is
 established.
+
+A separate fresh detached local worktree at base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`
+resolved live issue #16 with `npm run contract:fetch -- --issue 16` and
+recorded body digest `2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`.
+That digest matches approved plan PR #26, whose exact-head review and
+`plan-approval` check pass. The chat-only cloud proposal leaves the digest
+unresolved and repeats the issue's statement that PR #26's approval is stale;
+this conflicts with the current plan/base/check evidence. Do not publish,
+approve, or implement the chat proposal until the contract binding and that
+conflict are reconciled.
 The system-maintenance items are reopened, but none of these statuses accepts
 their plans or implementations.
 

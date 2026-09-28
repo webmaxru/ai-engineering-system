@@ -104,9 +104,12 @@ used `/plan 16`, the custom `plan` agent, and the correct base
 After the issue body was supplied, it generated a chat-only plan proposal, but
 its `contractDigest` remains an unresolved sentinel because
 `artifacts/task-contract.json` was not resolved and the planner had no shell.
-The branch remains at the base; no commit, source change, or PR resulted.
-This confirms task-contract bootstrap is still incomplete, not that repository
-permissions were denied.
+A separate local fetch in a detached worktree resolved the live issue to body
+digest `2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`,
+matching approved plan PR #26. The cloud branch remains at the base; no
+commit, source change, or PR resulted. The proposal's claim that PR #26's
+approval is stale conflicts with current GitHub evidence; this remains
+unresolved. The cloud bootstrap failure was not a permission denial.
 
 Issues #14, #16, #20, #22 and #24 and their plan/implementation PRs have been
 reopened for remediation. Their earlier closures were scope cancellations,
