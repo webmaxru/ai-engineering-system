@@ -92,6 +92,7 @@ for defects and host-specific evidence.
 | [Full installation reference](docs/FULL-INSTALLATION.md) | Detailed integrated recipe; current adoption release is blocked |
 | [Current audit](docs/AUDIT-2026-09-23.md) | Exact revisions, all-script assessment, defects and measured evidence |
 | [Copilot surfaces](docs/COPILOT-SURFACES.md) | CLI, VS Code and cloud-agent observations and remaining canaries |
+| [Technical session presentation](From-agents-to-engineering-systems.pptx) | Validated against the framework and Northstar source excerpts; hosted and cross-surface limits remain explicit |
 | [Reference walkthrough](docs/REFERENCE-WALKTHROUGH.md) | Run and inspect the Northstar proof of concept |
 | [WI-1842 demo](docs/END-TO-END-DEMO.md) | Local rehearsal and the actual blocked cloud run |
 | [New endpoint demo](docs/NEW-ENDPOINT-DEMO.md) | Draft `GET /orders/:id` candidate, local PostgreSQL evidence, and current acceptance limits |
