@@ -34,7 +34,7 @@ canary. VS Code's selected Local versus Copilot Agent Host harness matters.
 | VS Code | The running VS Code window did not expose an actionable accessibility tree or screenshot, and no live Local/Agent Host session was completed. | Unverified. |
 | Copilot cloud | Historical WI-1842 planner PR #13 stopped because the live task contract was absent. The later issue #16 run produced draft PR #29 on `main` with zero changed files, not on its approved base `17e7a5c5…`. | Not an AC9 canary; cloud isolation remains unproven. |
 | GitHub.com agent UI | The repository Agents page displayed “Unable to load tasks” with a stale-cache/account-switch warning during this check; no new task was started. | Platform/UI retrieval failure, not a successful or failed agent execution. |
-| Hosted candidate gates | PR #27 is approved as a review but remains draft; its current `acceptance` checks pass while `evidence` and `repository-controls` fail. PR #28 also remains draft with `human-review` and `repository-controls` failing. | No candidate has `ready_for_acceptance`; do not merge or treat review approval as hosted acceptance. |
+| Hosted candidate gates | PR #19 at `cf762216…` and PR #28 at `0260fe99…` have exact-head `vibeprogrammer` approvals and passing `human-review` checks; both remain draft and fail `repository-controls`. PR #27 remains draft; its `acceptance` passes while `evidence` and `repository-controls` fail. | No candidate has `ready_for_acceptance`; the approvals do not bypass the failed trusted-control/evidence gates. |
 
 PR #27's `npm run validate:all` failure is owned by the scanner-remediation
 work tracked in

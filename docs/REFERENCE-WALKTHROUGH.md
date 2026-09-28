@@ -57,7 +57,7 @@ does not make the whole repository conformant.
 Use [WI-1842](END-TO-END-DEMO.md) for the observed local application invariant
 and the honestly blocked cloud handoff. The order-read endpoint has a draft
 candidate rebased onto the refreshed `17e7a5c` plan base, plus local PostgreSQL
-evidence; full Zizmor, hosted repository-controls, independent review and
-cross-surface proof remain outstanding. See [the endpoint runbook](NEW-ENDPOINT-DEMO.md).
-Pin recordings and artifacts to exact commits; label designs, rehearsals and
-completed hosted runs separately.
+evidence and an approved exact-head review; full Zizmor, hosted
+repository-controls and cross-surface proof remain outstanding. See
+[the endpoint runbook](NEW-ENDPOINT-DEMO.md). Pin recordings and artifacts to
+exact commits; label designs, rehearsals and completed hosted runs separately.

@@ -31,10 +31,10 @@ independent-process retrieval and restart; scope (13 paths, zero violations)
 and merge checks passed against the declared base. `npm run validate:all`
 exited 1 at Zizmor with 86 findings (65 errors, 21 notes); Poutine reported
 zero findings, and no suppressions were added. Hosted Plan Gate, scope,
-acceptance, quality, dependency review, secret scan, and evidence pass on the
-refreshed head; the latest CodeQL rerun is pending. `repository-controls` and
-`human-review` still fail; an independent review has been requested but not
-submitted. No current VS Code or Copilot cloud run has been completed. Do not
+acceptance, quality, dependency review, secret scan, CodeQL, and evidence pass
+on the refreshed head. `vibeprogrammer` approved this exact implementation
+head and the hosted `human-review` check passes; `repository-controls` still
+fails. No current VS Code or Copilot cloud run has been completed. Do not
 present this draft as an accepted or cross-surface demo.
 
 ## Issue #17 task contract summary

@@ -90,8 +90,8 @@ inspection, not adoption.
 | --- | --- | --- |
 | PR #18, issue #14, head `17e7a5c5…` | Independent review; hosted acceptance tests pass; candidate annotates identified customization seams | `evidence` and `repository-controls` fail |
 | PR #27, issue #16, head `fc59deef…` | 500 unit tests, 10 PostgreSQL acceptance tests, 66-path scope check and merge check pass against base `17e7a5c5…`; two read-only CLI identity canaries pass | Full `validate:all` fails on 84 Zizmor findings (64 errors, 20 notes); hosted evidence and repository-controls fail |
-| PR #28, issue #24, head `0260fe99…` | Hosted `evidence` check passes | `human-review` and `repository-controls` fail; the implementation is still draft |
-| PR #19, issue #17, head `cf762216…` | Issue/plan base is `17e7a5c…`; `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted repository-controls fails, independent implementation review pending; no VS Code/cloud run |
+| PR #28, issue #24, head `0260fe99…` | `vibeprogrammer` approved the exact head; hosted `human-review` and `evidence` checks pass | Still draft; `repository-controls` fails, so trusted acceptance is not established |
+| PR #19, issue #17, head `cf762216…` | Issue/plan base is `17e7a5c…`; `vibeprogrammer` approved the exact head and hosted `human-review` passes; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted `repository-controls` fails; no VS Code/cloud run |
 | PR #29, issue #16 cloud attempt | GitHub.com run completed and created a draft PR | Wrong `main` base and zero changed files; not cloud isolation evidence |
 
 The issue chain and current hosted gates are maintained in

@@ -23,9 +23,9 @@ and scanner-remediation candidates are tracked by issues
 [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20).
 PR #18 is independently reviewed but fails hosted evidence/repository-control
 gates. PR #27 passes focused local and PostgreSQL validation but fails those
-hosted gates and the full local Zizmor stage. PR #28 has a passing evidence
-check but still needs implementation review and repository-controls. These
-are candidate results, not an accepted release; see
+hosted gates and the full local Zizmor stage. PRs #19 and #28 have approved
+exact-head reviews and passing `human-review` checks, but still fail
+`repository-controls`. These are candidate results, not an accepted release; see
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact refs and blockers.
 Northstar remains an inspectable proof of concept, not an adoption source.
 
