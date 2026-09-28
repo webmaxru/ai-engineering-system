@@ -1,4 +1,5 @@
 param(
+  # CUSTOMIZE: checkout location only; the locked repository and revision are authority.
   [string]$NorthstarPath = "..\northstar-orders-api-demo"
 )
 
@@ -164,12 +165,20 @@ foreach ($entry in $coverage) {
   }
 }
 
+$markdownPaths = @(
+  & git -C $repositoryRoot ls-files --cached --others --exclude-standard -- "*.md"
+)
+if ($LASTEXITCODE -ne 0) {
+  throw "Unable to enumerate framework Markdown files"
+}
 $unknownReferences = @()
-Get-ChildItem -Path $repositoryRoot -Recurse -Filter "*.md" -File |
-  Where-Object { $_.FullName -notlike "*\templates\northstar\*" } |
+$markdownPaths | Sort-Object -Unique |
+  Where-Object { $_ -notlike "templates/northstar/*" } |
   ForEach-Object {
-    $relativePath = $_.FullName.Substring($repositoryRoot.Length + 1)
-    $content = Get-Content -Raw $_.FullName
+    $relativePath = $_
+    $documentPath = Join-Path $repositoryRoot $relativePath
+    if (-not (Test-Path -LiteralPath $documentPath -PathType Leaf)) { return }
+    $content = Get-Content -Raw -LiteralPath $documentPath
     foreach ($match in [regex]::Matches($content, "EXT-\d{3}")) {
       if (-not $registeredIds.Contains($match.Value)) {
         $unknownReferences += "$relativePath references $($match.Value)"
@@ -180,9 +189,24 @@ if ($unknownReferences.Count -gt 0) {
   throw ($unknownReferences -join [Environment]::NewLine)
 }
 
-foreach ($activePath in @(".github\agents", ".github\hooks", ".github\workflows")) {
+foreach ($activePath in @(".github\agents", ".github\hooks")) {
   if (Test-Path -LiteralPath (Join-Path $repositoryRoot $activePath)) {
     throw "The framework repository must not activate $activePath"
+  }
+}
+
+# Ordinary documentation publishing is not self-governance. This is an exact
+# exception, not permission to add enforcement or agentic workflows.
+$workflowsPath = Join-Path $repositoryRoot ".github\workflows"
+if (Test-Path -LiteralPath $workflowsPath) {
+  $unexpectedWorkflows = @(
+    Get-ChildItem -LiteralPath $workflowsPath -Recurse -Force -File |
+      Where-Object {
+        $_.FullName -ne (Join-Path $workflowsPath "docs.yml")
+      }
+  )
+  if ($unexpectedWorkflows.Count -gt 0) {
+    throw "The framework repository permits only the ordinary docs.yml publishing workflow"
   }
 }
 

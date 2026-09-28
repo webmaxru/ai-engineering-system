@@ -1,9 +1,16 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   auditSourceTree,
   environmentAllowsOnlyDefaultBranch,
   environmentReviewersMatch,
   exactStringSet,
+  governedAcceptanceDatabaseUrlIsSafe,
+  governedArtifactsTargetExpectedDirectory,
+  governedEvidenceTaskLookupPermissionsAreSafe,
+  governedMergedArtifactsHaveUniquePaths,
+  governedScopeUsesPullRequestContext,
+  governedSingleCheckArtifactsPreserveDirectory,
   hasRulesetBypass,
   rulesetAppliesToDefaultBranch,
   strictRequiredContexts,
@@ -22,6 +29,112 @@ describe("source-controlled governance", () => {
     expect(new Set(Object.values(auditSourceTree().externalControls))).toEqual(
       new Set(["not-verified"]),
     );
+  });
+
+  it("preserves the governed acceptance database boundary", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    expect(governedAcceptanceDatabaseUrlIsSafe(workflow)).toBe(true);
+  });
+
+  it("starts the governed change workflow", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    expect(workflow).toMatch(/^\s{2}plan-contract:\s*$/m);
+    expect(governedAcceptanceDatabaseUrlIsSafe(workflow)).toBe(true);
+  });
+
+  it("rejects an invalid governed workflow database URL", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    const invalid = workflow.replace(
+      /^\s*DATABASE_URL:.*$/m,
+      "      DATABASE_URL: ******localhost:5432/northstar",
+    );
+    expect(invalid).not.toBe(workflow);
+    expect(governedAcceptanceDatabaseUrlIsSafe(invalid)).toBe(false);
+  });
+
+  it("routes governed artifacts to their expected directory", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    expect(governedArtifactsTargetExpectedDirectory(workflow)).toBe(true);
+    expect(
+      governedArtifactsTargetExpectedDirectory(
+        workflow.replace(
+          /(\s+name: northstar-plan-context\r?\n\s+)path: artifacts/,
+          "$1path: .",
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("grants evidence the task lookup permissions", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    expect(governedEvidenceTaskLookupPermissionsAreSafe(workflow)).toBe(true);
+    expect(
+      governedEvidenceTaskLookupPermissionsAreSafe(
+        workflow.replace(
+          /( {2}evidence:[\s\S]*? {4}permissions:\r?\n(?: {6}[^\r\n]+\r?\n)*?) {6}pull-requests: read\r?\n/,
+          "$1",
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("completes the governed evidence handoff", () => {
+    const workflow = readFileSync(
+      ".github/workflows/governed-change.yml",
+      "utf8",
+    );
+    expect(governedArtifactsTargetExpectedDirectory(workflow)).toBe(true);
+    expect(governedSingleCheckArtifactsPreserveDirectory(workflow)).toBe(true);
+    expect(governedEvidenceTaskLookupPermissionsAreSafe(workflow)).toBe(true);
+    expect(governedMergedArtifactsHaveUniquePaths(workflow)).toBe(true);
+    expect(governedScopeUsesPullRequestContext(workflow)).toBe(true);
+    expect(
+      governedSingleCheckArtifactsPreserveDirectory(
+        workflow.replace(
+          "path: artifacts/**/secret-scan.json",
+          "path: artifacts/checks/secret-scan.json",
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      governedMergedArtifactsHaveUniquePaths(
+        workflow.replaceAll(
+          "quality-governance-report.json",
+          "governance-report.json",
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      governedScopeUsesPullRequestContext(
+        workflow.replace(
+          /npm run scope:check --\r?\n\s+--pr "\$PR_NUMBER"\r?\n\s+--expected-head "\$NORTHSTAR_HEAD_SHA"/,
+          'npm run scope:check -- --base "$BASE_SHA"',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      governedScopeUsesPullRequestContext(
+        workflow.replace(
+          /(\s+- id: scope\r?\n\s+continue-on-error: true\r?\n)\s+env:\r?\n\s+GH_TOKEN: \$\{\{ github\.token \}\}\r?\n/,
+          "$1",
+        ),
+      ),
+    ).toBe(false);
   });
 
   it("ignores a ruleset that excludes the default branch", () => {

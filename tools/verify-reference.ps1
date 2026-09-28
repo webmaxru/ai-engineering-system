@@ -1,4 +1,5 @@
 param(
+  # CUSTOMIZE: checkout location only; do not substitute a moving ref for the lock.
   [string]$NorthstarPath = "..\northstar-orders-api-demo"
 )
 

@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import { repositoryDocsIntegration } from './scripts/sync-docs.mjs';
 
 export default defineConfig({
+  // CUSTOMIZE: Pages origin and repository base path must match the deployment.
   site: 'https://webmaxru.github.io',
   base: '/ai-engineering-system/',
   trailingSlash: 'always',
@@ -11,6 +12,7 @@ export default defineConfig({
     repositoryDocsIntegration(),
     sitemap(),
     starlight({
+      // CUSTOMIZE: branding and repository link; retain the canonical docs source.
       title: 'AI Engineering System',
       description:
         'A practical, inspectable control loop for agent-assisted software delivery.',

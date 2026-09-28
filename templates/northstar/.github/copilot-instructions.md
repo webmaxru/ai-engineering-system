@@ -18,7 +18,7 @@ The operating principle is:
 
 > Agents propose; humans and policy accept.
 
-The control loop is **plan -> act -> evaluate**. Every phase must leave durable,
+The control loop is **plan → act → evaluate**. Every phase must leave durable,
 inspectable evidence in GitHub or in a machine-readable local artifact.
 
 `.github/copilot-instructions.md` is generated from this file. Edit only
@@ -58,6 +58,9 @@ authority.
 
 The pull request is the state anchor. It carries the objective, current plan,
 decisions and handoffs, risks, rollback, commits, checks, and evidence.
+Apply the **contributor model**: evaluate the work by its intent, scope,
+evidence, ownership, policy, and fallback, not by whether the author is human
+or an agent.
 
 The machine-readable plan must bind:
 
@@ -100,9 +103,10 @@ Narrative confidence cannot lower the required controls.
 Parallel work is allowed only on isolated paths and branches. Sequential work
 uses durable artifacts and explicit handoffs, not hidden agent-to-agent state.
 
-## Context and memory
+## GitHub as the system of record and control plane
 
-GitHub is the external memory and system of record:
+GitHub is the external memory and source of truth. It is the **system of record
+and control plane**:
 
 - issue: requirements and acceptance criteria;
 - pull request: plan, decisions, implementation, evidence, and review;
@@ -137,6 +141,8 @@ become deny decisions. Keep pre-tool policy deterministic and fast.
 ## MCP governance
 
 Use only approved MCP servers from the organization or enterprise registry.
+The organization or enterprise **MCP allow list** decides which registered
+servers may be used.
 Enable specific tool names, not `*`, unless a human explicitly approves the
 expanded blast radius. Runtime credentials must use protected
 `COPILOT_MCP_*` secrets or variables and must never be committed.

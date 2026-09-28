@@ -25,6 +25,8 @@ const IGNORED = [
   "scope-report.json",
   "repository-controls-report.json",
   "validation-authority-report.json",
+  "quality-governance-report.json",
+  "report.json",
 ];
 const MAINTENANCE_ALLOWED = [
   "task-contract.json",

@@ -8,6 +8,10 @@ The current requirement-by-requirement audit is maintained in
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md); this document preserves the
 historical before-and-after assessment.
 
+**Current evidence supersedes the historical "implemented" column below.**
+See [AUDIT-2026-09-23.md](AUDIT-2026-09-23.md) for the 35-script review and
+actual local/cloud results. Presence in source is not operational conformance.
+
 ## Baseline assessment
 
 The starting repository had a sound application example and useful agent
@@ -72,13 +76,27 @@ The Northstar reference contains the intended implementation:
 - a protected maintenance path for changes to validation authority;
 - patched dependencies with no known audit vulnerabilities at validation time.
 
-The strict follow-up audit found one release-blocking defect not detected by
-that local evidence: GitHub rejects the required governed-change workflow
-before creating jobs because its database URL is invalid YAML. The current
-reference therefore remains blocked until
-`webmaxru/northstar-orders-api-demo#8` is implemented and accepted,
-terminology repair `webmaxru/northstar-orders-api-demo#7` is accepted, and the
-snapshot is refreshed.
+The earlier workflow syntax and terminology defects were repaired and merged.
+The September 23 audit at `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c` found
+new task-bootstrap, evidence-integrity, host-compatibility, scanner and recovery
+defects. It also recorded two moderate dependency findings, superseding the
+historical clean-audit statement above. The reference remains blocked under
+`webmaxru/northstar-orders-api-demo#14`; the snapshot is refreshed for
+inspection, not adoption.
+
+## Current candidate state (2026-09-28)
+
+| Candidate | Verified local evidence | Remaining blocker |
+| --- | --- | --- |
+| PR #18, issue #14, head `17e7a5c5…` | Independent review; hosted acceptance tests pass; candidate annotates identified customization seams | `evidence` and `repository-controls` fail |
+| PR #27, issue #16, head `fc59deef…` | 500 unit tests, 10 PostgreSQL acceptance tests, 66-path scope check and merge check pass against base `17e7a5c5…`; two read-only CLI identity canaries pass | Full `validate:all` fails on 84 Zizmor findings (64 errors, 20 notes); hosted evidence and repository-controls fail |
+| PR #28, issue #24, head `0260fe99…` | Hosted `evidence` check passes | `human-review` and `repository-controls` fail; the implementation is still draft |
+| PR #19, issue #17, head `cf762216…` | Issue/plan base is `17e7a5c…`; `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | Full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes); hosted repository-controls fails, independent implementation review pending; no VS Code/cloud run |
+| PR #29, issue #16 cloud attempt | GitHub.com run completed and created a draft PR | Wrong `main` base and zero changed files; not cloud isolation evidence |
+
+The issue chain and current hosted gates are maintained in
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md). These candidates do not
+supersede the audited `main` baseline or permit adoption.
 
 ## Validation boundary
 
@@ -98,7 +116,7 @@ Hosted `ready_for_acceptance` additionally depends on real GitHub state:
 Those controls must remain **not verified** until the platform provides direct
 evidence. A policy file describing them is not proof that they are active.
 
-## Remaining limitations
+## Remaining limitations at the audited baseline (2026-09-23)
 
 - The reference is GitHub- and Copilot-oriented rather than framework-neutral.
 - The current private-repository plan may prevent API verification or
@@ -107,8 +125,8 @@ evidence. A policy file describing them is not proof that they are active.
   output lifecycle point.
 - The trusted maintenance path requires one audited installation bootstrap
   before its default-branch workflow can govern later changes.
-- The currently locked governed-change workflow does not parse on GitHub;
-  `webmaxru/northstar-orders-api-demo#8` and
-  `webmaxru/northstar-orders-api-demo#9` track the required high-risk repair.
+- The workflow now runs, but its examined acceptance-related jobs failed;
+  the actual cloud rehearsal stopped before a plan because task authority
+  was missing. See [COPILOT-SURFACES.md](COPILOT-SURFACES.md).
 - The experimental Responsible AI Agent Hooks adapter is partial and
   nonconformant because the host does not expose all required lifecycle points.
