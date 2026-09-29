@@ -72,6 +72,13 @@ PR #28 remains draft and unmerged; no trusted acceptance is established. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
 and controlled-bootstrap boundary.
 
+Issue #16 plan PR #26 is now refreshed to parent base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584` at plan head
+`42721d4ee34a55cb031567d3942dd037e5bbe513` (contract `2afe7ed6…`, plan
+`d020ca88…`). The plan gate passes, but fresh native approval is pending.
+Implementation PR #27 remains based on `17e7a5c…` and must not be rebased or
+implemented against the refreshed plan until that approval is recorded.
+
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
 service instances, while PostgreSQL provides shared durability and concurrency
