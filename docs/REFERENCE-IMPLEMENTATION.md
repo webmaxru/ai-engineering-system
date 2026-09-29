@@ -35,13 +35,33 @@ and `human-review` checks now pass; hosted evidence and `repository-controls`
 remain unresolved. Issue #20 remains blocked by issue #22; no scanner finding
 has been fixed.
 
-The issue #14 implementation candidate PR #18 is now at
-`a7664bfef3f587dbd767efd421979480e2ad889e`. Local validation passes with 469
-unit tests, and dedicated PostgreSQL acceptance passes 9/9 after the privacy
-test was isolated in a per-run schema. The high `fast-uri` advisory still
-blocks dependency review. Issue #14's refreshed contract and PR #15's proposed
-plan now specify a post-bootstrap, pre-final-acceptance AC15 canary; plan digest `e5ce0f4c…` was approved in review `5353720051`, but its reviewer-authored record is missing and `plan-approval` still fails. Review `5352060539` binds only the superseded `5cacbb69…` plan. The implementation review remains approved at `a7664bf`. No
-trusted acceptance or ruleset change is claimed. See
+The issue #14 implementation candidate
+[PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is at
+`2ce3cf8a69439c22246de7d5449ce186e23bd584` on
+`agent/implement/aes-surface-evidence`. Local `npm run validate` passes
+489 unit tests; isolated PostgreSQL acceptance passes 9/9;
+`npm audit --audit-level=high` reports zero vulnerabilities; and
+`npm run agentic:compile` passes. The approved PR #15 plan (`e5ce0f4c…`,
+review `5353720051`) stages AC15 after controlled bootstrap activation but
+before final acceptance. The candidate adds a protected, exact-head
+browser-plan canary and keeps `ready_for_acceptance` blocked until that
+evidence is present.
+
+PR #18 remains open and unmerged. Its exact native review (5356731352) is
+approved, but hosted `human-review` fails because GitHub reports
+`reviewDecision` as not `APPROVED`; repository-controls lookups return
+HTTP 403, and `trusted-acceptance` remains failure. The
+[source report](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36610256698)
+is `ready_for_review` with AC15 unverified and 14/15 criteria proven; the
+[review-event report](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612195971)
+is `review_required`, and the
+[trusted-acceptance run](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612770691)
+fails. Local `agentic:zizmor` remains blocked with 85 findings. No ruleset,
+App permission, or secret changed, and no acceptance or conformance is
+claimed. Issue #24 plan
+[PR #25](https://github.com/webmaxru/northstar-orders-api-demo/pull/25) has
+been refreshed to contract `93a40b20…` and base `2ce3cf8…`; its new
+independent review is pending before child PR #28 may be rebased. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
 and controlled-bootstrap boundary.
 

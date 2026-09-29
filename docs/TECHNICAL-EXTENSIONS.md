@@ -156,6 +156,12 @@ request and a separate `agent/implement/<task-id>` branch created from the
 approved base SHA. Lower-risk work may use the guide's plan + execution
 mode when policy allows it.
 
+For the Issue #14 AC15 browser canary, the candidate adds a separate
+`plan/<task-id>-canary` branch and a file-backed plan artifact. The distinct
+branch keeps the still-open zero-file bootstrap plan from being mistaken for
+the canary; the canary plan must carry a validated `canaryFor` binding and a
+current independent native review.
+
 **Compatibility target.** Both guide-defined workflow modes must remain available;
 the current all-risk authorizer requirement does not prove the lower-risk mode.
 Separating publication from planning preserves the required read-only planning
@@ -163,7 +169,10 @@ boundary.
 
 **Trust and operational effects.** Approval binds to a plan-only commit and
 cannot be reused after the plan or base changes. Exact branch names are a
-Northstar convention, not a universal guide requirement.
+Northstar convention, not a universal guide requirement. The canary suffix is
+not a second implementation branch or a substitute for its approved base; the
+trusted verifier re-reads the explicit canary PR, artifact blob and reviewer
+before it can resolve AC15.
 
 **Rollback.** Close the implementation pull request, return to the approved
 base, and republish a new plan when scope or assumptions change.
@@ -171,7 +180,10 @@ base, and republish a new plan when scope or assumptions change.
 **Northstar evidence.** `.github/agents/plan.agent.md`,
 `.github/agents/implement.agent.md`, `scripts/plan-stop.mjs`,
 `scripts/publish-plan.mjs`, `scripts/plan-approval.mjs`, and
-`.github/workflows/plan-gate.yml`.
+`.github/workflows/plan-gate.yml`. Candidate
+[PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) at
+`2ce3cf8a69439c22246de7d5449ce186e23bd584` adds and locally tests the
+`plan/<task-id>-canary` path; the candidate is not merged or accepted.
 
 ## EXT-004 - Exact pre-tool authorization
 
@@ -239,14 +251,21 @@ stale, cross-run, or cross-commit evidence. `ready_for_review` means local
 proof is complete; `ready_for_acceptance` additionally requires current hosted
 review and policy evidence.
 
-The refreshed Issue #14 proposal moves AC15 to a `post-bootstrap`,
-pre-final-acceptance stage. Before its file-backed browser canary, the report
-may be `ready_for_review` only after AC1-AC14 pass; AC15 remains explicitly
-unverified and `ready_for_acceptance` stays blocked. The protected default-branch
-publisher must bind a native APPROVED review of the exact canary plan artifact
-to the original issue digest, approved bootstrap plan/base, and implementation
-PR/head before resolving AC15. The one-time Issue #24 integration is activation,
-not acceptance; no trusted success may be published until the canary passes.
+The approved Issue #14 plan moves AC15 to a post-bootstrap,
+pre-final-acceptance stage. The report generator can return `ready_for_review`
+after local evidence and every non-deferred criterion pass; it still lists
+missing or failed hosted checks, leaves AC15 unverified, and cannot produce
+`ready_for_acceptance`. The protected system-maintenance gate accepts a staged
+report only when AC15 is the sole unproven criterion and
+`browser-plan-canary` is the sole missing hosted check; any other hosted
+failure blocks that stage. Even an accepted staged report publishes a failing,
+not successful, `trusted-acceptance` status. The trusted default-branch
+verifier binds a native APPROVED review of the exact canary plan artifact to
+the original issue digest, bootstrap plan/base and review, implementation
+PR/head, source/evidence runs, merge ancestry, and canary PR/head/blob before
+resolving AC15. The one-time Issue #24 integration is activation, not
+acceptance; only a fresh report with every criterion proven may publish
+trusted success.
 
 **Compatibility.** The extension prevents self-reported success from replacing
 the guide's system signals. Neither readiness state means that an agent
@@ -257,7 +276,9 @@ of validation authority. Hosted evidence must be re-resolved for the immutable
 head instead of copied from an earlier run. A deferred criterion never counts
 as proven; only a protected, identity-bound browser-canary record can resolve
 it. The trusted publisher and maintenance workflow must understand the same
-stage contract; until they do, the status remains blocked.
+stage contract. If any other criterion or hosted check is missing, failed, or
+unverified, the staged maintenance gate rejects the report. Until the canary
+and all other gates pass, final acceptance remains blocked.
 
 **Rollback.** Revert producer, schema, required-check policy, and fan-in
 changes together. Missing evidence remains a failure during rollback.
@@ -265,14 +286,27 @@ changes together. Missing evidence remains a failure during rollback.
 **Northstar evidence.** `scripts/evidence-record.mjs`,
 `scripts/build-execution-report.mjs`, `scripts/check-human-review.mjs`,
 `.github/workflows/governed-change.yml`, and the execution-report tests.
-Candidate commit `a7664bfef3f587dbd767efd421979480e2ad889e` passes
-`npm run validate` with 469 unit tests and dedicated PostgreSQL acceptance
-with 9/9 tests. The updated Issue #14 contract and PR #15 plan are proposed
-at digests `a611cd038b1ea29e17790f2911612e3e0a86ad2b455061292bdb38694f620f6a`
-and `5cacbb698f513ced0e488005c80436a058eb008b99c1dafb740360548537ae86`;
-fresh approvals are pending. The trusted path remains blocked by the current
-high `fast-uri` audit finding, unavailable repository controls, and unproven
-AC15. This candidate is not accepted and does not change the locked baseline.
+Candidate [PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18),
+head `2ce3cf8a69439c22246de7d5449ce186e23bd584`, passes `npm run validate`
+(489 unit tests), disposable PostgreSQL acceptance (9/9),
+`npm audit --audit-level=high` (zero vulnerabilities), and
+`npm run agentic:compile`. The approved Issue #14 plan is bound to contract
+`a611cd038b1ea29e17790f2911612e3e0a86ad2b455061292bdb38694f620f6a` and plan
+`e5ce0f4cb9923daa93a00e17c2ef286cc3b0ef32a8b12de51221b515d7424c4c`.
+Hosted [report run 36610256698](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36610256698)
+is `ready_for_review` with AC15 unverified and
+14/15 criteria proven; plan approval, validation-authority, repository-controls,
+human review, and the canary remain pending or failed hosted evidence. Native
+review `5356731352` approves the exact
+implementation head, but hosted `human-review` still fails because GitHub
+reports `reviewDecision` as not `APPROVED`; repository-controls is unavailable
+with HTTP 403 and trusted-acceptance remains failure. The
+[review-event report run 36612195971](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612195971)
+is `review_required`; the
+[trusted-acceptance run 36612770691](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612770691)
+failed. Local Zizmor also remains blocked with 85 findings. No ruleset, App
+permission, or secret changed. The implementation candidate is not accepted
+and does not change the locked baseline.
 
 ## EXT-007 - Trusted publication and validation-authority maintenance
 
@@ -287,13 +321,24 @@ changes additionally require an immutable maintenance manifest, a protected
 `system-maintenance` environment, and revalidation by default-branch code
 before the stable `trusted-acceptance` status is published.
 
+Candidate PR #18 adds a narrow staged maintenance decision for AC15: the
+protected maintenance run may record an environment-approved activation only
+when the report is `ready_for_review`, AC15 is the sole unproven criterion, and
+the browser-canary check is the sole missing hosted check. It still publishes
+a failing status in that stage. A separate trusted dispatch verifies the
+merged source PR, original base/head and merge ancestry plus a fresh native
+canary-plan review; success remains limited to a fully proven
+`ready_for_acceptance` report.
+
 **Compatibility.** This preserves the guide's independent human and platform
 acceptance boundary when the proposed change can alter its own checks.
 
 **Trust and operational effects.** The default branch, protected environment,
 reviewer, workflow definition, evidence allow list, and publisher identity are
 part of the trust root. The first installation requires one explicit audited
-bootstrap; it is not a reusable bypass.
+bootstrap; it is not a reusable bypass. The staged AC15 decision is not a
+success signal or merge waiver, and the explicit merged-PR path is usable only
+from protected code with exact source-run and merge identities.
 
 **Rollback.** Revert to the last trusted default-branch publisher and policy.
 Do not let pull-request code publish a substitute success status.
@@ -302,7 +347,12 @@ Do not let pull-request code publish a substitute success status.
 `scripts/import-evidence-artifacts.mjs`,
 `scripts/maintenance-manifest.mjs`,
 `.github/workflows/publish-evidence.yml`, and
-`.github/workflows/system-maintenance-approval.yml`.
+`.github/workflows/system-maintenance-approval.yml`. Candidate PR #18 at
+`2ce3cf8a69439c22246de7d5449ce186e23bd584` has passing local tests, but
+hosted human-review and repository-controls remain blocked and
+`trusted-acceptance` is failure. Issue #24 plan PR #25 has been rebound to this
+parent base and awaits fresh review; the merged-source publisher has not yet
+run, and no external setting was changed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 
