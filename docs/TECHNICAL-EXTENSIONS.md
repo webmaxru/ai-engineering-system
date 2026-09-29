@@ -320,6 +320,13 @@ acceptance verdict for a validation-authority change. A default-branch
 changes additionally require an immutable maintenance manifest, a protected
 `system-maintenance` environment, and revalidation by default-branch code
 before the stable `trusted-acceptance` status is published.
+For the Issue #24 migration continuation, the resolver selects the unique
+maintenance artifact ID from the exact publisher run/attempt and publisher
+job, matching repository, head, and job-time window before download. The
+workflow uses `artifact-ids` rather than a name-only lookup, and revalidation
+requires the publisher attempt to complete successfully before status
+publication. The importer still applies its path allowlist and producer
+provenance checks.
 
 Candidate PR #18 adds a narrow staged maintenance decision for AC15: the
 protected maintenance run may record an environment-approved activation only
@@ -351,8 +358,16 @@ Do not let pull-request code publish a substitute success status.
 `2ce3cf8a69439c22246de7d5449ce186e23bd584` has passing local tests, but
 hosted human-review and repository-controls remain blocked and
 `trusted-acceptance` is failure. Issue #24 plan PR #25 has been rebound to this
-parent base and awaits fresh review; the merged-source publisher has not yet
-run, and no external setting was changed.
+parent base and is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66`
+(review `5357419226`). Child PR #28 is pushed at `35ac91150fa4088af3132a9dda75bc690d657165`
+on base `2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local validation passed
+525 unit tests, PostgreSQL acceptance 9/9, and scope/merge checks. Hosted run
+`36635911460` passes plan, scope, quality, acceptance, CodeQL, secret scan,
+dependency review, merge validation, governance, and evidence; `human-review`
+and `repository-controls` fail. `validate:all` remains blocked by 79
+repository-wide Zizmor findings, with none in the modified maintenance
+workflow. PR #28 remains draft and unmerged; no external setting changed and
+no trusted-acceptance success is claimed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 

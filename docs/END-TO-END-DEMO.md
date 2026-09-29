@@ -62,7 +62,7 @@ digest-bound, publishable plan are established. The run reported no permission
 denial; fixture output cannot substitute for a successful immutable-head cloud
 session and trusted acceptance.
 
-## Current follow-up state (2026-09-28)
+## Current follow-up state (2026-09-30)
 
 The historical run above remains a demonstration of a **correct stop**, not a
 completed WI-1842 delivery. Later maintenance candidates and their subsequent
@@ -70,8 +70,9 @@ scope closures have not changed that conclusion:
 
 | Evidence | Current state |
 | --- | --- |
-| Controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f` was independently reviewed and passed hosted acceptance tests, but hosted `evidence` and `repository-controls` failed. Issue #14 and PR #18 are reopened; they remain unmerged and unaccepted. |
+| Controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is open at `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local validation passes 489 unit tests and isolated PostgreSQL acceptance 9/9. Native review `5356731352` is approved, but the hosted `human-review` check still fails because GitHub reports `reviewDecision` as not `APPROVED`; repository-controls metadata is unavailable with HTTP 403. Report `36610256698` is `ready_for_review` with 14/15 criteria proven and AC15 unverified; trusted-acceptance remains failure. No ruleset setting changed and PR #18 remains unmerged/unaccepted. |
 | Local isolation candidate | Reopened PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) passed local `validate` (500 unit tests), PostgreSQL acceptance (10/10), scope and merge checks against PR #18's head. Full `validate:all` exits 1 on 84 Zizmor findings and hosted evidence/repository-controls fail. |
+| Trusted-acceptance bootstrap | PR #25's refreshed Issue #24 plan is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`). Child PR [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28) is rebased and pushed at `35ac91150fa4088af3132a9dda75bc690d657165` on parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local unit, PostgreSQL, scope, and merge checks pass. Hosted run `36635911460` fails `human-review` and `repository-controls`; full `validate:all` remains blocked by 79 repository-wide Zizmor findings. |
 | Historical local CLI canaries | Two read-only canaries for issue #16 matched task/contract/plan/base/session/owner identities. They are not an implementation or acceptance run for WI-1842; issue #16 is reopened. |
 | Historical GitHub.com cloud attempt | PR [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) was closed after using the default `main` base and producing zero changed files. It does not prove cloud isolation. |
 | Current GitHub.com cloud canaries | Session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5` produced an unapproved proposal on `copilot/plan-16`, based on `main` at `b65c2de5…`, not the approved `17e7a5c` base. Session [5724baed-e173-4722-95ae-077e90c39c6a](https://github.com/webmaxru/northstar-orders-api-demo/tasks/5724baed-e173-4722-95ae-077e90c39c6a) used a mismatched workspace branch. Latest session [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4) used `/plan 16`, custom agent `plan`, and the exact base branch at `17e7a5c…`. After the issue body was supplied, it generated a chat-only plan proposal with an unresolved `contractDigest`; a separate local resolver fetched the canonical issue digest, but no commit/PR resulted. |

@@ -60,8 +60,15 @@ fails. Local `agentic:zizmor` remains blocked with 85 findings. No ruleset,
 App permission, or secret changed, and no acceptance or conformance is
 claimed. Issue #24 plan
 [PR #25](https://github.com/webmaxru/northstar-orders-api-demo/pull/25) has
-been refreshed to contract `93a40b20…` and base `2ce3cf8…`; its new
-independent review is pending before child PR #28 may be rebased. See
+been refreshed to contract `93a40b20…` and base `2ce3cf8…`, and is approved
+on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`).
+Child PR #28 is rebased and pushed at `35ac91150fa4088af3132a9dda75bc690d657165`
+on that parent base. Its local task/plan, scope, merge, 525-unit, and 9/9
+acceptance checks pass; `validate:all` remains blocked by 79 repository-wide
+Zizmor findings. Hosted run `36635911460` passes plan, scope, quality,
+acceptance, CodeQL, secret scan, dependency review, merge validation,
+governance, and evidence, but `human-review` and `repository-controls` fail.
+PR #28 remains draft and unmerged; no trusted acceptance is established. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
 and controlled-bootstrap boundary.
 
