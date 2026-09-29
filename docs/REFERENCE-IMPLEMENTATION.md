@@ -35,6 +35,17 @@ and `human-review` checks now pass; hosted evidence and `repository-controls`
 remain unresolved. Issue #20 remains blocked by issue #22; no scanner finding
 has been fixed.
 
+The issue #14 implementation candidate PR #18 is now at
+`487c14eb095aaea58365bb9463434d03e5aace8e`. Its local validation passes with
+469 unit tests, and its plan-contract, plan-approval, scope-policy, quality,
+acceptance, CodeQL, secret-scan, governance, and merge checks pass. It is still
+unaccepted: the high `fast-uri` advisory fails dependency review; current-head
+human review is pending; trusted evidence remains `review_required` with AC15
+unproven. The approved post-acceptance deferral conflicts with the current
+maintenance gate, which requires `ready_for_acceptance` before it publishes.
+See [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact evidence and
+blocked sequence.
+
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
 service instances, while PostgreSQL provides shared durability and concurrency
