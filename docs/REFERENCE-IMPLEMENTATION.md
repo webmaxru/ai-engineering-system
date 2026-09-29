@@ -40,8 +40,7 @@ The issue #14 implementation candidate PR #18 is now at
 unit tests, and dedicated PostgreSQL acceptance passes 9/9 after the privacy
 test was isolated in a per-run schema. The high `fast-uri` advisory still
 blocks dependency review. Issue #14's refreshed contract and PR #15's proposed
-plan now specify a post-bootstrap, pre-final-acceptance AC15 canary; both the
-new plan approval and exact-head implementation review are pending. No
+plan now specify a post-bootstrap, pre-final-acceptance AC15 canary; the plan approval and reviewer-authored record for digest `e5ce0f4c…` remain pending; the implementation review is approved by vibeprogrammer (5352065196). Review 5352060539 binds only the superseded plan digest `5cacbb69…`. No
 trusted acceptance or ruleset change is claimed. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
 and controlled-bootstrap boundary.
