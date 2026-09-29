@@ -36,15 +36,15 @@ remain unresolved. Issue #20 remains blocked by issue #22; no scanner finding
 has been fixed.
 
 The issue #14 implementation candidate PR #18 is now at
-`487c14eb095aaea58365bb9463434d03e5aace8e`. Its local validation passes with
-469 unit tests, and its plan-contract, plan-approval, scope-policy, quality,
-acceptance, CodeQL, secret-scan, governance, and merge checks pass. It is still
-unaccepted: the high `fast-uri` advisory fails dependency review; current-head
-human review is pending; trusted evidence remains `review_required` with AC15
-unproven. The approved post-acceptance deferral conflicts with the current
-maintenance gate, which requires `ready_for_acceptance` before it publishes.
-See [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact evidence and
-blocked sequence.
+`a7664bfef3f587dbd767efd421979480e2ad889e`. Local validation passes with 469
+unit tests, and dedicated PostgreSQL acceptance passes 9/9 after the privacy
+test was isolated in a per-run schema. The high `fast-uri` advisory still
+blocks dependency review. Issue #14's refreshed contract and PR #15's proposed
+plan now specify a post-bootstrap, pre-final-acceptance AC15 canary; both the
+new plan approval and exact-head implementation review are pending. No
+trusted acceptance or ruleset change is claimed. See
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
+and controlled-bootstrap boundary.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless

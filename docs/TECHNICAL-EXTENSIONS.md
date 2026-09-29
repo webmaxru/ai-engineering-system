@@ -97,7 +97,7 @@ between those artifacts.
 **Implementation.** Northstar uses versioned JSON records such as
 `northstar/plan/1`, `northstar/check-evidence/1`, and
 `northstar/execution-report/3` on the locked baseline. Candidate PR #18 adds
-`northstar/execution-report/4` for explicitly staged post-acceptance criteria.
+`northstar/execution-report/4` for explicitly staged criteria.
 SHA-256 digests bind the live issue body, plan, base commit, approval, evidence,
 and maintenance manifest.
 
@@ -239,13 +239,14 @@ stale, cross-run, or cross-commit evidence. `ready_for_review` means local
 proof is complete; `ready_for_acceptance` additionally requires current hosted
 review and policy evidence.
 
-The issue #14 plan adds an explicit `deferredCriteria` entry for AC15 at
-`post-acceptance`, with a reason and required evidence. The candidate validator
-requires each deferral to name a unique task criterion and the report keeps it
-listed as unverified. Only criteria due at the approved plan stage may be
-omitted from `ready_for_review`; every task criterion remains necessary for
-`ready_for_acceptance`. This is a staged review state, not an acceptance
-exception.
+The refreshed Issue #14 proposal moves AC15 to a `post-bootstrap`,
+pre-final-acceptance stage. Before its file-backed browser canary, the report
+may be `ready_for_review` only after AC1-AC14 pass; AC15 remains explicitly
+unverified and `ready_for_acceptance` stays blocked. The protected default-branch
+publisher must bind a native APPROVED review of the exact canary plan artifact
+to the original issue digest, approved bootstrap plan/base, and implementation
+PR/head before resolving AC15. The one-time Issue #24 integration is activation,
+not acceptance; no trusted success may be published until the canary passes.
 
 **Compatibility.** The extension prevents self-reported success from replacing
 the guide's system signals. Neither readiness state means that an agent
@@ -254,8 +255,9 @@ approved its own work.
 **Trust and operational effects.** Producers and the fan-in consumer form part
 of validation authority. Hosted evidence must be re-resolved for the immutable
 head instead of copied from an earlier run. A deferred criterion never counts
-as proven. The trusted publisher and maintenance workflow must understand the
-same stage contract; until they do, the status remains blocked.
+as proven; only a protected, identity-bound browser-canary record can resolve
+it. The trusted publisher and maintenance workflow must understand the same
+stage contract; until they do, the status remains blocked.
 
 **Rollback.** Revert producer, schema, required-check policy, and fan-in
 changes together. Missing evidence remains a failure during rollback.
@@ -263,12 +265,14 @@ changes together. Missing evidence remains a failure during rollback.
 **Northstar evidence.** `scripts/evidence-record.mjs`,
 `scripts/build-execution-report.mjs`, `scripts/check-human-review.mjs`,
 `.github/workflows/governed-change.yml`, and the execution-report tests.
-Candidate evidence: `webmaxru/northstar-orders-api-demo@487c14eb095aaea58365bb9463434d03e5aace8e`
-passes `npm run validate` with 469 unit tests. Trusted run
-`36553781673` still uses the locked schema-3 publisher and reports
-`review_required` with AC15 unproven; dependency review and hosted acceptance
-remain blocked. This candidate is not accepted and does not change the locked
-baseline.
+Candidate commit `a7664bfef3f587dbd767efd421979480e2ad889e` passes
+`npm run validate` with 469 unit tests and dedicated PostgreSQL acceptance
+with 9/9 tests. The updated Issue #14 contract and PR #15 plan are proposed
+at digests `a611cd038b1ea29e17790f2911612e3e0a86ad2b455061292bdb38694f620f6a`
+and `5cacbb698f513ced0e488005c80436a058eb008b99c1dafb740360548537ae86`;
+fresh approvals are pending. The trusted path remains blocked by the current
+high `fast-uri` audit finding, unavailable repository controls, and unproven
+AC15. This candidate is not accepted and does not change the locked baseline.
 
 ## EXT-007 - Trusted publication and validation-authority maintenance
 
