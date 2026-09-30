@@ -76,10 +76,11 @@ request, hosted workflow proof, and human acceptance is complete.
 The snapshot is for study and comparison. Northstar remains the executable
 source of truth.
 
-With both repositories checked out as siblings:
+With both repositories checked out and the Northstar worktree at the exact
+`sourceCommit` in `templates/northstar/reference-lock.json`:
 
 ```powershell
-pwsh -File tools\verify-architecture.ps1
+pwsh -File tools\verify-architecture.ps1 -NorthstarPath <Northstar-worktree-at-locked-commit>
 ```
 
 The verifier must fail when `architecture-lock.json` reports a blocked

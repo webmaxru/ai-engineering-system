@@ -27,7 +27,9 @@ framework and reference are audited again.
 intentionally blocks a successful release verification while required
 reference changes remain pending. The audited `main` baseline remains the
 historically inspected `b65c2de…` commit; the PR #27 snapshot is an unaccepted
-candidate and is for study, not adoption. Run `pwsh -File tools/verify-architecture.ps1` to check the guide,
+candidate and is for study, not adoption. Since the snapshot lock points to
+`bfb2cbf…`, run the verifier against a Northstar worktree at that exact commit
+(not the unchanged `main` checkout) to check the guide,
 extension coverage, non-self-governance boundary, one-way Northstar reference,
 snapshot, and conformance decision.
 

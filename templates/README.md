@@ -32,8 +32,9 @@ The source `AGENTS.md` is intentionally stored as `AGENTS.snapshot.md`.
 `AGENTS.md` files are discovered recursively by agent tooling, so retaining its
 active name would apply Northstar's instructions inside this repository.
 
-Verify a checkout against a sibling Northstar clone:
+Verify a checkout against a Northstar worktree at the exact `sourceCommit`
+recorded in `northstar/reference-lock.json`:
 
 ```powershell
-pwsh -File tools\verify-reference.ps1
+pwsh -File tools\verify-reference.ps1 -NorthstarPath <Northstar-worktree-at-locked-commit>
 ```
