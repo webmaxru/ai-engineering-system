@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -13,6 +14,15 @@ import {
   loadTaskContract,
   matchesPattern,
 } from "./task-contract.mjs";
+import { localProposalPath } from "./plan-artifact.mjs";
+import {
+  assertWorkspaceOwner,
+  claimWorkspaceOwner,
+  readWorkspaceOwner,
+  releaseWorkspaceClaim,
+  workspaceOwnerIdentity,
+} from "./workspace-owner.mjs";
+import { workspacePath } from "./workspace-path.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 
@@ -136,6 +146,7 @@ export function validatePlanContract(plan, contract) {
       errors.push(`Plan ${field} must contain at least one entry.`);
     }
   }
+  if (errors.length > 0) return { ok: false, errors, warnings };
 
   const plannedCriteria = Array.isArray(plan.successCriteria)
     ? plan.successCriteria
@@ -149,6 +160,81 @@ export function validatePlanContract(plan, contract) {
         errors.push(
           `Plan changes the proving test for ${criterion.id}; reference the task contract instead.`,
         );
+      }
+    }
+  }
+
+  const deferredCriteria = plan.deferredCriteria;
+  if (deferredCriteria !== undefined && !Array.isArray(deferredCriteria)) {
+    errors.push("Plan deferredCriteria must be an array.");
+  } else {
+    const deferredIds = new Set();
+    for (const deferred of deferredCriteria ?? []) {
+      if (!deferred || typeof deferred !== "object" || Array.isArray(deferred)) {
+        errors.push("Plan deferredCriteria entries must be objects.");
+        continue;
+      }
+      const id = deferred.id;
+      if (typeof id !== "string" || !id.trim()) {
+        errors.push("Deferred criterion id is required.");
+        continue;
+      }
+      if (deferredIds.has(id)) {
+        errors.push(`Deferred criterion ${id} is duplicated.`);
+      }
+      deferredIds.add(id);
+      if (!plannedCriteria.some((criterion) => criterion.id === id)) {
+        errors.push(`Deferred criterion ${id} is not mapped by the plan.`);
+      }
+      if (contract && !contract.successCriteria.some((criterion) => criterion.id === id)) {
+        errors.push(`Deferred criterion ${id} is not part of the task contract.`);
+      }
+      if (deferred.stage !== "post-acceptance") {
+        errors.push(`Deferred criterion ${id} stage must be post-acceptance.`);
+      }
+      if (typeof deferred.reason !== "string" || !deferred.reason.trim()) {
+        errors.push(`Deferred criterion ${id} requires a reason.`);
+      }
+      if (typeof deferred.evidence !== "string" || !deferred.evidence.trim()) {
+        errors.push(`Deferred criterion ${id} requires an evidence description.`);
+      }
+    }
+  }
+
+  const canaryFor = plan.canaryFor;
+  if (canaryFor !== undefined) {
+    if (!canaryFor || typeof canaryFor !== "object" || Array.isArray(canaryFor)) {
+      errors.push("Plan canaryFor must be an object.");
+    } else {
+      if (canaryFor.sourceTaskId !== contract?.id) {
+        errors.push("Plan canaryFor sourceTaskId must match the task contract.");
+      }
+      if (canaryFor.sourceContractDigest !== contract?.source?.bodyDigest) {
+        errors.push("Plan canaryFor sourceContractDigest must match the live task.");
+      }
+      if (!/^[0-9a-f]{64}$/i.test(String(canaryFor.sourcePlanDigest ?? ""))) {
+        errors.push("Plan canaryFor sourcePlanDigest must be a SHA-256 digest.");
+      }
+      for (const field of ["sourceBaseSha", "sourceHeadSha", "bootstrapPlanHeadSha"]) {
+        if (!/^[0-9a-f]{40}$/i.test(String(canaryFor[field] ?? ""))) {
+          errors.push(`Plan canaryFor ${field} must be a full 40-character commit SHA.`);
+        }
+      }
+      for (const field of ["sourceRunId", "sourceRunAttempt", "sourceEvidenceRunId"]) {
+        if (!/^[1-9]\d*$/.test(String(canaryFor[field] ?? ""))) {
+          errors.push(`Plan canaryFor ${field} must be a positive decimal string.`);
+        }
+      }
+      for (const field of ["sourcePullRequest", "bootstrapPlanPr", "bootstrapReviewId"]) {
+        if (!Number.isSafeInteger(canaryFor[field]) || canaryFor[field] < 1) {
+          errors.push(`Plan canaryFor ${field} must be a positive integer.`);
+        }
+      }
+      if (typeof canaryFor.bootstrapReviewer !== "string" || !canaryFor.bootstrapReviewer.trim()) {
+        errors.push("Plan canaryFor bootstrapReviewer is required.");
+      }
+      if (!plan.requiredChecks.includes("browser-plan-canary")) {
+        errors.push("A canary plan must require browser-plan-canary evidence.");
       }
     }
   }
@@ -189,6 +275,9 @@ export function validatePlanContract(plan, contract) {
   if (approvalPolicyForRisk(isRisk(plan.risk) ? plan.risk : "critical").requirePlanOnlyApproval) {
     warnings.push("This risk level requires a human approval of the plan-only state.");
   }
+  if (plan.planDigest !== undefined && plan.planDigest !== planDigest(plan)) {
+    errors.push("Plan planDigest does not match its canonical content.");
+  }
 
   return {
     ok: errors.length === 0,
@@ -211,29 +300,105 @@ function main() {
     process.stderr.write("Pass --file <plan.md|plan.json>.\n");
     process.exit(2);
   }
-  const absolute = resolve(REPO_ROOT, file);
-  const raw = readFileSync(absolute, "utf8");
-  const plan = file.endsWith(".json") ? JSON.parse(raw) : extractPlanContract(raw);
-  if (!plan) {
-    process.stderr.write("No machine-readable plan contract was found.\n");
-    process.exit(1);
+  const sessionId = valueOf("--session-id");
+  if (!sessionId) throw new Error("Plan materialization requires the current explicit session ID.");
+  const owner = readWorkspaceOwner(REPO_ROOT);
+  if (!owner || owner.issue === null || !owner.taskId || !owner.contractDigest) {
+    throw new Error("Plan materialization requires a complete owned task workspace.");
   }
-  const result = validatePlanContract(plan, loadTaskContract());
-  if (!result.ok) {
-    process.stderr.write(`${result.errors.join("\n")}\n`);
-    process.exit(1);
+  const ownerEnv = { ...process.env, GITHUB_REPOSITORY: owner.repository };
+  const identity = workspaceOwnerIdentity({
+    root: REPO_ROOT,
+    issue: owner.issue,
+    taskId: owner.taskId,
+    contractDigest: owner.contractDigest,
+    sessionId,
+    env: ownerEnv,
+  });
+  assertWorkspaceOwner(REPO_ROOT, identity);
+  const claim = claimWorkspaceOwner({
+    root: REPO_ROOT,
+    issue: owner.issue,
+    taskId: owner.taskId,
+    contractDigest: owner.contractDigest,
+    sessionId,
+    env: ownerEnv,
+  });
+  try {
+    const contract = loadTaskContract(undefined, REPO_ROOT);
+    const session = JSON.parse(readFileSync(
+      workspacePath("artifacts/task-session.json", REPO_ROOT),
+      "utf8",
+    ));
+    if (!contract?.source?.trusted || contract.source.issue !== owner.issue ||
+        contract.id !== owner.taskId || contract.source.bodyDigest !== owner.contractDigest ||
+        session.issue !== owner.issue || session.taskId !== owner.taskId ||
+        session.contractDigest !== owner.contractDigest || session.sessionId !== sessionId ||
+        session.workspaceOwner !== owner.ownerKey || session.role !== "implement") {
+      throw new Error("Plan materialization session does not match the active workspace owner.");
+    }
+    const absolute = process.argv.includes("--execute-proposed")
+      ? localProposalPath(file, REPO_ROOT) : workspacePath(file, REPO_ROOT);
+    const raw = readFileSync(absolute, "utf8");
+    const plan = file.endsWith(".json") ? JSON.parse(raw) : extractPlanContract(raw);
+    if (!plan) {
+      process.stderr.write("No machine-readable plan contract was found.\n");
+      process.exitCode = 1;
+      return;
+    }
+    const result = validatePlanContract(plan, contract);
+    if (!result.ok) {
+      process.stderr.write(`${result.errors.join("\n")}\n`);
+      process.exitCode = 1;
+      return;
+    }
+    const out = valueOf("--out") ?? "artifacts/plan.json";
+    if (process.argv.includes("--execute-proposed") && out !== "artifacts/plan.json") {
+      throw new Error("Proposed execution must materialize the canonical local plan path.");
+    }
+    const target = workspacePath(out, REPO_ROOT);
+    let activatedSession = null;
+    if (process.argv.includes("--execute-proposed")) {
+      if (session.workflow !== "plan-and-execute" ||
+          session.canPropose !== true ||
+          session.taskId !== contract.id ||
+          session.contractDigest !== contract.source.bodyDigest ||
+          approvalPolicyForRisk(plan.risk).requirePlanOnlyApproval ||
+          Object.hasOwn(plan, "approval") ||
+          absolute !== workspacePath("artifacts/plan-proposal.md", REPO_ROOT)) {
+        throw new Error("Only the selected lower-risk session may activate this proposed plan.");
+      }
+      const git = (args) => execFileSync("git", args, {
+        cwd: REPO_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+      }).trim();
+      if (git(["branch", "--show-current"]) !== `agent/implement/${contract.id.toLowerCase()}` ||
+          git(["rev-parse", "HEAD"]) !== plan.baseSha || session.workspaceHead !== plan.baseSha) {
+        throw new Error("The proposed plan must start from the session's exact isolated base.");
+      }
+      writeFileSync(workspacePath("artifacts/task-plan.md", REPO_ROOT), `${raw.trim()}\n`, "utf8");
+      activatedSession = {
+        ...session, approvalState: "proposed", canPropose: false,
+      };
+    }
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(
+      target,
+      `${JSON.stringify({ ...plan, planDigest: result.planDigest }, null, 2)}\n`,
+      "utf8",
+    );
+    if (activatedSession) {
+      writeFileSync(
+        workspacePath("artifacts/task-session.json", REPO_ROOT),
+        `${JSON.stringify(activatedSession)}\n`,
+        "utf8",
+      );
+    }
+    process.stdout.write(
+      `plan=${plan.taskId} risk=${plan.risk} digest=${result.planDigest}\n${target}\n`,
+    );
+  } finally {
+    releaseWorkspaceClaim(claim);
   }
-  const out = valueOf("--out") ?? "artifacts/plan.json";
-  const target = resolve(REPO_ROOT, out);
-  mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(
-    target,
-    `${JSON.stringify({ ...plan, planDigest: result.planDigest }, null, 2)}\n`,
-    "utf8",
-  );
-  process.stdout.write(
-    `plan=${plan.taskId} risk=${plan.risk} digest=${result.planDigest}\n${target}\n`,
-  );
 }
 
 const invokedDirectly =

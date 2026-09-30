@@ -1,19 +1,19 @@
 {
-  "$comment": "Use the PascalCase compatibility event names once. Copilot CLI and cloud agent accept these names and emit the VS Code-compatible payload shape; registering both cases would execute the same control twice. Commands invoke node directly so stdin reaches the policy unchanged. Post-tool and session-end records are payload-free and session-local; GitHub Actions remains the durable acceptance authority.",
+  "$comment": "CUSTOMIZE the Node invocation only for your installed runtime. PascalCase event names select the documented VS Code-compatible payload format; they do not prove host parity. Register each event once. SessionStart and UserPromptSubmit allow 90 seconds for live task/plan resolution; PreToolUse remains 10 seconds and must stay fast. Command-hook timeouts are fail-open, including PreToolUse, so no universal write denial is claimed when authorization times out. Same-owner recovery is required after an interrupted resolver. Prompt hook output is not a universal stop control. Stop dispatch uses the explicit task role. Local hook records are not hosted acceptance evidence.",
   "version": 1,
   "hooks": {
     "SessionStart": [
       {
         "type": "command",
         "command": "node scripts/session-start.mjs",
-        "timeout": 20
+        "timeout": 90
       }
     ],
     "UserPromptSubmit": [
       {
         "type": "command",
         "command": "node scripts/resolve-task.mjs",
-        "timeout": 20
+        "timeout": 90
       }
     ],
     "PreToolUse": [
@@ -35,6 +35,13 @@
         "type": "command",
         "command": "node scripts/audit-hook.mjs",
         "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node scripts/stop-dispatch.mjs",
+        "timeout": 300
       }
     ],
     "SessionEnd": [

@@ -24,6 +24,14 @@ import {
   cacheContract,
   contractFromFile,
 } from "./task-contract.mjs";
+import {
+  clearTaskState,
+} from "./resolve-task.mjs";
+import {
+  claimWorkspaceOwner,
+  releaseWorkspaceClaim,
+  removeWorkspaceOwner,
+} from "./workspace-owner.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -65,13 +73,13 @@ function requireStep(id, result, artifact, category) {
   }
 }
 
-async function main() {
+async function runDemo(owner) {
   const artifacts = resolve(REPO_ROOT, "artifacts");
   rmSync(resolve(artifacts, "checks"), { recursive: true, force: true });
   mkdirSync(resolve(artifacts, "checks"), { recursive: true });
 
   const contract = contractFromFile("tests/fixtures/WI-1842.issue.md");
-  cacheContract(contract);
+  cacheContract(contract, undefined, owner);
 
   const planMarkdown = readFileSync(
     resolve(REPO_ROOT, "tests/fixtures/WI-1842.plan.md"),
@@ -217,6 +225,29 @@ async function main() {
   );
   if (report.decision !== "ready_for_review") {
     process.exitCode = 1;
+  }
+}
+
+async function main() {
+  const owner = claimWorkspaceOwner({
+    root: REPO_ROOT,
+    issue: null,
+    sessionId: "system-demo",
+  });
+  let taskStateCleared = false;
+  try {
+    await runDemo(owner);
+  } finally {
+    try {
+      clearTaskState(REPO_ROOT, owner);
+      taskStateCleared = true;
+    } finally {
+      try {
+        if (taskStateCleared) removeWorkspaceOwner(owner);
+      } finally {
+        releaseWorkspaceClaim(owner);
+      }
+    }
   }
 }
 

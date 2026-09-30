@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   evaluateExecutionContext,
   evaluateChangedPaths,
+  isPlanOnlyBranch,
   parseNameStatus,
 } from "../../scripts/check-scope.mjs";
 
@@ -123,5 +124,29 @@ describe("changed-path scope gate", () => {
         expect.stringMatching(/does not descend/),
       ]),
     });
+
+  });
+
+  it("isolates canary plan branches from both implementation and bootstrap plan branches", () => {
+    const canaryPlan = {
+      canaryFor: {
+        sourceTaskId: "TASK-1",
+        sourceContractDigest: "a".repeat(64),
+        sourcePlanDigest: "b".repeat(64),
+        sourceBaseSha: "c".repeat(40),
+        sourcePullRequest: 17,
+        sourceHeadSha: "d".repeat(40),
+        sourceRunId: "18",
+        sourceRunAttempt: "1",
+        sourceEvidenceRunId: "19",
+        bootstrapPlanPr: 20,
+        bootstrapPlanHeadSha: "e".repeat(40),
+        bootstrapReviewId: 21,
+        bootstrapReviewer: "reviewer",
+      },
+    };
+    expect(isPlanOnlyBranch("TASK-1", "plan/task-1-canary", canaryPlan)).toBe(true);
+    expect(isPlanOnlyBranch("TASK-1", "plan/task-1", canaryPlan)).toBe(false);
+    expect(isPlanOnlyBranch("TASK-1", "plan/task-1-canary", {})).toBe(false);
   });
 });

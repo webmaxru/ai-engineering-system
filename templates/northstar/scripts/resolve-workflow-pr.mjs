@@ -8,10 +8,14 @@ export function selectWorkflowPullRequest({
   repository,
   defaultBranch,
   expectedNumber,
+  allowMerged = false,
 }) {
+  const matchesState = (pull) => pull.state === "open" ||
+    (allowMerged && pull.state === "closed" && pull.merged === true &&
+      typeof pull.merged_at === "string" && /^[0-9a-f]{40}$/i.test(pull.merge_commit_sha ?? ""));
   const matches = (pulls ?? []).filter(
     (pull) =>
-      pull.state === "open" &&
+      matchesState(pull) &&
       pull.head?.sha === sha &&
       pull.head?.repo?.full_name === repository &&
       pull.base?.repo?.full_name === repository &&
@@ -60,6 +64,7 @@ function main() {
       repository,
       defaultBranch: repo.default_branch,
       expectedNumber: process.env.PR_NUMBER,
+      allowMerged: process.argv.includes("--allow-merged"),
     });
     if (process.env.GITHUB_ENV) {
       appendFileSync(

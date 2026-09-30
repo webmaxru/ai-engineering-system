@@ -61,13 +61,39 @@ The machine-readable plan must bind:
 - required checks and evidence;
 - decisions, handoffs, risks, rollback, and escalation.
 
-This repository uses a plan-first pull request for implementation work. The
-planner is read-only. Its Stop hook persists a local proposal; a human must
-explicitly publish it. High and critical plans require a human approval bound
-to the current plan digest and plan-only commit before write tools are used.
-Implementation runs on a separate `agent/implement/<task>` branch created from
-the approved base SHA. Final acceptance requires a separate human review of the
-latest implementation commit.
+The planner is read-only. The repository-level Stop dispatcher persists its
+local proposal; an explicitly authorized publisher commits the proposal as
+`docs/plans/<task-id>.md` and requests eligible human reviewers configured in
+`.github/governance/policy.json`. A plan-only PR may add or modify only that
+task's non-executable regular Markdown artifact. It cannot contain source,
+workflow, symlink, submodule, renamed, or deleted files.
+
+High and critical plans require a real current GitHub APPROVED review of the
+plan-only commit before implementation. The resolver binds that native review
+to the committed plan, live task digest, base SHA and current plan head.
+Changing any binding invalidates approval. A PR-description copy must match
+the committed plan. New file-backed plans do not require a reviewer to run
+`plan:record-approval`; only the explicitly pinned legacy bootstrap retains
+the zero-file plus reviewer-authored-record protocol.
+
+Low and medium work may execute a validated, explicitly handed-off plan before
+plan approval, with the risk's required checks and final review still required.
+Use `/work <issue>` for the explicit combined route. A fresh local session may
+write only `artifacts/plan-proposal.md` until `plan:materialize` with
+`--execute-proposed --session-id <current-session-id>` validates the owner,
+task, scope, risk and exact base. This does not create an approval. To resume,
+explicitly select the implementation
+`Task PR: #<number>` or local `Task plan: artifacts/plan.json`; startup never
+adopts an arbitrary remaining file. The combined PR carries plan and code
+together, and the hosted selector requires independent plan approval only for
+high/critical risk.
+Local implementation uses `agent/implement/<task>` from the declared base.
+Cloud implementation retains the host branch only after resolving the actual
+same-repository PR, task, plan, base and current head; its branch prefix alone
+grants no authority. Final acceptance targets the latest implementation commit.
+Cloud combined execution requires the actual implementation PR to carry its
+task-bound proposed plan. Local proposal files do not replace that live PR
+binding; absence of the binding remains a visible stop condition.
 
 ## Risk-based autonomy
 
@@ -89,8 +115,21 @@ Narrative confidence cannot lower the required controls.
 - **Security reviewer:** runs and interprets security evidence; does not edit.
 - **Risk reviewer:** reads the diff and evidence; does not edit or repair.
 
-Parallel work is allowed only on isolated paths and branches. Sequential work
-uses durable artifacts and explicit handoffs, not hidden agent-to-agent state.
+Parallel work is allowed only on isolated paths and branches. Each write-capable
+Copilot CLI or cloud-agent task uses its own Git worktree; a shared worktree is
+not made safe by separating artifact filenames. Use
+`npm run workspace:prepare -- --issue <number> --path <absolute-path> --session-id <current-session-id>`
+to create or select the approved task worktree without switching this checkout.
+The owner record binds the worktree to its issue, contract, repository, and
+session/run identity. A conflicting owner is rejected before task state changes.
+
+Use `npm run workspace:release -- --issue <number> --session-id <current-session-id>`
+only to release the exact matching owner. If task authority files exist without
+an owner, preserve them and stop; never adopt or delete them as a default.
+`workspace:release --clear-unowned` is an explicit recovery that removes only
+the known orphaned task authority files and requires human confirmation.
+Sequential work uses durable artifacts and explicit handoffs, not hidden
+agent-to-agent state.
 
 ## GitHub as the system of record and control plane
 
@@ -112,7 +151,8 @@ checks, and latest approvals before acting.
 
 - Workflow permissions default to read-only and elevate only per job.
 - Planning and review agents have no edit tools.
-- Implementation tools are enabled only after an approved plan is resolved.
+- Implementation tools require a trusted task and validated plan; high/critical
+  work additionally requires the current human plan approval.
 - Tool writes must remain inside the task scope; prohibited paths beat allowed
   paths.
 - Raw idempotency keys, request payloads, credentials, and secret values must
@@ -125,7 +165,15 @@ checks, and latest approvals before acting.
   not a substitute for durable GitHub workflow evidence.
 
 Copilot command-hook timeouts are fail-open, and cloud-agent `ask` decisions
-become deny decisions. Keep pre-tool policy deterministic and fast.
+become deny decisions. Keep pre-tool policy deterministic and fast. Hook
+compatibility is host-specific; a schema unit test is not a live host canary.
+The SessionStart resolver accepts explicit `AGENT_TASK_ISSUE`, documented
+`initial_prompt`/`initialPrompt`, or `COPILOT_AGENT_PROMPT` task input.
+Conflicting selectors and failed resolution clear only state owned by the
+current session. Foreign-owner conflicts and unowned legacy authority are
+preserved and fail closed.
+UserPromptSubmit output cannot reliably halt every host; PreToolUse still
+denies writes without matching task, plan, isolation and session identity.
 
 ## MCP governance
 
@@ -172,8 +220,10 @@ Hosted acceptance additionally requires CodeQL/SARIF, real workflow runs,
 current human approval, required checks, CODEOWNERS enforcement, and any
 required environment approval. **Missing evidence is failure.**
 
-`ready_for_review` means local reference evidence is complete.
-`ready_for_acceptance` is reserved for complete hosted evidence.
+`ready_for_review` means local reference evidence for every criterion due at the
+approved plan stage is complete; explicitly deferred criteria remain listed and
+unverified.
+`ready_for_acceptance` requires every task criterion and complete hosted evidence.
 
 ## Recovery
 

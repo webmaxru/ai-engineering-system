@@ -16,6 +16,13 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import {
+  assertWorkspaceOwner,
+  readWorkspaceOwner,
+  unownedTaskAuthorityPaths,
+  workspaceOwnerIdentity,
+} from "./workspace-owner.mjs";
+import { workspacePath } from "./workspace-path.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 export const CONTRACT_CACHE = "artifacts/task-contract.json";
@@ -175,23 +182,75 @@ export function contractFromIssue(issueNumber) {
 
 /** Read an explicitly untrusted contract fixture for tests or offline demos. */
 export function contractFromFile(path) {
-  const absolute = resolve(REPO_ROOT, path);
+  const absolute = workspacePath(path, REPO_ROOT);
   return parseIssueBody(readFileSync(absolute, "utf8"), {
     source: `fixture file ${path}`,
     trusted: false,
   });
 }
 
-export function cacheContract(contract, cachePath = CONTRACT_CACHE) {
-  const target = resolve(REPO_ROOT, cachePath);
+export function cacheContract(contract, cachePath = CONTRACT_CACHE, ownerClaim = null) {
+  const root = ownerClaim?.root ?? REPO_ROOT;
+  const target = workspacePath(cachePath, root);
+  if (target !== workspacePath(CONTRACT_CACHE, root)) {
+    throw new Error("Task contracts may be cached only at artifacts/task-contract.json.");
+  }
+  if (contract?.source?.trusted !== true && !ownerClaim) {
+    throw new Error("An offline fixture cannot be cached without an explicit owned demo workspace.");
+  }
+  const existingOwner = readWorkspaceOwner(root);
+  if (!existingOwner && !ownerClaim && unownedTaskAuthorityPaths(root).length > 0) {
+    throw new Error("Unowned task authority artifacts are preserved; an explicit owner-controlled transition is required.");
+  }
+  if (existingOwner || contract?.source?.trusted === true || ownerClaim) {
+    if (existingOwner && !ownerClaim && contract?.source?.trusted !== true) {
+      throw new Error("An offline fixture cannot overwrite an owned task workspace.");
+    }
+    let identity = ownerClaim?.identity;
+    if (!identity) {
+      let sessionId = process.env.COPILOT_SESSION_ID ??
+        process.env.COPILOT_SESSION_UUID ??
+        process.env.COPILOT_AGENT_SESSION_ID;
+      if (!sessionId && existingOwner && process.env.GITHUB_ACTIONS !== "true") {
+        const sessionPath = resolve(root, "artifacts/task-session.json");
+        if (!existsSync(sessionPath)) {
+          throw new Error("The owned task session record is missing; workspace ownership cannot be inferred.");
+        }
+        let session;
+        try {
+          session = JSON.parse(readFileSync(sessionPath, "utf8"));
+        } catch (error) {
+          throw new Error(`The owned task session record is malformed: ${error.message}`, { cause: error });
+        }
+        if (session.workspaceOwner !== existingOwner.ownerKey ||
+            session.issue !== contract?.source?.issue ||
+            session.taskId !== contract?.id ||
+            session.contractDigest !== contract?.source?.bodyDigest ||
+            typeof session.sessionId !== "string" || !session.sessionId.trim()) {
+          throw new Error("The cached task session does not match the owned workspace and contract.");
+        }
+        sessionId = session.sessionId;
+      }
+      identity = workspaceOwnerIdentity({
+        root,
+        issue: contract?.source?.issue,
+        taskId: contract?.id,
+        contractDigest: contract?.source?.bodyDigest,
+        sessionId,
+        env: process.env,
+        contract,
+      });
+    }
+    assertWorkspaceOwner(root, identity);
+  }
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, `${JSON.stringify(contract, null, 2)}\n`, "utf8");
   return target;
 }
 
 /** The contract resolved by the last `contract:fetch`, or null. */
-export function loadTaskContract(cachePath = CONTRACT_CACHE) {
-  const target = resolve(REPO_ROOT, cachePath);
+export function loadTaskContract(cachePath = CONTRACT_CACHE, root = REPO_ROOT) {
+  const target = workspacePath(cachePath, root);
   return existsSync(target) ? JSON.parse(readFileSync(target, "utf8")) : null;
 }
 

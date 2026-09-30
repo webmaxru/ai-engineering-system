@@ -80,9 +80,13 @@ export declare function contractFromIssue(issueNumber: string | number): TaskCon
 
 export declare function contractFromFile(path: string): TaskContract;
 
-export declare function cacheContract(contract: TaskContract, cachePath?: string): string;
+export declare function cacheContract(
+  contract: TaskContract,
+  cachePath?: string,
+  ownerClaim?: import("./workspace-owner.d.mts").WorkspaceOwnerClaim | null,
+): string;
 
-export declare function loadTaskContract(cachePath?: string): TaskContract | null;
+export declare function loadTaskContract(cachePath?: string, root?: string): TaskContract | null;
 
 export declare function taskScope(contract?: TaskContract | null): TaskScope;
 

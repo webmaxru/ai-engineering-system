@@ -7,6 +7,12 @@ import {
 } from "../../scripts/risk-policy.mjs";
 
 describe("risk-based autonomy", () => {
+  it("preserves low-risk documentation classification", () => {
+    expect(inferRisk({ paths: ["docs/example.md"] }).risk).toBe("low");
+    expect(inferRisk({ paths: ["unclassified.txt"] }).risk).toBe("medium");
+    expect(inferRisk({ paths: ["docs/example.md", ".github/hooks/agent-boundary.json"] }).risk).toBe("high");
+    expect(inferRisk({ paths: ["docs-old/file.md"] }).risk).toBe("medium");
+  });
   it("uses the guide's low, medium, high, and critical ordering", () => {
     expect(maxRisk("low", "high", "medium")).toBe("high");
     expect(maxRisk("critical", "low")).toBe("critical");

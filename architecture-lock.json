@@ -6,7 +6,7 @@
   },
   "auditedReference": {
     "repository": "webmaxru/northstar-orders-api-demo",
-    "commit": "b65c2de5c8224342c72c37eeed7ef9f965ad8a2c",
+    "commit": "bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7",
     "status": "known-defective"
   },
   "conformance": {
@@ -43,7 +43,7 @@
         "id": "workflow-scanner-remediation",
         "issue": 20,
         "planPullRequest": 21,
-        "state": "pending-plan-approval"
+        "state": "pending-implementation"
       }
     ]
   },
@@ -86,8 +86,8 @@
     },
     {
       "id": "EXT-004",
-      "mechanisms": ["exact pre-tool authorization"],
-      "evidencePaths": ["templates/northstar/scripts/authorize-tool.mjs"]
+      "mechanisms": ["exact pre-tool authorization", "bounded task-resolution hook budget"],
+      "evidencePaths": ["templates/northstar/.github/hooks/agent-boundary.json", "templates/northstar/scripts/authorize-tool.mjs", "templates/northstar/scripts/session-start.mjs", "templates/northstar/tests/unit/resolve-task.test.ts", "docs/COPILOT-SURFACES.md"]
     },
     {
       "id": "EXT-005",

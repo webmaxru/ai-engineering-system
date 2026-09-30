@@ -38,7 +38,7 @@ architecture-review responsibility.
 | EXT-001 | Versioned contracts and digest binding | Canonical control plane | Active |
 | EXT-002 | Deterministic risk floors | Canonical control plane | Active |
 | EXT-003 | Plan publication and branch topology | Reference policy | Active |
-| EXT-004 | Exact pre-tool authorization | Reference enforcement | Active |
+| EXT-004 | Bounded task resolution and exact pre-tool authorization | Reference enforcement | Active |
 | EXT-005 | Payload-minimized local audit | Reference observability | Active |
 | EXT-006 | Evidence envelopes and readiness decisions | Canonical evidence model | Active |
 | EXT-007 | Trusted publication and validation-authority maintenance | Hosted trust boundary | Active |
@@ -185,33 +185,62 @@ base, and republish a new plan when scope or assumptions change.
 `2ce3cf8a69439c22246de7d5449ce186e23bd584` adds and locally tests the
 `plan/<task-id>-canary` path; the candidate is not merged or accepted.
 
-## EXT-004 - Exact pre-tool authorization
+## EXT-004 - Bounded task resolution and exact pre-tool authorization
 
 **Guide gap.** The guide requires hooks, tool allow lists, capability limits,
 path scope, and least privilege. It leaves repository-specific command grammar,
-tool payload parsing, base ancestry checks, and precedence rules unspecified.
+tool payload parsing, base ancestry checks, precedence rules, and the time
+budget for live task and plan resolution unspecified.
 
-**Implementation.** Northstar's native `PreToolUse` hook resolves a trusted
-live task contract and approved plan, denies shell metacharacters and
-non-allowlisted command shapes, extracts paths from supported tool payloads,
-checks issue and plan scope, verifies the implementation branch and approved
-base ancestry, and categorically denies privileged operations.
+**Implementation.** Northstar's native `SessionStart` and `UserPromptSubmit`
+hooks resolve the live task contract and approved plan before the
+`PreToolUse` hook authorizes an action. The measured live resolver path took
+55.076 seconds, longer than the previous 20-second startup budget. Candidate
+PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) at
+`bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` raises only those two resolution
+budgets to 90 seconds; the fast `PreToolUse` authorization remains 10 seconds.
+If resolution fails, the authorizer denies writes when it runs to completion
+without complete task and plan identity. Command-hook timeouts are fail-open,
+including `PreToolUse`, so no universal denial is claimed if the authorization
+hook itself times out. An interrupted workspace lock can be reclaimed only by
+its matching owner after the resolver process exits.
 
-**Compatibility.** This is a concrete, stricter implementation of the guide's
-pre-action and least-privilege controls. It remains defense in depth; complete
-diff checks, GitHub policy, and human acceptance are still required.
+**Compatibility.** The bounded lookup adds time to resolve authority; it does
+not grant additional tools, widen task scope, or relax approval, branch, diff,
+GitHub policy, or human-acceptance requirements. The setting uses the documented
+`timeout` alias for `timeoutSec`; GitHub's hook reference does not specify a
+maximum. This is a concrete implementation of the guide's independent
+pre-action and least-privilege controls, not a substitute for them.
 
 **Trust and operational effects.** Unknown commands and unknown tool payload
-shapes fail closed. Hook timeout behavior supplied by the host remains a
-documented platform limitation and is not represented as complete mediation.
+shapes fail closed when the authorization command completes. Copilot command
+hook timeouts are fail-open, including `PreToolUse`; a longer startup budget
+does not change that platform behavior. Copilot CLI 1.0.90-2 completed two
+simultaneous read-only task-resolution sessions with the 90-second setting,
+but this does not prove VS Code parity or cloud-agent execution. Two
+cloud-agent canaries stopped because `artifacts/task-contract.json` was
+absent; logs did not expose whether the startup hook failed or timed out, so
+the underlying cloud bootstrap cause remains unverified. This setting is not
+represented as complete mediation.
 
 **Rollback.** Revert policy and authorizer changes together. A failing
 authorizer must be repaired through the approved control-plane maintenance
 path, not bypassed by renaming or disabling hooks.
 
 **Northstar evidence.** `.github/hooks/agent-boundary.json`,
-`scripts/authorize-tool.mjs`, `scripts/check-scope.mjs`, and
-`tests/unit/tool-authorization.test.ts`.
+`scripts/authorize-tool.mjs`, `scripts/check-scope.mjs`,
+`tests/unit/resolve-task.test.ts`, and
+[`COPILOT-SURFACES.md`](COPILOT-SURFACES.md). On PR #27 head
+`bb767fc73a18834eebdfd20e63dd8ef9c4f28efb`, the focused resolver tests pass
+14/14, `npm run validate` passes 528 unit tests, and disposable PostgreSQL
+acceptance passes 10/10 on head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`.
+The previous hosted run
+[`36695109134`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36695109134)
+was for predecessor head `bb767fc…`; it passed quality and acceptance but
+still failed `repository-controls`,
+`human-review`, and `evidence`; `validation-authority` was not run and AC9 is
+unproven. The new hosted run for `bfb2cbf…` was pending at documentation time.
+The candidate is open, draft, and not an accepted release.
 
 ## EXT-005 - Payload-minimized local audit
 

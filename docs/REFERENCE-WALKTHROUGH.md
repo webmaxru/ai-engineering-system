@@ -26,10 +26,10 @@ Use the exact commands, prerequisites, expected responses and cleanup in
 | Unit tests | In-process behavior of tested code paths | Distributed execution or hosted settings |
 | PostgreSQL acceptance | Two service instances over actual database durability | Two independent server processes; existing suite uses Fastify injection |
 | Additional audit harness | Real HTTP across independent processes and replay after restart | A committed regression suite or cloud-agent success |
-| Historical issue #16 CLI canaries | Two separate worktrees matched task/contract/approved-plan/base/session/owner identity; issue #16 has since reopened | Write authorization, all hook events, recovery, VS Code behavior, or cloud acceptance |
+| Current issue #16 local CLI canaries | Two simultaneous read-only Copilot CLI 1.0.90-2 sessions at predecessor `bb767fc…` matched the live task, contract `2afe7ed6…`, approved plan `d020ca88…`, base `2ce3cf8…`, and implementation PR #27; each had a distinct workspace owner and made no source changes | Write authorization, Stop behavior, VS Code behavior, cloud execution, or hosted acceptance |
 | Historical cloud rehearsal, PR #13 (closed) | Planner correctly stopped without WI-1842 task authority; no plan or files were produced | Implementation-to-acceptance completion |
 | Historical issue #16 cloud attempt, PR #29 (closed) | GitHub.com run created a draft PR on `main` with zero changed files | The approved `17e7a5c…` base, independent cloud isolation, or a successful agent outcome |
-| Current issue #16 cloud canaries | Session `d1dd79e9…` produced an unapproved proposal on a branch based on `main`; session `5724baed…` returned `CANARY-FAIL` because task/session authority was unavailable and workspace branch binding mismatched | No successful cloud binding or parallel-isolation proof |
+| Current issue #16 cloud canary | Session `26c6b1b9-9f6f-43f7-81bc-e457b915b440` / PR #30 used predecessor candidate base `bb767fc…`, but the agent log reported `artifacts/task-contract.json` absent and no source files changed | Cloud contract/plan binding and parallel isolation remain unproven |
 
 Latest GitHub.com session
 [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4)
@@ -45,11 +45,14 @@ task-contract bootstrap remains blocked. Its assertion that PR #26 approval
 is stale conflicts with current GitHub evidence and needs human reconciliation.
 
 The runbook's local `ready_for_review` output must not be presented as
-`ready_for_acceptance`. Reopened PR #27's historical local validation (500
-unit tests, 10 PostgreSQL acceptance tests, scope, and merge checks) did not
-make it accepted: its full `validate:all` run failed on 84 Zizmor findings and
-its hosted evidence and repository-controls checks failed. The maintenance
-workstream is active again, but those blockers remain unresolved.
+`ready_for_acceptance`. PR #27's current candidate at `bfb2cbf…` passes local
+validation (528 unit tests and 10 PostgreSQL acceptance tests). Hosted run
+`36705616895` passes the plan, scope, quality, acceptance, CodeQL, dependency,
+secret-scan, merge, and governance checks, but `repository-controls`,
+`human-review`, and `evidence` fail; `validation-authority` was not run and
+AC9 remains unproven. Full `validate:all` at `bfb2cbf…` fails on 83 Zizmor
+findings. The maintenance workstream is active again, but those blockers
+remain unresolved.
 
 ## Trace the control loop
 

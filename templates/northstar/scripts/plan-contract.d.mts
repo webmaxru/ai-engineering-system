@@ -1,6 +1,29 @@
 import type { TaskContract } from "./task-contract.d.mts";
 import type { Risk } from "./risk-policy.d.mts";
 
+export interface DeferredCriterion {
+  id: string;
+  stage: "post-acceptance";
+  reason: string;
+  evidence: string;
+}
+
+export interface BrowserPlanCanaryBinding {
+  sourceTaskId: string;
+  sourceContractDigest: string;
+  sourcePlanDigest: string;
+  sourceBaseSha: string;
+  sourcePullRequest: number;
+  sourceHeadSha: string;
+  sourceRunId: string;
+  sourceRunAttempt: string;
+  sourceEvidenceRunId: string;
+  bootstrapPlanPr: number;
+  bootstrapPlanHeadSha: string;
+  bootstrapReviewId: number;
+  bootstrapReviewer: string;
+}
+
 export interface PlanContract {
   schema: "northstar/plan/1";
   taskId: string;
@@ -13,6 +36,8 @@ export interface PlanContract {
   operations?: string[];
   steps: string[];
   successCriteria: Array<{ id: string; provenBy: string }>;
+  deferredCriteria?: DeferredCriterion[];
+  canaryFor?: BrowserPlanCanaryBinding;
   requiredChecks: string[];
   evidence: string[];
   decisionsAndHandoffs: string[];

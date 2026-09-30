@@ -71,22 +71,26 @@ scope closures have not changed that conclusion:
 | Evidence | Current state |
 | --- | --- |
 | Controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is open at `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local validation passes 489 unit tests and isolated PostgreSQL acceptance 9/9. Native review `5356731352` is approved, but the hosted `human-review` check still fails because GitHub reports `reviewDecision` as not `APPROVED`; repository-controls metadata is unavailable with HTTP 403. Report `36610256698` is `ready_for_review` with 14/15 criteria proven and AC15 unverified; trusted-acceptance remains failure. No ruleset setting changed and PR #18 remains unmerged/unaccepted. |
-| Local isolation candidate | Reopened PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) passed local `validate` (500 unit tests), PostgreSQL acceptance (10/10), scope and merge checks against its old parent base. Plan PR #26 is refreshed to parent head `2ce3cf8…` at `42721d4e…`; `require-plan` passes and fresh native approval is pending. PR #27 must not be rebased until that approval. Full `validate:all` on PR #27 exits 1 on 84 Zizmor findings and hosted evidence/repository-controls fail. |
+| Local isolation candidate | PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) is at `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` on approved parent base `2ce3cf8…`; plan PR #26 is approved (review `5362561711`). Local `validate` passes 528 unit tests and 79 governance checks, PostgreSQL acceptance passes 10/10, and the plan gate passes. Two simultaneous read-only CLI sessions independently resolved the task and plan in separate worktrees at predecessor `bb767fc…`. |
+| Hosted PR #27 evaluation | Run `36705616895` evaluated exact candidate `bfb2cbf…`; AC1–AC8 and AC10 are proven, AC9 remains unproven. Plan, scope, quality, acceptance, CodeQL, dependency, secret, merge, and governance checks pass; `repository-controls`, `human-review`, and `evidence` fail, and `validation-authority` was not run. |
 | Trusted-acceptance bootstrap | PR #25's refreshed Issue #24 plan is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`). Child PR [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28) is rebased and pushed at `35ac91150fa4088af3132a9dda75bc690d657165` on parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local unit, PostgreSQL, scope, and merge checks pass. Hosted run `36635911460` fails `human-review` and `repository-controls`; full `validate:all` remains blocked by 79 repository-wide Zizmor findings. |
-| Historical local CLI canaries | Two read-only canaries for issue #16 matched task/contract/plan/base/session/owner identities. They are not an implementation or acceptance run for WI-1842; issue #16 is reopened. |
+| Current local CLI canaries | Two simultaneous read-only sessions for issue #16 matched task/contract/approved-plan/base/session/owner identities on PR #27 predecessor `bb767fc…`. They are not an implementation or acceptance run for WI-1842. |
 | Historical GitHub.com cloud attempt | PR [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) was closed after using the default `main` base and producing zero changed files. It does not prove cloud isolation. |
-| Current GitHub.com cloud canaries | Session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5` produced an unapproved proposal on `copilot/plan-16`, based on `main` at `b65c2de5…`, not the approved `17e7a5c` base. Session [5724baed-e173-4722-95ae-077e90c39c6a](https://github.com/webmaxru/northstar-orders-api-demo/tasks/5724baed-e173-4722-95ae-077e90c39c6a) used a mismatched workspace branch. Latest session [0621d3a5-e662-47f5-b737-bdca4dbe01c4](https://github.com/webmaxru/northstar-orders-api-demo/tasks/0621d3a5-e662-47f5-b737-bdca4dbe01c4) used `/plan 16`, custom agent `plan`, and the exact base branch at `17e7a5c…`. After the issue body was supplied, it generated a chat-only plan proposal with an unresolved `contractDigest`; a separate local resolver fetched the canonical issue digest, but no commit/PR resulted. |
+| Current GitHub.com cloud canaries | Read-only sessions `26c6b1b9-9f6f-43f7-81bc-e457b915b440` (Issue #16, PR #30) and `12ec3302-9b64-473f-9339-1a9b844637ef` (attempted Issue #24, PR #32) both stopped because `artifacts/task-contract.json` was absent. PR #30 and the invalid Issue #24 attempt used PR #27 predecessor `bb767fc…`; neither changed source files. |
 | VS Code | No Local or Copilot Agent Host canary was completed. |
 
-The latest GitHub.com Agents run proves that the custom agent and base-branch
-selectors can be set correctly, but the task-contract bootstrap still did not
-resolve issue #16. Its chat-only plan is not a publishable or approved plan
-until the canonical contract digest is bound. The proposal's assertion that
-PR #26 approval is stale also conflicts with the current approved PR #26 plan
-on the same contract digest and base; do not decide that conflict in the
-runbook. Do not use the proposal for implementation or the earlier session on
-`main` as task evidence. No successful cloud plan → act → evaluate sequence or
-`ready_for_acceptance` decision has been recorded.
+These current cloud runs reinforce that task-contract bootstrap is still
+blocked; the missing artifact is not a permission denial. They do not validate
+WI-1842 or an Issue #16 cloud implementation. An earlier GitHub.com Agents UI
+run proves that the custom agent and base-branch selectors could be set correctly,
+but task-contract bootstrap still did not resolve issue #16. Its chat-only
+plan is not a publishable or approved plan until the canonical contract digest
+is bound. The proposal's assertion that PR #26 approval is stale also
+conflicts with the current approved PR #26 plan on the same contract digest
+and base; do not decide that conflict in the runbook. Do not use the proposal
+for implementation or the earlier session on `main` as task evidence. No
+successful cloud plan → act → evaluate sequence or `ready_for_acceptance`
+decision has been recorded.
 
 The currently open demo tasks are WI-1842 (#4) and WI-1843 (#17); PR #19 is
 the draft WI-1843 candidate. Maintenance work is reopened for conformance

@@ -6,11 +6,12 @@ agent: plan
 ---
 
 Task issue: #${input:issue}
+Task role: plan
 
 That number is the only thing this prompt supplies. The `UserPromptSubmit` hook
 reads the issue, caches the contract at `artifacts/task-contract.json`, and
-stops the turn if no number was given - so a missing task fails before any
-tokens are spent rather than becoming a guess.
+clears cached authority if no number was given. Prompt-hook stop outputs
+differ by host; the PreToolUse boundary denies writes without valid authority.
 
 Everything else - what to read, what to produce, what not to touch - is in
 `AGENTS.md` and the `plan` agent profile. It is not repeated here, because a

@@ -12,8 +12,11 @@ the guide concrete without being prescribed by it are recorded in
 
 ## Current release status
 
-The locked Northstar baseline `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c` is
-**known defective**. Earlier terminology and workflow fixes are merged. On
+Northstar `main` remains at known-defective baseline
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`. The inert control-plane snapshot
+is refreshed to validated candidate `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`
+from open, draft PR #27 and remains `known-defective`; it is not an adoption
+release. Earlier terminology and workflow fixes are merged. On
 2026-09-28 the owner reopened system-maintenance issues #14, #16, #20, #22 and
 #24 and their associated plan/implementation PRs to resume conformance
 remediation. Their earlier closures were cancellations, not accepted fixes;
@@ -72,12 +75,29 @@ PR #28 remains draft and unmerged; no trusted acceptance is established. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
 and controlled-bootstrap boundary.
 
-Issue #16 plan PR #26 is now refreshed to parent base
-`2ce3cf8a69439c22246de7d5449ce186e23bd584` at plan head
-`42721d4ee34a55cb031567d3942dd037e5bbe513` (contract `2afe7ed6…`, plan
-`d020ca88…`). The plan gate passes, but fresh native approval is pending.
-Implementation PR #27 remains based on `17e7a5c…` and must not be rebased or
-implemented against the refreshed plan until that approval is recorded.
+Issue #16 plan PR #26 is approved at head
+`42721d4ee34a55cb031567d3942dd037e5bbe513` (review `5362561711`), bound to
+parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`, contract
+`2afe7ed6…`, and plan `d020ca88…`. Implementation PR #27 is rebased to that
+base and at candidate head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`.
+`npm run validate` passes 528 unit tests and 79 offline governance checks;
+PostgreSQL acceptance passes 10/10. The candidate also gives live task/plan
+resolution 90 seconds while retaining the 10-second pre-tool authorization
+hook; command-hook timeouts are fail-open, including pre-tool authorization,
+so denial is not guaranteed if that hook itself times out. Two simultaneous
+local CLI canaries resolved separate owner state at predecessor `bb767fc…`.
+Hosted run `36705616895` at this exact head passes plan-contract,
+plan-approval, scope, quality, acceptance, CodeQL, dependency review,
+secret-scan, merge-validation, and governance. `repository-controls`,
+`human-review`, and `evidence` fail; `validation-authority` was not run, and
+the report is `review_required` with AC9 unproven because cloud task-contract
+bootstrap failed. PR #27 remains draft and unmerged. Full `validate:all` at
+`bfb2cbf…` fails at Zizmor with 83 findings (19 `artipacked`, 61
+`unpinned-uses`, one each `dangerous-triggers`, `obfuscation`, and
+`template-injection`). No acceptance or conformance is claimed.
+The inert template snapshot and `reference-lock.json` remain on
+`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; the unaccepted candidate is not
+published as an adoption snapshot.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless
