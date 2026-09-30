@@ -97,6 +97,17 @@ repository controls, and human review. PR #27 remains draft and unmerged. Full `
 `bfb2cbf…` fails at Zizmor with 83 findings (19 `artipacked`, 61
 `unpinned-uses`, one each `dangerous-triggers`, `obfuscation`, and
 `template-injection`). No acceptance or conformance is claimed.
+
+A later owner-bound local write attempt also stopped before editing. The
+workspace records Issue #16, role `implement`, PR #27, the current session
+owner, and the approved plan; `approved-plan.json` contains native plan review
+`5362561711` for PR #26 head `42721d4…`. However, `plan.json` lacks the
+approval envelope, and `authorize-tool.mjs` reads `plan.json` only, so its
+exact edit preflight denies the write. The current parser also accepts
+`Task PR: #27` only as task input, not as an invocation or implementation
+role. No workaround, file edit, or test run was performed; this cache/parser
+defect must be corrected through the authorized reference workflow before
+local session writes or AC9 can be claimed.
 The inert template snapshot and `reference-lock.json` remain on
 `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; the unaccepted candidate is not
 published as an adoption snapshot.

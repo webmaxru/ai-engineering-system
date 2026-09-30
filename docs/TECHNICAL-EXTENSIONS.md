@@ -251,6 +251,20 @@ remains unproven because the cloud task-contract artifact was missing. Full
 `validate:all` at this head fails at Zizmor with 83 findings. The candidate is
 open, draft, and not an accepted release.
 
+A subsequent local write preflight used the existing owner-bound PR #27
+worktree and exact plan approval. The live plan PR #26 has APPROVED review
+`5362561711` on head `42721d4…`, and `artifacts/approved-plan.json` carries
+that review and the matching plan digest. However, `artifacts/plan.json` lacks
+the approval envelope, while `scripts/authorize-tool.mjs` derives its
+`approvedPlan` decision from `plan.json` only; it therefore denied the exact
+in-scope edit with “no human-approved machine-readable plan authorizes writes.”
+The task selector has a related gap: `taskInputs` parses `Task PR: #27`, but
+`isTaskInvocation` and `taskRole` do not treat that documented selector as an
+invocation or implement role. No change was made and the authorizer was not
+bypassed. Local execution remains blocked until the task resolver restores
+consistent approved-plan state and the selector path is covered by focused
+tests under an authorized session.
+
 ## EXT-005 - Payload-minimized local audit
 
 **Guide gap.** The guide requires post-action/error observability and warns
