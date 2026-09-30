@@ -32,6 +32,10 @@ candidate and is for study, not adoption. Since the snapshot lock points to
 (not the unchanged `main` checkout) to check the guide,
 extension coverage, non-self-governance boundary, one-way Northstar reference,
 snapshot, and conformance decision.
+On 2026-09-30, that exact-path run verified all 174 locked snapshot files, then
+stopped at the expected release gate: the audited reference is `known-defective`,
+not accepted. `node --test tools/verify-architecture.test.mjs` passes 7/7.
+This is a fail-closed conformance result, not a path or snapshot-integrity error.
 
 The earlier parser/terminology blockers are resolved in the inspected source;
 the workflow now creates jobs. This does not imply release acceptance.
