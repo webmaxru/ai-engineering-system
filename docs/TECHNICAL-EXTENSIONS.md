@@ -239,8 +239,17 @@ The previous hosted run
 was for predecessor head `bb767fc…`; it passed quality and acceptance but
 still failed `repository-controls`,
 `human-review`, and `evidence`; `validation-authority` was not run and AC9 is
-unproven. The new hosted run for `bfb2cbf…` was pending at documentation time.
-The candidate is open, draft, and not an accepted release.
+unproven. Hosted run
+[`36748901455`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36748901455)
+evaluated `bfb2cbf…`; it passed plan-contract, plan-approval, scope, quality,
+acceptance, CodeQL, dependency review, secret-scan, merge-validation, and
+governance, but failed `repository-controls`, `human-review`, and `evidence`.
+`validation-authority` did not run. The report is `review_required` with 9/10
+criteria proven (AC1–AC8 and AC10), and identifies missing trusted current-run
+revalidation for plan approval, repository controls, and human review. AC9
+remains unproven because the cloud task-contract artifact was missing. Full
+`validate:all` at this head fails at Zizmor with 83 findings. The candidate is
+open, draft, and not an accepted release.
 
 ## EXT-005 - Payload-minimized local audit
 

@@ -86,12 +86,14 @@ resolution 90 seconds while retaining the 10-second pre-tool authorization
 hook; command-hook timeouts are fail-open, including pre-tool authorization,
 so denial is not guaranteed if that hook itself times out. Two simultaneous
 local CLI canaries resolved separate owner state at predecessor `bb767fc…`.
-Hosted run `36705616895` at this exact head passes plan-contract,
+Hosted run `36748901455` at this exact head passes plan-contract,
 plan-approval, scope, quality, acceptance, CodeQL, dependency review,
 secret-scan, merge-validation, and governance. `repository-controls`,
-`human-review`, and `evidence` fail; `validation-authority` was not run, and
-the report is `review_required` with AC9 unproven because cloud task-contract
-bootstrap failed. PR #27 remains draft and unmerged. Full `validate:all` at
+`human-review`, and `evidence` fail; `validation-authority` was not run. The
+report is `review_required` with 9/10 criteria proven (AC1–AC8 and AC10);
+AC9 remains unproven because cloud task-contract bootstrap failed. The report
+also identifies missing trusted current-run revalidation for plan approval,
+repository controls, and human review. PR #27 remains draft and unmerged. Full `validate:all` at
 `bfb2cbf…` fails at Zizmor with 83 findings (19 `artipacked`, 61
 `unpinned-uses`, one each `dangerous-triggers`, `obfuscation`, and
 `template-injection`). No acceptance or conformance is claimed.
