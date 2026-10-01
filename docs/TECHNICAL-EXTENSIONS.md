@@ -264,7 +264,7 @@ resolver/authorization tests pass 102/102, `plan:gate` passes, live PR
 10/10. Fastify is pinned to 5.12.5; `npm audit` reports zero vulnerabilities.
 Secret scanning passes 199 files and agentic workflow compilation passes.
 
-An unpublished local candidate, based on PR #27 head `a5c64fc…`, removes the
+Published candidate PR #27 head `92a8af6…`, based on `a5c64fc…`, removes the
 extra `pull.user.type === "Bot"` and `copilot/`-branch-prefix predicates from
 Cloud execution validation. The remaining checks bind the open same-repository
 PR to its exact task issue, plan, base branch/SHA, branch, current head, and
@@ -272,23 +272,18 @@ approved-base ancestry. This follows the contributor model: the guide says to
 evaluate PRs by workflow standards regardless of whether their author is a
 human or agent (Learning Path Unit 6, lines 385-400). Local commits
 `4f66c57fbcb925945fcf84aedbb52b04e37aa1fe` and
-`92a8af62939847c0ba3120128afbb3129a12cab6` are ahead of the remote PR and have
-not been pushed or reviewed.
+`92a8af62939847c0ba3120128afbb3129a12cab6` are on the existing draft PR #27.
 
-At this local candidate, `tests/unit/execution-context.test.ts` passes; the
-direct read-only resolver call against live PR #27 metadata returns the
-expected Issue #16/plan #26/base/head context; the full unit suite passes
+At this candidate, `tests/unit/execution-context.test.ts` passes; the direct
+read-only resolver call against live PR #27 metadata returns the expected Issue
+#16/plan #26/base/head context; the full unit suite passes
 535/535, `npm run validate`'s governance/lint/typecheck/build stages pass, the
 plan gate passes, and scope reports 72 paths with zero violations. `npm audit`
 reports zero vulnerabilities, secret scanning passes 199 files, and agentic
-workflow compilation has zero warnings. `npm run validate:all` did not reach
-the scanner successfully: PostgreSQL acceptance passes 10/10 against the
-task-specific local Compose service using per-suite temporary schemas, npm
-audit reports zero vulnerabilities, secret scanning passes 199 files, and
-workflow compilation is clean. Poutine reports zero findings; pinned Zizmor
-still reports 83 unsuppressed findings and fails `validate:all`. This local
-candidate is not PR evidence or a Cloud host run; AC9 and hosted
-`ready_for_acceptance` remain unproven.
+workflow compilation has zero warnings. `npm run validate:all` passes PostgreSQL acceptance 10/10 against the
+task-specific local Compose service using per-suite temporary schemas, then
+reaches pinned Zizmor. Poutine reports zero findings; Zizmor reports 83
+unsuppressed findings and fails `validate:all`.
 
 At published PR #27 head `a5c64fc…`, the full `npm run validate:all` reaches
 Zizmor and fails with 83 unsuppressed findings (19 `artipacked`, 61
@@ -300,6 +295,16 @@ dependency-review, CodeQL, secret-scan, merge-validation, and governance, but
 fails repository-controls, human-review, and evidence; `validation-authority`
 is missing. Its report is `review_required` with 9/10 criteria proven and AC9
 unproven.
+
+Latest hosted run
+[`36929325151`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36929325151)
+evaluates PR #27 at `92a8af62939847c0ba3120128afbb3129a12cab6`. Plan-contract,
+plan-approval, scope, quality, acceptance, dependency review, CodeQL,
+secret-scan, merge-validation, and governance pass; repository-controls,
+human-review, and evidence fail. The visible PR approvals predate this head,
+`validation-authority` is absent, and the evidence report is `review_required`
+with 9/10 criteria proven and AC9 unproven. The candidate is still draft and
+unaccepted.
 
 Cloud run
 [`36869969461`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36869969461)

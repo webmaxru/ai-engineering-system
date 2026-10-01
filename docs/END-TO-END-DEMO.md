@@ -100,21 +100,24 @@ the framework baseline.
 ## Latest maintenance and Cloud status (2026-10-01)
 
 Northstar PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27)
-is still draft at `a5c64fc2b4d5d09b99b1b79747275525f21751c2` on parent base
+is still draft at `92a8af62939847c0ba3120128afbb3129a12cab6` on parent base
 `2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local `npm run validate` passes
 79 governance checks, lint, typecheck, build, and 535 unit tests; PostgreSQL
 acceptance passes 10/10, and Fastify 5.12.5 has zero npm audit findings.
-At that published head, `npm run validate:all` reaches Zizmor and fails on 83
+At this published head, `npm run validate:all` reaches Zizmor and fails on 83
 unsuppressed findings.
 
-Hosted run `36873981770` passes plan-contract, plan-approval, scope, quality,
+Latest hosted run `36929325151` passes plan-contract, plan-approval, scope,
+quality, acceptance, dependency-review, CodeQL, secret-scan, merge-validation,
+and governance, but fails repository-controls, human-review, and evidence.
+The visible approvals target older commits, so current-head review is
+unverified. `validation-authority` is absent, the evidence report is
+`review_required`, and AC9 remains unproven. No hosted `ready_for_acceptance`
+exists. Historical run `36873981770` at predecessor `a5c64fc` passed plan-
+contract, plan-approval, scope, quality,
 acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
-governance, but fails repository-controls, human-review, and evidence.
-`validation-authority` is missing, the report is `review_required` with 9/10
-criteria proven, and AC9 remains unproven. Although GitHub's PR summary field
-shows `APPROVED`, the visible reviews target older commits and the current-head
-`human-review` check finds no approval for `a5c64fc`; do not treat that summary
-field as current-head acceptance.
+governance, but failed repository-controls, human-review, and evidence; it is
+predecessor evidence only.
 
 Two later bounded Cloud canaries did not close the gap. Run `36900971355`
 records a successful `npm run contract:fetch -- --issue 16`, but no plan-gate
@@ -125,16 +128,14 @@ changes resulted. Neither run proves AC9 or a Cloud implementation. Show these
 as diagnostic stops only: there is no successful WI-1842 Cloud
 **plan → act → evaluate** sequence or hosted `ready_for_acceptance`.
 
-An unpublished local candidate now removes the Cloud resolver's extra
-human-author and `copilot/` branch-prefix requirements while preserving the
-live PR/task/plan/base/head/ancestry checks. Its focused test and a read-only
-resolver call against live PR #27 metadata pass; the full unit suite passes
-535/535. The candidate is two commits ahead in the owner-bound worktree, not
-on the remote PR, and has not been evaluated by a Cloud run or current-head
-review. PostgreSQL acceptance now passes 10/10 against the task-specific
-Compose service, with isolated temporary schemas. The full validation still
-fails at Zizmor with 83 unsuppressed findings. Treat this as an unreviewed
-repair candidate, not as a fixed Cloud demo.
+The published candidate removes the Cloud resolver's extra human-author and
+`copilot/` branch-prefix requirements while preserving live
+PR/task/plan/base/head/ancestry checks. Its focused test and a read-only
+resolver call against live PR #27 metadata pass. It remains unreviewed at its
+current head and has not been evaluated in a successful Cloud task session.
+PostgreSQL acceptance passes 10/10 with isolated temporary schemas. Zizmor
+still has 83 unsuppressed findings. Treat this as an unaccepted repair
+candidate, not as a fixed Cloud demo.
 
 ## 1. Reproduce the local fixture rehearsal
 

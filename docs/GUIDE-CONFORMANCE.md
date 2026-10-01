@@ -169,7 +169,7 @@ That run also published no artifacts and did not change PR #27. The successful
 workflow wrappers are not plan-gate or task-binding evidence; AC9 remains
 unproven and no further blind retry is claimed.
 
-### Local Cloud identity fix candidate (2026-10-01)
+### Published Cloud identity fix candidate (2026-10-01)
 
 The owner-bound PR #27 worktree exposed a separate concrete mismatch in
 `scripts/execution-context.mjs`: it rejected the actual same-repository
@@ -177,24 +177,31 @@ implementation PR because its author was a human and its branch was
 `agent/implement/aes-parallel-isolation`, despite the live PR, linked Issue
 #16, approved plan #26, base, head, and ancestry matching. The guide's
 contributor model says to evaluate agent and human pull requests by the same
-workflow standards (Learning Path Unit 6, lines 385-400). The local candidate
+workflow standards (Learning Path Unit 6, lines 385-400). The published fix
 removes only the author-class and branch-prefix checks; exact PR/task/plan/base/
 head and ancestry validation remains required.
 
-The candidate is in local commits
-`4f66c57fbcb925945fcf84aedbb52b04e37aa1fe` and
-`92a8af62939847c0ba3120128afbb3129a12cab6` on the Issue #16 worktree, ahead
-of remote PR #27 at `a5c64fc2b4d5d09b99b1b79747275525f21751c2`. The focused
-execution-context test passes; the live read-only resolver returns the
-expected current PR context; `npm run validate` passes all 535 unit tests and
-79 governance checks; the approved plan gate passes; and the exact-base scope
-check reports 72 paths with zero violations. Dependency audit, secret scan,
-workflow compilation, and PostgreSQL acceptance pass (10/10 using per-suite
-temporary schemas against the task-specific local Compose service). Full
-`npm run validate:all` reaches Zizmor and fails on the 83 unsuppressed
-findings. No change was pushed, no hosted run evaluated these commits, and AC9
-remains unproven. Treat this only as a local implementation candidate—not as
-accepted Northstar behavior or conformance evidence.
+The candidate is published to draft PR
+[#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) at
+`92a8af62939847c0ba3120128afbb3129a12cab6`, on base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584`. The focused execution-context
+test and full `validate` pass (535 unit tests, 79 governance checks, lint,
+typecheck, and build); the plan gate passes and the exact-base scope check
+reports 72 paths with zero violations. PostgreSQL acceptance passes 10/10
+using per-suite temporary schemas; dependency audit reports zero
+vulnerabilities, secret scan passes, and workflow compilation is clean.
+`validate:all` reaches Zizmor and fails on the 83 unsuppressed findings.
+
+Hosted run
+[`36929325151`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36929325151)
+on this head passes plan-contract, plan-approval, scope-policy, quality,
+acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
+governance-policy. It fails repository-controls, human-review, and evidence;
+the approvals visible on PR #27 target older commits, so the current-head
+human-review gate correctly fails. The evidence report is `review_required`
+with 9/10 criteria proven; `validation-authority` is missing and AC9 remains
+unproven. No successful Cloud task-binding run was produced. The candidate is
+published for review, not accepted Northstar behavior or conformance evidence.
 
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
