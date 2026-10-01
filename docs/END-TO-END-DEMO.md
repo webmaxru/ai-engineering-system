@@ -97,6 +97,33 @@ the draft WI-1843 candidate. Maintenance work is reopened for conformance
 remediation; its status does not make the demo candidates accepted or repair
 the framework baseline.
 
+## Latest maintenance and Cloud status (2026-10-01)
+
+Northstar PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27)
+is still draft at `a5c64fc2b4d5d09b99b1b79747275525f21751c2` on parent base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local `npm run validate` passes
+79 governance checks, lint, typecheck, build, and 535 unit tests; PostgreSQL
+acceptance passes 10/10, and Fastify 5.12.5 has zero npm audit findings.
+`npm run validate:all` still fails on 83 unsuppressed Zizmor findings.
+
+Hosted run `36873981770` passes plan-contract, plan-approval, scope, quality,
+acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
+governance, but fails repository-controls, human-review, and evidence.
+`validation-authority` is missing, the report is `review_required` with 9/10
+criteria proven, and AC9 remains unproven. Although GitHub's PR summary field
+shows `APPROVED`, the visible reviews target older commits and the current-head
+`human-review` check finds no approval for `a5c64fc`; do not treat that summary
+field as current-head acceptance.
+
+Two later bounded Cloud canaries did not close the gap. Run `36900971355`
+records a successful `npm run contract:fetch -- --issue 16`, but no plan-gate
+execution, task/owner binding evidence, or artifact publication. Run
+`36901509449` attempted `npm run plan:gate -- --pr 27`; the tool reported
+failure without exposing the command result or reason, and no artifacts or PR
+changes resulted. Neither run proves AC9 or a Cloud implementation. Show these
+as diagnostic stops only: there is no successful WI-1842 Cloud
+**plan → act → evaluate** sequence or hosted `ready_for_acceptance`.
+
 ## 1. Reproduce the local fixture rehearsal
 
 Prerequisites: Node.js 22+, Docker Desktop running, Git, and repository access.
