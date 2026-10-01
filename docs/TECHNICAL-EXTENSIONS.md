@@ -282,11 +282,13 @@ expected Issue #16/plan #26/base/head context; the full unit suite passes
 plan gate passes, and scope reports 72 paths with zero violations. `npm audit`
 reports zero vulnerabilities, secret scanning passes 199 files, and agentic
 workflow compilation has zero warnings. `npm run validate:all` did not reach
-the audit/scanner stages because PostgreSQL acceptance stopped at its
-disposable-database confirmation guard; the local Compose database was stopped.
-The separate Zizmor scan still reports the 83 existing unsuppressed findings.
-This local candidate is not PR evidence, not a Cloud host run, and not
-acceptance; AC9 and hosted `ready_for_acceptance` remain unproven.
+the scanner successfully: PostgreSQL acceptance passes 10/10 against the
+task-specific local Compose service using per-suite temporary schemas, npm
+audit reports zero vulnerabilities, secret scanning passes 199 files, and
+workflow compilation is clean. Poutine reports zero findings; pinned Zizmor
+still reports 83 unsuppressed findings and fails `validate:all`. This local
+candidate is not PR evidence or a Cloud host run; AC9 and hosted
+`ready_for_acceptance` remain unproven.
 
 At published PR #27 head `a5c64fc…`, the full `npm run validate:all` reaches
 Zizmor and fails with 83 unsuppressed findings (19 `artipacked`, 61

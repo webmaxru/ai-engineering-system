@@ -131,9 +131,10 @@ live PR/task/plan/base/head/ancestry checks. Its focused test and a read-only
 resolver call against live PR #27 metadata pass; the full unit suite passes
 535/535. The candidate is two commits ahead in the owner-bound worktree, not
 on the remote PR, and has not been evaluated by a Cloud run or current-head
-review. PostgreSQL acceptance could not be run locally because the Compose
-test database is stopped and its disposable-target guard was not satisfied.
-Treat this as an unreviewed repair candidate, not as a fixed Cloud demo.
+review. PostgreSQL acceptance now passes 10/10 against the task-specific
+Compose service, with isolated temporary schemas. The full validation still
+fails at Zizmor with 83 unsuppressed findings. Treat this as an unreviewed
+repair candidate, not as a fixed Cloud demo.
 
 ## 1. Reproduce the local fixture rehearsal
 

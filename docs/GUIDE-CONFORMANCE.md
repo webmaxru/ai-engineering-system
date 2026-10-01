@@ -189,12 +189,12 @@ execution-context test passes; the live read-only resolver returns the
 expected current PR context; `npm run validate` passes all 535 unit tests and
 79 governance checks; the approved plan gate passes; and the exact-base scope
 check reports 72 paths with zero violations. Dependency audit, secret scan,
-and workflow compilation pass. PostgreSQL acceptance did not run because the
-local Compose database is stopped and its explicit disposable-database
-confirmation guard was not satisfied. No change was pushed, no hosted run
-evaluated these commits, and AC9 remains unproven. Treat this only as a local
-implementation candidate—not as accepted Northstar behavior or conformance
-evidence.
+workflow compilation, and PostgreSQL acceptance pass (10/10 using per-suite
+temporary schemas against the task-specific local Compose service). Full
+`npm run validate:all` reaches Zizmor and fails on the 83 unsuppressed
+findings. No change was pushed, no hosted run evaluated these commits, and AC9
+remains unproven. Treat this only as a local implementation candidate—not as
+accepted Northstar behavior or conformance evidence.
 
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
