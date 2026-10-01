@@ -102,6 +102,12 @@ unaccepted. PR #30 was not edited; its base still references the earlier #27
 commit `bb767fc…`, so stack follow-up remains separate. These results do not
 change the locked `main` baseline.
 
+A separate VS Code 1.140.0 window opened the local `northstar-pr27` worktree in
+Restricted Mode. Its trust banner states that trusting the folder enables all
+features; Copilot is disabled in this mode. No trust decision was made, and no
+Copilot agent, workspace task, or project hook was run. This is an attempted
+host inspection, not VS Code runtime evidence; host parity remains unverified.
+
 ## PR-comment Cloud continuation evidence (2026-10-01)
 
 To continue the existing PR rather than assign another writer, a scoped
