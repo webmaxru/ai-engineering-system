@@ -190,7 +190,12 @@ base, and republish a new plan when scope or assumptions change.
 **Guide gap.** The guide requires hooks, tool allow lists, capability limits,
 path scope, and least privilege. It leaves repository-specific command grammar,
 tool payload parsing, base ancestry checks, precedence rules, and the time
-budget for live task and plan resolution unspecified.
+budget for live task and plan resolution unspecified. It also does not
+prescribe a selector syntax or binding procedure for resolving an existing
+implementation PR to its live task, plan, base, and execution context. The
+guide's branch isolation and role boundaries (Unit 2, lines 2296-2326; Unit 4,
+lines 2504-2593; Unit 5, lines 2015-2021) do not define this repository-local
+lookup protocol.
 
 **Implementation.** Northstar's native `SessionStart` and `UserPromptSubmit`
 hooks resolve the live task contract and approved plan before the
@@ -205,9 +210,19 @@ including `PreToolUse`, so no universal denial is claimed if the authorization
 hook itself times out. An interrupted workspace lock can be reclaimed only by
 its matching owner after the resolver process exits.
 
+Candidate commit `b05b481525053fdc82b35b113824cec4bcc98bc6` adds the explicit
+`Task PR: #<number>` implementation selector. It resolves only an open,
+same-repository PR linked to one task issue, then binds the selected plan's
+base and the local worktree or Cloud execution context to the live PR branch
+and head. The exact `npm run plan:approved` refresh is permitted only for a
+trusted, owner-bound high-risk implementation session with a valid plan; the
+command still re-fetches the independent plan-only approval.
+
 **Compatibility.** The bounded lookup adds time to resolve authority; it does
 not grant additional tools, widen task scope, or relax approval, branch, diff,
-GitHub policy, or human-acceptance requirements. The setting uses the documented
+GitHub policy, or human-acceptance requirements. The PR selector is an explicit
+lookup into GitHub's system of record, not an inference from a branch name or
+cached task. The setting uses the documented
 `timeout` alias for `timeoutSec`; GitHub's hook reference does not specify a
 maximum. This is a concrete implementation of the guide's independent
 pre-action and least-privilege controls, not a substitute for them.
@@ -217,11 +232,13 @@ shapes fail closed when the authorization command completes. Copilot command
 hook timeouts are fail-open, including `PreToolUse`; a longer startup budget
 does not change that platform behavior. Copilot CLI 1.0.90-2 completed two
 simultaneous read-only task-resolution sessions with the 90-second setting,
-but this does not prove VS Code parity or cloud-agent execution. Two
-cloud-agent canaries stopped because `artifacts/task-contract.json` was
-absent; logs did not expose whether the startup hook failed or timed out, so
-the underlying cloud bootstrap cause remains unverified. This setting is not
-represented as complete mediation.
+but this does not prove VS Code parity. GitHub reads use the existing
+read-scoped API helper; missing identity, stale branch/head/base, or unavailable
+GitHub data stops resolution. Two pre-fix Cloud canaries stopped without an
+active task contract. A post-fix Cloud run completed its Actions wrapper, but
+the task's artifact-view calls failed and no task-binding result was inspectable;
+Cloud execution therefore remains unverified. This setting is not represented
+as complete mediation.
 
 **Rollback.** Revert policy and authorizer changes together. A failing
 authorizer must be repaired through the approved control-plane maintenance
@@ -229,41 +246,40 @@ path, not bypassed by renaming or disabling hooks.
 
 **Northstar evidence.** `.github/hooks/agent-boundary.json`,
 `scripts/authorize-tool.mjs`, `scripts/check-scope.mjs`,
-`tests/unit/resolve-task.test.ts`, and
-[`COPILOT-SURFACES.md`](COPILOT-SURFACES.md). On PR #27 head
-`bb767fc73a18834eebdfd20e63dd8ef9c4f28efb`, the focused resolver tests pass
-14/14, `npm run validate` passes 528 unit tests, and disposable PostgreSQL
-acceptance passes 10/10 on head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`.
-The previous hosted run
-[`36695109134`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36695109134)
-was for predecessor head `bb767fc…`; it passed quality and acceptance but
-still failed `repository-controls`,
-`human-review`, and `evidence`; `validation-authority` was not run and AC9 is
-unproven. Hosted run
-[`36748901455`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36748901455)
-evaluated `bfb2cbf…`; it passed plan-contract, plan-approval, scope, quality,
-acceptance, CodeQL, dependency review, secret-scan, merge-validation, and
-governance, but failed `repository-controls`, `human-review`, and `evidence`.
-`validation-authority` did not run. The report is `review_required` with 9/10
-criteria proven (AC1–AC8 and AC10), and identifies missing trusted current-run
-revalidation for plan approval, repository controls, and human review. AC9
-remains unproven because the cloud task-contract artifact was missing. Full
-`validate:all` at this head fails at Zizmor with 83 findings. The candidate is
-open, draft, and not an accepted release.
+`tests/unit/resolve-task.test.ts`, `tests/unit/combined-session.test.ts`,
+`tests/unit/tool-authorization.test.ts`, and
+[`COPILOT-SURFACES.md`](COPILOT-SURFACES.md). Candidate commit
+`a5c64fc2b4d5d09b99b1b79747275525f21751c2` is pushed to draft PR #27, based
+on `2ce3cf8a69439c22246de7d5449ce186e23bd584`; plan PR #26 remains approved
+at `42721d4ee34a55cb031567d3942dd037e5bbe513` by review `5362561711`.
+At this exact commit, an owner-bound local `SessionStart` using the explicit
+issue/role/PR selectors records Issue #16, PR #27, the approved plan, the
+current owner/session, and workspace head `a5c64fc…`. The focused
+resolver/authorization tests pass 102/102, `plan:gate` passes, live PR
+`scope:check` reports 70 paths and zero violations, `npm run validate` passes
+535 unit tests and 79 governance checks, and PostgreSQL acceptance passes
+10/10. Fastify is pinned to 5.12.5; `npm audit` reports zero vulnerabilities.
+Secret scanning passes 199 files and agentic workflow compilation passes.
 
-A subsequent local write preflight used the existing owner-bound PR #27
-worktree and exact plan approval. The live plan PR #26 has APPROVED review
-`5362561711` on head `42721d4…`, and `artifacts/approved-plan.json` carries
-that review and the matching plan digest. However, `artifacts/plan.json` lacks
-the approval envelope, while `scripts/authorize-tool.mjs` derives its
-`approvedPlan` decision from `plan.json` only; it therefore denied the exact
-in-scope edit with “no human-approved machine-readable plan authorizes writes.”
-The task selector has a related gap: `taskInputs` parses `Task PR: #27`, but
-`isTaskInvocation` and `taskRole` do not treat that documented selector as an
-invocation or implement role. No change was made and the authorizer was not
-bypassed. Local execution remains blocked until the task resolver restores
-consistent approved-plan state and the selector path is covered by focused
-tests under an authorized session.
+The full `npm run validate:all` fails at Zizmor with 83 unsuppressed findings
+(19 `artipacked`, 61 `unpinned-uses`, and one each `dangerous-triggers`,
+`obfuscation`, and `template-injection`). Hosted run
+[`36873981770`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36873981770)
+passes plan-contract, plan-approval, scope, quality, acceptance,
+dependency-review, CodeQL, secret-scan, merge-validation, and governance, but
+fails repository-controls, human-review, and evidence; `validation-authority`
+is missing. Its report is `review_required` with 9/10 criteria proven and AC9
+unproven.
+
+Cloud run
+[`36869969461`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36869969461)
+completed its workflow wrapper at predecessor head `b05b481…`, but its four
+artifact-view calls for the task contract, task session, workspace owner, and
+execution context returned `success=false`. It also completed GitHub issue/PR
+reads, but no matching artifact contents or bound Cloud session result were
+inspectable. The wrapper's success is not AC9 evidence. PR #27 remains draft
+and unaccepted; these candidate results do not change the locked baseline or
+establish conformance.
 
 ## EXT-005 - Payload-minimized local audit
 

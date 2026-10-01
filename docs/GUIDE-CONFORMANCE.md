@@ -67,6 +67,88 @@ baseline.
 | WI-1842 rehearsal: issue #4, PR #13 | The issue remains as the plan-first demo task; PR #13 recorded the planner stopping because the cached task contract was absent | PR #13 is a closed stale, zero-file rehearsal; it does not prove a successful cloud run. Historical PR #29 is also closed after using the wrong base and making no changes |
 | Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; exact-head approval and hosted `human-review` pass; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | PR #19 remains draft; full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes), hosted `repository-controls` fails, and no successful issue #17 cloud run is proven |
 
+## Follow-up local and owner-session evidence (2026-10-01)
+
+The coordinator's isolated local worktree was bound to live `Task PR: #27`,
+Issue #16, and approved plan #26. At commit
+`a5c64fc2b4d5d09b99b1b79747275525f21751c2`, `SessionStart` resolved the
+explicit issue/role/PR selectors and wrote a task-session record matching the
+current session, workspace owner, approved plan, PR #27, and workspace head.
+The live plan refresh and `plan:gate -- --pr 27` passed;
+`scope:check -- --base 2ce3cf8a69439c22246de7d5449ce186e23bd584` reported
+70 paths and zero violations.
+
+At that exact source tree, `npm run validate` passed instructions sync, 79
+governance checks, lint, typecheck, build, and 535 unit tests. PostgreSQL
+acceptance passed 10/10 using per-suite temporary schemas on the local
+PostgreSQL 17 test container. Fastify was updated from 5.12.1 to 5.12.5 in the
+allowed manifest/lockfile scope; `npm audit` then reported zero
+vulnerabilities, and secret scanning passed 199 source files. Agentic workflow
+compilation passed. The complete `npm run validate:all` now fails only at
+Zizmor with 83 unsuppressed findings (19 `artipacked`, 61 `unpinned-uses`,
+and one each `dangerous-triggers`, `obfuscation`, and `template-injection`).
+
+Commits `b05b481…` and `a5c64fc…` were pushed to existing draft PR #27; no
+new branch or PR was created, and no settings, secrets, or permissions
+changed. Hosted run
+`36873981770` at that exact head passes plan-contract, plan-approval,
+scope-policy, quality, acceptance, dependency-review, CodeQL, secret-scan,
+merge-validation, and governance-policy. It fails repository-controls (the
+`GITHUB_TOKEN` has only `contents: read`; hosted metadata lookups return HTTP
+403), human-review (zero approvals target the new head), and evidence.
+`validation-authority` is missing; the evidence report is `review_required`
+with 9/10 criteria proven and AC9 unproven. PR #27 remains draft and
+unaccepted. PR #30 was not edited; its base still references the earlier #27
+commit `bb767fc…`, so stack follow-up remains separate. These results do not
+change the locked `main` baseline.
+
+## PR-comment Cloud continuation evidence (2026-10-01)
+
+To continue the existing PR rather than assign another writer, a scoped
+`@copilot` comment was posted on PR #27. Copilot Cloud run `36854976862`
+started at head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` and finished two
+minutes later without changing the PR. Its session record states: “no task
+issue is active”; the authorizer denied `runtime-tools-vote_memory` because
+no task contract was active and rejected the first shell inspection because
+it chained commands (`git status ... && git rev-parse ...`). Later
+`git rev-parse` and `pwd` inspections also failed. The run is not
+implementation or validation evidence.
+
+A corrected continuation comment `5931423920` began with `/implement 16` and
+instructed the agent to establish task/plan/owner identity before editing,
+use authorized commands individually, preserve PR #27's branch and stack
+#31, and stop on any authorization denial. Cloud run `36861785538` started
+at `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` and finished at
+2026-10-01T12:28:32Z without a commit. Its Actions trace shows failed reads
+of `artifacts/task-contract.json`, `artifacts/task-session.json`, and
+`artifacts/task-workspace-owner.json`; the Git identity/revision commands
+were also denied. Issue, PR, and plan reads through GitHub MCP succeeded, but
+the run produced no evidence that an active task contract and owner were
+loaded. PR #27 remains draft at the same head and base. The corrected selector
+alone did not produce an implementation or Cloud validation result.
+
+A third continuation comment `5931655271` used the explicit `Task issue: #16`
+and `Task role: implement` selectors. GitHub workflow run `36863278843` was
+created at `2026-10-01T12:39:58Z` and completed successfully at
+`2026-10-01T12:41:53Z`, but the task activity stopped before edits. The
+selector did not activate a task contract: `artifacts/task-contract.json`,
+`artifacts/task-session.json`, and `artifacts/task-workspace-owner.json` were
+missing, so repository commands were denied. PR #27 remains draft at the same
+head and base. The workflow's successful conclusion is not implementation,
+task-binding, or validation evidence.
+
+A fourth, post-fix continuation comment `5932587372` was posted after commit
+`b05b481…`. Copilot Cloud run `36869969461` was created at
+`2026-10-01T13:36:50Z` and its workflow completed successfully at
+`2026-10-01T13:38:48Z` on that head; PR #27 did not change. The log shows
+attempted reads of `task-contract.json`, `task-session.json`,
+`task-workspace-owner.json`, and `execution-context.json`, but all four
+`view` calls returned `success=false`. Bash and GitHub issue/PR reads did
+complete, yet neither the artifact contents nor a task-binding result were
+available in the workflow log or session history. The green workflow wrapper
+therefore does not prove an active Cloud task contract or AC9; no successful
+Cloud canary is claimed.
+
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
 do not prove every VS Code lifecycle hook or hosted acceptance. The separate
