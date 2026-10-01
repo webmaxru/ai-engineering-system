@@ -100,42 +100,39 @@ the framework baseline.
 ## Latest maintenance and Cloud status (2026-10-01)
 
 Northstar PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27)
-is still draft at `92a8af62939847c0ba3120128afbb3129a12cab6` on parent base
+is still draft at `f1c40a961451d29fed04ac37ad01eb63ddec076d` on parent base
 `2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local `npm run validate` passes
-79 governance checks, lint, typecheck, build, and 535 unit tests; PostgreSQL
-acceptance passes 10/10, and Fastify 5.12.5 has zero npm audit findings.
-At this published head, `npm run validate:all` reaches Zizmor and fails on 83
+79 governance checks, lint, typecheck, build, and 541 unit tests; PostgreSQL
+acceptance passes 10/10, audit reports zero vulnerabilities, and secret
+scanning passes. `npm run validate:all` reaches Zizmor and fails on 83
 unsuppressed findings.
 
-Latest hosted run `36929325151` passes plan-contract, plan-approval, scope,
-quality, acceptance, dependency-review, CodeQL, secret-scan, merge-validation,
-and governance, but fails repository-controls, human-review, and evidence.
-The visible approvals target older commits, so current-head review is
-unverified. `validation-authority` is absent, the evidence report is
-`review_required`, and AC9 remains unproven. No hosted `ready_for_acceptance`
-exists. Historical run `36873981770` at predecessor `a5c64fc` passed plan-
-contract, plan-approval, scope, quality,
+Hosted run `36934750341` passes plan-contract, plan-approval, scope, quality,
 acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
-governance, but failed repository-controls, human-review, and evidence; it is
-predecessor evidence only.
+governance; repository-controls, human-review, and evidence fail. The visible
+approvals target older commits, `validation-authority` is absent, and the
+report is `review_required` with 9/10 criteria proven. AC9 remains unproven;
+there is no hosted `ready_for_acceptance`.
 
-Two later bounded Cloud canaries did not close the gap. Run `36900971355`
-records a successful `npm run contract:fetch -- --issue 16`, but no plan-gate
-execution, task/owner binding evidence, or artifact publication. Run
-`36901509449` attempted `npm run plan:gate -- --pr 27`; the tool reported
-failure without exposing the command result or reason, and no artifacts or PR
-changes resulted. Neither run proves AC9 or a Cloud implementation. Show these
-as diagnostic stops only: there is no successful WI-1842 Cloud
-**plan → act → evaluate** sequence or hosted `ready_for_acceptance`.
+The published candidate now resolves session identity from the hook payload,
+Copilot session environment, or—when Copilot session variables are unavailable—
+the exact GitHub Actions repository/run/attempt. A local Cloud-shaped
+SessionStart → PreToolUse simulation with no session ID in the event payload
+binds Issue #16, plan #26, PR #27, base/head, and the environment session; the
+plan gate passes. This is not a real Cloud host run.
 
-The published candidate removes the Cloud resolver's extra human-author and
-`copilot/` branch-prefix requirements while preserving live
-PR/task/plan/base/head/ancestry checks. Its focused test and a read-only
-resolver call against live PR #27 metadata pass. It remains unreviewed at its
-current head and has not been evaluated in a successful Cloud task session.
-PostgreSQL acceptance passes 10/10 with isolated temporary schemas. Zizmor
-still has 83 unsuppressed findings. Treat this as an unaccepted repair
-candidate, not as a fixed Cloud demo.
+Cloud runs `36900971355` and `36901509449` on `a5c64fc` did not establish
+task binding: the first only fetched the contract; the second returned
+`bash success=false` on the plan gate without output. The post-fix canary
+`36930550238` on predecessor `92a8af6` again returned `success=false` for the
+plan-gate tool and published no artifacts. No Cloud run has tested the newer
+session-identity fallback. Do not present these as successful execution:
+there is still no WI-1842 Cloud **plan → act → evaluate** sequence or hosted
+`ready_for_acceptance`.
+
+Show the local application/fixture rehearsal separately from the Cloud
+bootstrap stops. PR #27 remains draft and unaccepted; the local candidate does
+not establish a fixed or accepted Cloud demo.
 
 ## 1. Reproduce the local fixture rehearsal
 

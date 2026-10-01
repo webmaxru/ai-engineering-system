@@ -252,69 +252,51 @@ path, not bypassed by renaming or disabling hooks.
 `tests/unit/resolve-task.test.ts`, `tests/unit/combined-session.test.ts`,
 `tests/unit/tool-authorization.test.ts`, and
 [`COPILOT-SURFACES.md`](COPILOT-SURFACES.md). Candidate commit
-`a5c64fc2b4d5d09b99b1b79747275525f21751c2` is pushed to draft PR #27, based
-on `2ce3cf8a69439c22246de7d5449ce186e23bd584`; plan PR #26 remains approved
+`f1c40a961451d29fed04ac37ad01eb63ddec076d` is published to draft PR #27 on
+base `2ce3cf8a69439c22246de7d5449ce186e23bd584`; plan PR #26 remains approved
 at `42721d4ee34a55cb031567d3942dd037e5bbe513` by review `5362561711`.
-At this exact commit, an owner-bound local `SessionStart` using the explicit
-issue/role/PR selectors records Issue #16, PR #27, the approved plan, the
-current owner/session, and workspace head `a5c64fc…`. The focused
-resolver/authorization tests pass 102/102, `plan:gate` passes, live PR
-`scope:check` reports 70 paths and zero violations, `npm run validate` passes
-535 unit tests and 79 governance checks, and PostgreSQL acceptance passes
-10/10. Fastify is pinned to 5.12.5; `npm audit` reports zero vulnerabilities.
-Secret scanning passes 199 files and agentic workflow compilation passes.
 
-Published candidate PR #27 head `92a8af6…`, based on `a5c64fc…`, removes the
-extra `pull.user.type === "Bot"` and `copilot/`-branch-prefix predicates from
-Cloud execution validation. The remaining checks bind the open same-repository
-PR to its exact task issue, plan, base branch/SHA, branch, current head, and
-approved-base ancestry. This follows the contributor model: the guide says to
-evaluate PRs by workflow standards regardless of whether their author is a
-human or agent (Learning Path Unit 6, lines 385-400). Local commits
-`4f66c57fbcb925945fcf84aedbb52b04e37aa1fe` and
-`92a8af62939847c0ba3120128afbb3129a12cab6` are on the existing draft PR #27.
+The candidate contains two related corrections. Commit `92a8af6` removes the
+extra `pull.user.type === "Bot"` and `copilot/`-branch-prefix predicates while
+retaining exact same-repository PR, linked issue, plan, base, branch, head, and
+approved-base ancestry checks. Commit `f1c40a9` centralizes session identity
+resolution across SessionStart, UserPromptSubmit, PreToolUse, audit, Stop, and
+CLI entry points: it prefers explicit event/CLI identity, then Copilot host
+session variables, then the exact GitHub Actions repository/run/attempt tuple.
+Missing or malformed identity still fails closed; the Actions attempt
+distinguishes reruns.
 
-At this candidate, `tests/unit/execution-context.test.ts` passes; the direct
-read-only resolver call against live PR #27 metadata returns the expected Issue
-#16/plan #26/base/head context; the full unit suite passes
-535/535, `npm run validate`'s governance/lint/typecheck/build stages pass, the
-plan gate passes, and scope reports 72 paths with zero violations. `npm audit`
-reports zero vulnerabilities, secret scanning passes 199 files, and agentic
-workflow compilation has zero warnings. `npm run validate:all` passes PostgreSQL acceptance 10/10 against the
-task-specific local Compose service using per-suite temporary schemas, then
-reaches pinned Zizmor. Poutine reports zero findings; Zizmor reports 83
-unsuppressed findings and fails `validate:all`.
+At `f1c40a9`, the full local suite passes 541 unit tests and PostgreSQL
+acceptance passes 10/10 using per-suite temporary schemas. Lint, typecheck,
+build, 79 governance checks, plan gate, and exact-base scope (75 paths, zero
+violations) pass. `npm audit` reports zero vulnerabilities; secret scanning
+passes 199 files; workflow compilation is clean and Poutine reports zero
+findings. Pinned Zizmor reports 83 unsuppressed findings and is the remaining
+local `validate:all` failure.
 
-At published PR #27 head `a5c64fc…`, the full `npm run validate:all` reaches
-Zizmor and fails with 83 unsuppressed findings (19 `artipacked`, 61
-`unpinned-uses`, and one each `dangerous-triggers`, `obfuscation`, and
-`template-injection`). Hosted run
-[`36873981770`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36873981770)
-passes plan-contract, plan-approval, scope, quality, acceptance,
-dependency-review, CodeQL, secret-scan, merge-validation, and governance, but
-fails repository-controls, human-review, and evidence; `validation-authority`
-is missing. Its report is `review_required` with 9/10 criteria proven and AC9
-unproven.
+A local Cloud-shaped hook simulation omitted session ID from the hook payload
+and supplied it only through the host environment. SessionStart resolved Issue
+#16, plan #26, PR #27, base/head and Cloud execution context; PreToolUse allowed
+the authorized plan-gate command, and `plan:gate` passed. This is local
+integration evidence, not a Cloud host canary.
 
-Latest hosted run
-[`36929325151`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36929325151)
-evaluates PR #27 at `92a8af62939847c0ba3120128afbb3129a12cab6`. Plan-contract,
-plan-approval, scope, quality, acceptance, dependency review, CodeQL,
-secret-scan, merge-validation, and governance pass; repository-controls,
-human-review, and evidence fail. The visible PR approvals predate this head,
-`validation-authority` is absent, and the evidence report is `review_required`
-with 9/10 criteria proven and AC9 unproven. The candidate is still draft and
+Hosted run
+[`36934750341`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36934750341)
+evaluates PR #27 at `f1c40a9`. Plan-contract, plan-approval, scope, quality,
+acceptance, dependency review, CodeQL, secret-scan, merge-validation, and
+governance pass. Repository-controls, human-review, and evidence fail; visible
+reviews target older commits, `validation-authority` is missing, and the report
+is `review_required` with 9/10 criteria proven. PR #27 remains draft and
 unaccepted.
 
-Cloud run
-[`36869969461`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36869969461)
-completed its workflow wrapper at predecessor head `b05b481…`, but its four
-artifact-view calls for the task contract, task session, workspace owner, and
-execution context returned `success=false`. It also completed GitHub issue/PR
-reads, but no matching artifact contents or bound Cloud session result were
-inspectable. The wrapper's success is not AC9 evidence. PR #27 remains draft
-and unaccepted; these candidate results do not change the locked baseline or
-establish conformance.
+The latest actual Cloud canary,
+[`36930550238`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36930550238),
+ran on predecessor `92a8af6`, before the session-identity fallback. Its
+`npm run plan:gate -- --pr 27` tool call returned `bash success=false` without
+a command result or artifacts. No actual Cloud run has tested `f1c40a9`;
+after the repeated opaque failure, the bounded retry stopped. AC9 remains
+unproven, and these candidates do not change the locked baseline or establish
+conformance.
 
 ## EXT-005 - Payload-minimized local audit
 

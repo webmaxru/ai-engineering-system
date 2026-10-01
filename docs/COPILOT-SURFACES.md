@@ -71,6 +71,31 @@ re-establish the exact approved plan state through the repository resolver and
 then repair/test the selector and approval-cache contract under an authorized
 session; until then local writes and AC9 remain blocked.
 
+## Latest Issue #16 continuation (2026-10-01)
+
+Draft PR #27 is published at `f1c40a961451d29fed04ac37ad01eb63ddec076d`
+on approved base `2ce3cf8a69439c22246de7d5449ce186e23bd584`. A local
+Cloud-shaped simulation with the session ID omitted from the hook payload but
+present in the host environment resolved Issue #16, plan #26, PR #27, branch,
+base, head, workspace owner, and execution context. The PreToolUse hook then
+allowed `npm run plan:gate -- --pr 27`, which passed. This validates the
+repository hook path locally, not the Copilot Cloud host.
+
+Cloud run `36930550238` was a bounded canary on predecessor head `92a8af6`,
+before session-ID environment fallback was added. Its single plan-gate tool
+call returned `bash success=false` without command output, task-session
+evidence, or artifacts. No actual Cloud run has evaluated `f1c40a9`. This
+repeated opaque failure is not classified as a permission or repository
+setting issue; do not retry automatically. AC9 remains unproven.
+
+At hosted run `36934750341`, PR #27 head `f1c40a9` passes plan-contract,
+plan-approval, scope, quality, acceptance, dependency review, CodeQL, secret
+scan, merge-validation, and governance. Repository-controls, human-review,
+and evidence fail; current visible approvals target older commits,
+`validation-authority` is missing, and the report is `review_required` with
+9/10 criteria proven. PR #27 is draft and unaccepted. VS Code remains
+unverified because workspace trust was not granted.
+
 ## Host differences that need explicit adaptation
 
 | Boundary | Required interpretation |
