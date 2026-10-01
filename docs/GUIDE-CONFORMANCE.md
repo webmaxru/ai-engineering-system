@@ -155,6 +155,20 @@ available in the workflow log or session history. The green workflow wrapper
 therefore does not prove an active Cloud task contract or AC9; no successful
 Cloud canary is claimed.
 
+Two bounded follow-up canaries were run on the current PR #27 head
+`a5c64fc2b4d5d09b99b1b79747275525f21751c2`. The request in comment
+`5937004816` started Cloud run `36900971355`; its log records the standalone
+`npm run contract:fetch -- --issue 16` tool call as successful, but the agent
+did not invoke the plan gate, published no result comment, and the run exposed
+no artifacts. Contract-fetch success alone does not prove an active
+implementation role, PR selector, owner/session binding, or AC9. A follow-up
+request in comment `5937072552` started run `36901509449` with only
+`npm run plan:gate -- --pr 27`; the Cloud tool log records `bash
+success=false`, but exposes no command result or actionable denial reason.
+That run also published no artifacts and did not change PR #27. The successful
+workflow wrappers are not plan-gate or task-binding evidence; AC9 remains
+unproven and no further blind retry is claimed.
+
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
 do not prove every VS Code lifecycle hook or hosted acceptance. The separate
