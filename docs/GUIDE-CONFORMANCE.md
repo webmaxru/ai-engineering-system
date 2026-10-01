@@ -171,6 +171,16 @@ This is evidence of a cloud task-contract bootstrap failure, not of a
 permission denial or successful cloud execution. No parallel cloud proof is
 established.
 
+A fresh local Issue #20 plan-refresh session on branch
+`webmaxru-turbo-carnival` also stopped before repository inspection. The
+`/plan 20` startup attempted to load the `gh` skill and PreToolUse denied it
+because no task contract was active; a follow-up with explicit `Task issue:
+#20` and `Task role: plan` was denied because `"skill" is not a tool this
+policy recognizes`. The session read no issue/PR/scanner data, wrote no plan,
+and changed no files or remote state. PRs #21 and #23 remain bound to the
+stale `17e7a5c…` base while PR #18 is at `2ce3cf8…`; no refreshed approval
+exists. This is an unverified session bootstrap, not a reason to relax policy.
+
 A separate fresh detached local worktree at base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`
 resolved live issue #16 with `npm run contract:fetch -- --issue 16` and
 recorded body digest `2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`.
