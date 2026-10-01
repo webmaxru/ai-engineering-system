@@ -169,6 +169,33 @@ That run also published no artifacts and did not change PR #27. The successful
 workflow wrappers are not plan-gate or task-binding evidence; AC9 remains
 unproven and no further blind retry is claimed.
 
+### Local Cloud identity fix candidate (2026-10-01)
+
+The owner-bound PR #27 worktree exposed a separate concrete mismatch in
+`scripts/execution-context.mjs`: it rejected the actual same-repository
+implementation PR because its author was a human and its branch was
+`agent/implement/aes-parallel-isolation`, despite the live PR, linked Issue
+#16, approved plan #26, base, head, and ancestry matching. The guide's
+contributor model says to evaluate agent and human pull requests by the same
+workflow standards (Learning Path Unit 6, lines 385-400). The local candidate
+removes only the author-class and branch-prefix checks; exact PR/task/plan/base/
+head and ancestry validation remains required.
+
+The candidate is in local commits
+`4f66c57fbcb925945fcf84aedbb52b04e37aa1fe` and
+`92a8af62939847c0ba3120128afbb3129a12cab6` on the Issue #16 worktree, ahead
+of remote PR #27 at `a5c64fc2b4d5d09b99b1b79747275525f21751c2`. The focused
+execution-context test passes; the live read-only resolver returns the
+expected current PR context; `npm run validate` passes all 535 unit tests and
+79 governance checks; the approved plan gate passes; and the exact-base scope
+check reports 72 paths with zero violations. Dependency audit, secret scan,
+and workflow compilation pass. PostgreSQL acceptance did not run because the
+local Compose database is stopped and its explicit disposable-database
+confirmation guard was not satisfied. No change was pushed, no hosted run
+evaluated these commits, and AC9 remains unproven. Treat this only as a local
+implementation candidate—not as accepted Northstar behavior or conformance
+evidence.
+
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
 do not prove every VS Code lifecycle hook or hosted acceptance. The separate

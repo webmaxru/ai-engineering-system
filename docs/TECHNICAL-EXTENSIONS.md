@@ -219,10 +219,13 @@ trusted, owner-bound high-risk implementation session with a valid plan; the
 command still re-fetches the independent plan-only approval.
 
 **Compatibility.** The bounded lookup adds time to resolve authority; it does
-not grant additional tools, widen task scope, or relax approval, branch, diff,
-GitHub policy, or human-acceptance requirements. The PR selector is an explicit
-lookup into GitHub's system of record, not an inference from a branch name or
-cached task. The setting uses the documented
+not grant additional tools, widen task scope, or relax approval, exact PR,
+branch/head/base, diff, GitHub policy, or human-acceptance requirements. The
+PR selector is an explicit lookup into GitHub's system of record, not an
+inference from a branch name or cached task. PR author class and branch naming
+conventions are not authority: the live same-repository PR, linked issue,
+task-bound plan, exact base/head, and ancestry establish the binding. The
+setting uses the documented
 `timeout` alias for `timeoutSec`; GitHub's hook reference does not specify a
 maximum. This is a concrete implementation of the guide's independent
 pre-action and least-privilege controls, not a substitute for them.
@@ -261,9 +264,34 @@ resolver/authorization tests pass 102/102, `plan:gate` passes, live PR
 10/10. Fastify is pinned to 5.12.5; `npm audit` reports zero vulnerabilities.
 Secret scanning passes 199 files and agentic workflow compilation passes.
 
-The full `npm run validate:all` fails at Zizmor with 83 unsuppressed findings
-(19 `artipacked`, 61 `unpinned-uses`, and one each `dangerous-triggers`,
-`obfuscation`, and `template-injection`). Hosted run
+An unpublished local candidate, based on PR #27 head `a5c64fc…`, removes the
+extra `pull.user.type === "Bot"` and `copilot/`-branch-prefix predicates from
+Cloud execution validation. The remaining checks bind the open same-repository
+PR to its exact task issue, plan, base branch/SHA, branch, current head, and
+approved-base ancestry. This follows the contributor model: the guide says to
+evaluate PRs by workflow standards regardless of whether their author is a
+human or agent (Learning Path Unit 6, lines 385-400). Local commits
+`4f66c57fbcb925945fcf84aedbb52b04e37aa1fe` and
+`92a8af62939847c0ba3120128afbb3129a12cab6` are ahead of the remote PR and have
+not been pushed or reviewed.
+
+At this local candidate, `tests/unit/execution-context.test.ts` passes; the
+direct read-only resolver call against live PR #27 metadata returns the
+expected Issue #16/plan #26/base/head context; the full unit suite passes
+535/535, `npm run validate`'s governance/lint/typecheck/build stages pass, the
+plan gate passes, and scope reports 72 paths with zero violations. `npm audit`
+reports zero vulnerabilities, secret scanning passes 199 files, and agentic
+workflow compilation has zero warnings. `npm run validate:all` did not reach
+the audit/scanner stages because PostgreSQL acceptance stopped at its
+disposable-database confirmation guard; the local Compose database was stopped.
+The separate Zizmor scan still reports the 83 existing unsuppressed findings.
+This local candidate is not PR evidence, not a Cloud host run, and not
+acceptance; AC9 and hosted `ready_for_acceptance` remain unproven.
+
+At published PR #27 head `a5c64fc…`, the full `npm run validate:all` reaches
+Zizmor and fails with 83 unsuppressed findings (19 `artipacked`, 61
+`unpinned-uses`, and one each `dangerous-triggers`, `obfuscation`, and
+`template-injection`). Hosted run
 [`36873981770`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36873981770)
 passes plan-contract, plan-approval, scope, quality, acceptance,
 dependency-review, CodeQL, secret-scan, merge-validation, and governance, but

@@ -104,7 +104,8 @@ is still draft at `a5c64fc2b4d5d09b99b1b79747275525f21751c2` on parent base
 `2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local `npm run validate` passes
 79 governance checks, lint, typecheck, build, and 535 unit tests; PostgreSQL
 acceptance passes 10/10, and Fastify 5.12.5 has zero npm audit findings.
-`npm run validate:all` still fails on 83 unsuppressed Zizmor findings.
+At that published head, `npm run validate:all` reaches Zizmor and fails on 83
+unsuppressed findings.
 
 Hosted run `36873981770` passes plan-contract, plan-approval, scope, quality,
 acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
@@ -123,6 +124,16 @@ failure without exposing the command result or reason, and no artifacts or PR
 changes resulted. Neither run proves AC9 or a Cloud implementation. Show these
 as diagnostic stops only: there is no successful WI-1842 Cloud
 **plan → act → evaluate** sequence or hosted `ready_for_acceptance`.
+
+An unpublished local candidate now removes the Cloud resolver's extra
+human-author and `copilot/` branch-prefix requirements while preserving the
+live PR/task/plan/base/head/ancestry checks. Its focused test and a read-only
+resolver call against live PR #27 metadata pass; the full unit suite passes
+535/535. The candidate is two commits ahead in the owner-bound worktree, not
+on the remote PR, and has not been evaluated by a Cloud run or current-head
+review. PostgreSQL acceptance could not be run locally because the Compose
+test database is stopped and its disposable-target guard was not satisfied.
+Treat this as an unreviewed repair candidate, not as a fixed Cloud demo.
 
 ## 1. Reproduce the local fixture rehearsal
 
