@@ -62,7 +62,7 @@ digest-bound, publishable plan are established. The run reported no permission
 denial; fixture output cannot substitute for a successful immutable-head cloud
 session and trusted acceptance.
 
-## Current follow-up state (2026-09-30)
+## Current follow-up state (2026-10-02)
 
 The historical run above remains a demonstration of a **correct stop**, not a
 completed WI-1842 delivery. Later maintenance candidates and their subsequent
@@ -71,9 +71,9 @@ scope closures have not changed that conclusion:
 | Evidence | Current state |
 | --- | --- |
 | Controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is open at `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local validation passes 489 unit tests and isolated PostgreSQL acceptance 9/9. Native review `5356731352` is approved, but the hosted `human-review` check still fails because GitHub reports `reviewDecision` as not `APPROVED`; repository-controls metadata is unavailable with HTTP 403. Report `36610256698` is `ready_for_review` with 14/15 criteria proven and AC15 unverified; trusted-acceptance remains failure. No ruleset setting changed and PR #18 remains unmerged/unaccepted. |
-| Local isolation candidate | PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) is at `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` on approved parent base `2ce3cf8…`; plan PR #26 is approved (review `5362561711`). Local `validate` passes 528 unit tests and 79 governance checks, PostgreSQL acceptance passes 10/10, and the plan gate passes. Two simultaneous read-only CLI sessions independently resolved the task and plan in separate worktrees at predecessor `bb767fc…`. |
-| Hosted PR #27 evaluation | Run `36748901455` evaluated exact candidate `bfb2cbf…`; 9/10 criteria are proven (AC1–AC8 and AC10), while AC9 remains unproven. Plan, scope, quality, acceptance, CodeQL, dependency, secret, merge, and governance checks pass; `repository-controls`, `human-review`, and `evidence` fail, and `validation-authority` was not run. The report also identifies missing trusted current-run revalidation for plan approval, repository controls, and human review. |
-| Trusted-acceptance bootstrap | PR #25's refreshed Issue #24 plan is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`). Child PR [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28) is rebased and pushed at `35ac91150fa4088af3132a9dda75bc690d657165` on parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local unit, PostgreSQL, scope, and merge checks pass. Hosted run `36635911460` fails `human-review` and `repository-controls`; full `validate:all` remains blocked by 79 repository-wide Zizmor findings. |
+| Local isolation candidate | PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) is at `f1c40a961451d29fed04ac37ad01eb63ddec076d` on approved parent base `2ce3cf8…`; plan PR #26 is approved (review `5362561711`). Local `validate` passes 541 unit tests and 79 governance checks, PostgreSQL acceptance passes 10/10, and the plan gate passes. Two simultaneous read-only CLI sessions independently resolved the task and plan in separate worktrees at predecessor `bb767fc…`. |
+| Hosted PR #27 evaluation | `vibeprogrammer` approved exact head `f1c40a9…`. Run `36984950941` passes current-head `human-review`, plan, scope, quality, acceptance, CodeQL, dependency, secret, merge, and governance checks. `repository-controls` and `evidence` fail; `validation-authority` is missing and AC9 remains unproven (9/10 criteria proven). The report is `review_required`. |
+| Trusted-acceptance bootstrap | PR #25's refreshed Issue #24 plan is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`). Child PR [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28) is at `cb507e20cd0cb8fdeabfedaece67510a651757b0` on parent base `2ce3cf8…`; local `validate` passes 527 unit tests and 79 governance checks, PostgreSQL acceptance 9/9, and the secret scan and workflow compiler pass. Hosted run `36990391843` fails `dependency-review`, `repository-controls`, `human-review`, and `evidence`; PR #28 remains draft. |
 | Current local CLI canaries | Two simultaneous read-only sessions for issue #16 matched task/contract/approved-plan/base/session/owner identities on PR #27 predecessor `bb767fc…`. They are not an implementation or acceptance run for WI-1842. |
 | Historical GitHub.com cloud attempt | PR [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) was closed after using the default `main` base and producing zero changed files. It does not prove cloud isolation. |
 | Current GitHub.com cloud canaries | Read-only sessions `26c6b1b9-9f6f-43f7-81bc-e457b915b440` (Issue #16, PR #30) and `12ec3302-9b64-473f-9339-1a9b844637ef` (attempted Issue #24, PR #32) both stopped because `artifacts/task-contract.json` was absent. PR #30 and the invalid Issue #24 attempt used PR #27 predecessor `bb767fc…`; neither changed source files. |
@@ -97,7 +97,7 @@ the draft WI-1843 candidate. Maintenance work is reopened for conformance
 remediation; its status does not make the demo candidates accepted or repair
 the framework baseline.
 
-## Latest maintenance and Cloud status (2026-10-01)
+## Latest maintenance and Cloud status (2026-10-02)
 
 Northstar PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27)
 is still draft at `f1c40a961451d29fed04ac37ad01eb63ddec076d` on parent base
@@ -107,12 +107,21 @@ acceptance passes 10/10, audit reports zero vulnerabilities, and secret
 scanning passes. `npm run validate:all` reaches Zizmor and fails on 83
 unsuppressed findings.
 
-Hosted run `36934750341` passes plan-contract, plan-approval, scope, quality,
-acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
-governance; repository-controls, human-review, and evidence fail. The visible
-approvals target older commits, `validation-authority` is absent, and the
-report is `review_required` with 9/10 criteria proven. AC9 remains unproven;
-there is no hosted `ready_for_acceptance`.
+Hosted run `36984950941` passes current-head human-review, plan-contract,
+plan-approval, scope, quality, acceptance, dependency-review, CodeQL,
+secret-scan, merge-validation, and governance; repository-controls and
+evidence fail. The report is `review_required` with 9/10 criteria proven,
+`validation-authority` absent, and AC9 unproven. There is no hosted
+`ready_for_acceptance`.
+
+The pull-request repository-controls job uses `github.token` with
+`contents: read`; GitHub returns HTTP 403 for ruleset, legacy-protection,
+App, and secret-inventory lookups. Separate read-only GitHub API calls verified
+the active `main` ruleset has no bypass actors, requires PR/CODEOWNERS review
+and strict checks, binds `repository-controls` to Actions integration `15368`
+and `trusted-acceptance` to GitHub App integration `5075466`, and has secret
+scanning and push protection enabled. The check still fails closed because
+the PR token cannot verify all metadata. No settings changed.
 
 The published candidate now resolves session identity from the hook payload,
 Copilot session environment, or—when Copilot session variables are unavailable—
@@ -120,6 +129,17 @@ the exact GitHub Actions repository/run/attempt. A local Cloud-shaped
 SessionStart → PreToolUse simulation with no session ID in the event payload
 binds Issue #16, plan #26, PR #27, base/head, and the environment session; the
 plan gate passes. This is not a real Cloud host run.
+
+Issue #24 PR #28 is now at `cb507e2` on the same parent base. Its protected
+Publish Evidence dispatch selects migration mode only on the guarded default
+branch; System Maintenance resolves omitted run attempts from GitHub so the
+browser-plan-canary route remains usable while stale supplied attempts fail.
+The local focused tests, `validate`, PostgreSQL acceptance, secret scan, and
+workflow compilation pass. The hosted run `36990391843` still reports
+`review_required`: inherited dependency advisories, unavailable repository
+controls, stale implementation review, and missing validation-authority
+evidence remain. Issue #24 prohibits dependency-manifest edits, and PR #28
+remains draft/unaccepted.
 
 Cloud runs `36900971355` and `36901509449` on `a5c64fc` did not establish
 task binding: the first only fetched the contract; the second returned

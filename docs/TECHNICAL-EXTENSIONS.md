@@ -281,13 +281,20 @@ the authorized plan-gate command, and `plan:gate` passed. This is local
 integration evidence, not a Cloud host canary.
 
 Hosted run
-[`36934750341`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36934750341)
-evaluates PR #27 at `f1c40a9`. Plan-contract, plan-approval, scope, quality,
+[`36984950941`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36984950941)
+evaluates PR #27 at `f1c40a9`. `vibeprogrammer` approved this exact head and
+`human-review` now passes; plan-contract, plan-approval, scope, quality,
 acceptance, dependency review, CodeQL, secret-scan, merge-validation, and
-governance pass. Repository-controls, human-review, and evidence fail; visible
-reviews target older commits, `validation-authority` is missing, and the report
-is `review_required` with 9/10 criteria proven. PR #27 remains draft and
-unaccepted.
+governance also pass. Repository-controls and evidence fail,
+`validation-authority` is missing, and the report is `review_required` with
+9/10 criteria proven. AC9 remains unproven and PR #27 remains draft.
+
+The hosted repository-controls job uses the pull-request `github.token` with
+`contents: read`, so ruleset/legacy-protection, App and secret-inventory
+lookups return HTTP 403 and are correctly recorded as unavailable. Separate
+read-only API checks verified the active main ruleset's strict PR/CODEOWNERS
+controls, empty bypass list, required status identities, and enabled secret
+scanning/push protection. No external setting or permission was changed.
 
 The latest actual Cloud canary,
 [`36930550238`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36930550238),
@@ -410,8 +417,13 @@ maintenance artifact ID from the exact publisher run/attempt and publisher
 job, matching repository, head, and job-time window before download. The
 workflow uses `artifact-ids` rather than a name-only lookup, and revalidation
 requires the publisher attempt to complete successfully before status
-publication. The importer still applies its path allowlist and producer
-provenance checks.
+publication. The protected Publish Evidence `workflow_dispatch` selects
+`bootstrap-migration` only on its guarded default-branch/dispatcher path.
+System Maintenance defaults to `open-pr`; attempt inputs are optional for the
+existing browser-plan-canary dispatcher, and the resolver obtains current
+source/publisher attempts from GitHub, binds them to the resolved context, and
+rejects stale supplied attempts. The importer still applies its path allowlist
+and producer provenance checks.
 
 Candidate PR #18 adds a narrow staged maintenance decision for AC15: the
 protected maintenance run may record an environment-approved activation only
@@ -444,15 +456,26 @@ Do not let pull-request code publish a substitute success status.
 hosted human-review and repository-controls remain blocked and
 `trusted-acceptance` is failure. Issue #24 plan PR #25 has been rebound to this
 parent base and is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66`
-(review `5357419226`). Child PR #28 is pushed at `35ac91150fa4088af3132a9dda75bc690d657165`
-on base `2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local validation passed
-525 unit tests, PostgreSQL acceptance 9/9, and scope/merge checks. Hosted run
-`36635911460` passes plan, scope, quality, acceptance, CodeQL, secret scan,
-dependency review, merge validation, governance, and evidence; `human-review`
-and `repository-controls` fail. `validate:all` remains blocked by 79
-repository-wide Zizmor findings, with none in the modified maintenance
-workflow. PR #28 remains draft and unmerged; no external setting changed and
-no trusted-acceptance success is claimed.
+(review `5357419226`). Child PR #28 is pushed at
+`cb507e20cd0cb8fdeabfedaece67510a651757b0` on base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584`.
+Focused resolver/workflow tests pass 62/62; `validate` passes 527 unit tests,
+79 governance checks, lint, typecheck, and build; PostgreSQL acceptance passes
+9/9, secret scan covers 185 files, and workflow compilation has zero
+errors/warnings. `npm run validate:all` stops at `npm audit` with two high
+advisories inherited from base `2ce3cf8…` (Fastify 5.12.1 and
+`brace-expansion`); Issue #24 prohibits manifest/lockfile edits. A separate
+pinned Zizmor run reports 79 findings (18 `artipacked`, 57 `unpinned-uses`,
+two `template-injection`, one `dangerous-triggers`, one `obfuscation`).
+
+Hosted run
+[`36990391843`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36990391843)
+passes quality, acceptance, CodeQL, plan-contract/approval, scope,
+merge-validation, secret-scan, and governance. Dependency-review,
+repository-controls, current-head human-review, and evidence fail; the report
+is `review_required`, `validation-authority` is absent, and repository-control
+metadata is unavailable to the PR token. PR #28 remains draft and unmerged;
+no external setting changed and no trusted-acceptance success is claimed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 
