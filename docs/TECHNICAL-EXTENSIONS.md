@@ -469,13 +469,20 @@ pinned Zizmor run reports 79 findings (18 `artipacked`, 57 `unpinned-uses`,
 two `template-injection`, one `dangerous-triggers`, one `obfuscation`).
 
 Hosted run
-[`36990391843`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36990391843)
-passes quality, acceptance, CodeQL, plan-contract/approval, scope,
-merge-validation, secret-scan, and governance. Dependency-review,
-repository-controls, current-head human-review, and evidence fail; the report
-is `review_required`, `validation-authority` is absent, and repository-control
-metadata is unavailable to the PR token. PR #28 remains draft and unmerged;
-no external setting changed and no trusted-acceptance success is claimed.
+[`37001565136`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37001565136)
+passes current-head human-review, quality, acceptance, CodeQL,
+plan-contract/approval, scope, merge-validation, secret-scan, and governance.
+Dependency-review, repository-controls, and evidence fail. The report is
+`review_required`, `validation-authority` is absent, and repository-control
+metadata is unavailable to the PR token. The trusted Publish Evidence
+follow-up
+[`37001721147`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37001721147)
+ran protected `main` at `b65c2de` and failed because the deployed resolver
+only recognizes PRs targeting `main`, not the stacked Issue #24 PR. The
+approved PR #28 candidate contains exact declared-base resolution and
+regression tests, but is not yet integrated on the trusted default branch. PR
+#28 remains draft and unmerged; no external setting changed and no
+trusted-acceptance success is claimed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 
