@@ -96,6 +96,46 @@ resolver/test change for an exact declared same-repository stacked base, but
 that code is not deployed on `main`. Do not treat the failed publisher run as
 proof of acceptance or bypass its validation boundary.
 
+### Issue #24 parent preflight (2026-10-03)
+
+Child PR #28 was merged into parent PR #18 at
+`2222e882b966588e39a63991ece3a00935898cfc`; PR #18 remains open against
+`main`. Reviewer `vibeprogrammer` approved that exact head (review
+`5401432763`). Issue #24 plan PR #25 is approved at
+`ad4da17e679ba66d28025354021df9cc5ab18158` (review `5400367350`), bound to
+contract digest `8763c017e195fc22c2a4b4c3347ad961616eeaa8ee56029a72c2f315e33bf01c`
+and parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`.
+
+Governed Change run
+[`37133142406`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133142406)
+on the exact PR #18 head passes the source checks and publishes a truthful
+`ready_for_review` report with 14/15 criteria proven; AC15 is unverified.
+`repository-controls` is the remaining failed Governed Change check.
+`trusted-acceptance` remains a failure from protected Publisher run
+`37133121752`; it is not a success or acceptance signal.
+
+Protected Publish Evidence runs
+[`37133208919`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133208919)
+and
+[`37133310243`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133310243)
+ran on the old default-branch code at `b65c2de…` and failed before the
+controls audit because its artifact importer rejected
+`poutine-report.json`, `poutine.sarif`, and `zizmor-comparison.json`. A local
+replay of the exact source-run artifacts using the importer and path-safety
+helper whose Git blobs match the reviewed PR #18 merge commit accepted all 22
+imported files, including those three paths. This verifies the importer
+behavior only; it is not protected-publisher or hosted-controls evidence.
+
+Ruleset `23998987` remains active and strict, with no bypass actors and all
+original required contexts intact, including `repository-controls` from
+integration `15368` and `trusted-acceptance` from App `5075466`. The saved
+preflight snapshot matches the live ruleset. No temporary window, settings
+change, PR #18 merge, or successful post-merge Publisher audit has occurred.
+The plan still reserves the temporary window and parent merge to a human.
+This state follows the guide’s plan → act → evaluate lifecycle and its use of
+pull-request checks and human review as evaluation signals (Learning Path
+Units 1 and 5); local importer proof is not presented as hosted acceptance.
+
 ## Historical follow-up local and owner-session evidence (2026-10-01)
 
 This section preserves the state recorded on 2026-10-01. The current PR #27

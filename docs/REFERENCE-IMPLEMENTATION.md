@@ -19,8 +19,9 @@ from open, draft PR #27 and remains `known-defective`; it is not an adoption
 release. Earlier terminology and workflow fixes are merged. On
 2026-09-28 the owner reopened system-maintenance issues #14, #16, #20, #22 and
 #24 and their associated plan/implementation PRs to resume conformance
-remediation. Their earlier closures were cancellations, not accepted fixes;
-no maintenance PR has been merged, and no repository setting was changed.
+remediation. Their earlier closures were cancellations, not accepted fixes.
+Child PR #28 has since been merged into parent PR #18, but no maintenance PR is
+merged into `main`; no repository setting was changed.
 
 Demo issue #4 (WI-1842) and issue #17 (WI-1843) remain open; PR #19 remains a
 draft demo candidate. Its exact-head review and hosted `human-review` pass,
@@ -39,41 +40,40 @@ remain unresolved. Issue #20 remains blocked by issue #22; no scanner finding
 has been fixed.
 
 The issue #14 implementation candidate
-[PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is at
-`2ce3cf8a69439c22246de7d5449ce186e23bd584` on
-`agent/implement/aes-surface-evidence`. Local `npm run validate` passes
-489 unit tests; isolated PostgreSQL acceptance passes 9/9;
-`npm audit --audit-level=high` reports zero vulnerabilities; and
-`npm run agentic:compile` passes. The approved PR #15 plan (`e5ce0f4c…`,
-review `5353720051`) stages AC15 after controlled bootstrap activation but
-before final acceptance. The candidate adds a protected, exact-head
-browser-plan canary and keeps `ready_for_acceptance` blocked until that
-evidence is present.
+[PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is
+now at `2222e882b966588e39a63991ece3a00935898cfc` on
+`agent/implement/aes-surface-evidence`, incorporating child PR #28. Its
+exact-head review (`5401432763`) is approved. Governed Change run
+[`37133142406`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133142406)
+passes the source checks except `repository-controls`. The report is
+`ready_for_review` with 14/15 criteria proven; AC15 remains unverified.
+`repository-controls` and `trusted-acceptance` are still failed required
+contexts, so PR #18 is blocked and no acceptance is claimed.
 
-PR #18 remains open and unmerged. Its exact native review (5356731352) is
-approved, but hosted `human-review` fails because GitHub reports
-`reviewDecision` as not `APPROVED`; repository-controls lookups return
-HTTP 403, and `trusted-acceptance` remains failure. The
-[source report](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36610256698)
-is `ready_for_review` with AC15 unverified and 14/15 criteria proven; the
-[review-event report](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612195971)
-is `review_required`, and the
-[trusted-acceptance run](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612770691)
-fails. Local `agentic:zizmor` remains blocked with 85 findings. No ruleset,
-App permission, or secret changed, and no acceptance or conformance is
-claimed. Issue #24 plan
-[PR #25](https://github.com/webmaxru/northstar-orders-api-demo/pull/25) has
-been refreshed to contract `93a40b20…` and base `2ce3cf8…`, and is approved
-on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`).
-Child PR #28 is rebased and pushed at `35ac91150fa4088af3132a9dda75bc690d657165`
-on that parent base. Its local task/plan, scope, merge, 525-unit, and 9/9
-acceptance checks pass; `validate:all` remains blocked by 79 repository-wide
-Zizmor findings. Hosted run `36635911460` passes plan, scope, quality,
-acceptance, CodeQL, secret scan, dependency review, merge validation,
-governance, and evidence, but `human-review` and `repository-controls` fail.
-PR #28 remains draft and unmerged; no trusted acceptance is established. See
-[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the exact digests, checks,
-and controlled-bootstrap boundary.
+Issue #24 plan PR
+[#25](https://github.com/webmaxru/northstar-orders-api-demo/pull/25) is
+approved at head `ad4da17e679ba66d28025354021df9cc5ab18158` (review
+`5400367350`), bound to contract `8763c017…` and parent base `2ce3cf8…`.
+Child PR #28 was merged into PR #18 at `2222e882…`; PR #18 itself remains
+open and unmerged. Protected Publish Evidence runs
+[`37133208919`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133208919)
+and
+[`37133310243`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133310243)
+on `main` at `b65c2de…` failed during artifact import because that deployed
+importer rejected `poutine-report.json`, `poutine.sarif`, and
+`zizmor-comparison.json`; the audit did not run.
+
+The importer and path-safety helper at the reviewed PR #18 merge commit have
+the same Git blobs as the candidate used in a local replay of all 22 files
+from source run `37133142406`; the replay accepted the Poutine and Zizmor
+artifacts. This proves the candidate import behavior only. It does not prove
+that the protected App audit or trusted status publication succeeded. The
+ruleset remains active and strict with an empty bypass list, and its original
+`repository-controls` (integration `15368`) and `trusted-acceptance`
+(integration `5075466`) requirements remain intact. No settings change,
+parent merge, or hosted acceptance is claimed. See
+[`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the full preflight
+evidence and remaining human gate.
 
 Issue #16 plan PR #26 is approved at head
 `42721d4ee34a55cb031567d3942dd037e5bbe513` (review `5362561711`), bound to
