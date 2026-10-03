@@ -1,5 +1,6 @@
 {
   "schema": "northstar/governance-policy/1",
+  "$comment": "CUSTOMIZE repository paths, human owners, enabled optional capabilities, and reviewed check commands together. Do not customize away independent approval, provenance checks, or fail-closed behavior.",
   "principle": "agents propose; humans and policy accept",
   "riskLevels": [
     "low",
@@ -175,6 +176,20 @@
       "critical"
     ]
   },
+  "planApproval": {
+    "$comment": "CUSTOMIZE reviewers to eligible human repository owners. Preserve author exclusion and live permission checks. legacyPlans is a pinned migration exception, not a reusable adoption setting; remove these Northstar-specific entries in another repository.",
+    "reviewers": ["webmaxru", "vibeprogrammer"],
+    "legacyPlans": [
+      {
+        "repository": "webmaxru/northstar-orders-api-demo",
+        "pr": 15,
+        "headSha": "c6f5958a5117443ffaf1065bff7f0104a1ca8382",
+        "baseSha": "b65c2de5c8224342c72c37eeed7ef9f965ad8a2c",
+        "contractDigest": "a611cd038b1ea29e17790f2911612e3e0a86ad2b455061292bdb38694f620f6a",
+        "planDigest": "e5ce0f4cb9923daa93a00e17c2ef286cc3b0ef32a8b12de51221b515d7424c4c"
+      }
+    ]
+  },
   "requiredStatusChecks": [
     "plan-contract",
     "scope-policy",
@@ -188,6 +203,11 @@
     "trusted-acceptance"
   ],
   "evidenceRetentionDays": 90,
+  "optionalCapabilities": {
+    "$comment": "CUSTOMIZE by disabling and removing an unused optional integration together; omission preserves enabled reference behavior.",
+    "mcp": true,
+    "continuousAI": true
+  },
   "reviewCadence": {
     "failedRunsAndPolicyViolations": "weekly",
     "workflowPermissionsAndSecretScopes": "monthly",

@@ -3,10 +3,10 @@ export type PermissionDecision = "allow" | "deny" | "ask";
 export interface ToolCall {
   /** GitHub cloud agent and Copilot CLI. */
   toolName?: string;
-  toolArgs?: Record<string, unknown>;
+  toolArgs?: Record<string, unknown> | string;
   /** VS Code. */
   tool_name?: string;
-  tool_input?: Record<string, unknown>;
+  tool_input?: Record<string, unknown> | string;
   tool_use_id?: string;
 }
 
@@ -18,10 +18,18 @@ export interface TaskScope {
 export interface AuthorizationContext {
   scope?: TaskScope;
   taskId?: string;
+  issue?: number;
+  sessionId?: string;
+  workspaceOwnerMatches?: boolean;
   trustedContract?: boolean;
   approvedPlan?: boolean;
   branchAuthorized?: boolean;
   planScope?: TaskScope;
+  repoRoot?: string;
+  role?: "plan" | "implement" | null;
+  validPlan?: boolean;
+  requirePlanApproval?: boolean;
+  canPropose?: boolean;
 }
 
 export interface AuthorizationDecision {
@@ -30,6 +38,7 @@ export interface AuthorizationDecision {
 }
 
 export declare const WRITABLE_PATH_PREFIXES: readonly string[];
+export declare function normalizeEditPath(filePath: string, repoRoot?: string): string;
 
 export declare function evaluateToolCall(
   call: ToolCall,

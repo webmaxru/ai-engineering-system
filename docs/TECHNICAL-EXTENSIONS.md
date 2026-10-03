@@ -38,7 +38,7 @@ architecture-review responsibility.
 | EXT-001 | Versioned contracts and digest binding | Canonical control plane | Active |
 | EXT-002 | Deterministic risk floors | Canonical control plane | Active |
 | EXT-003 | Plan publication and branch topology | Reference policy | Active |
-| EXT-004 | Exact pre-tool authorization | Reference enforcement | Active |
+| EXT-004 | Bounded task resolution and exact pre-tool authorization | Reference enforcement | Active |
 | EXT-005 | Payload-minimized local audit | Reference observability | Active |
 | EXT-006 | Evidence envelopes and readiness decisions | Canonical evidence model | Active |
 | EXT-007 | Trusted publication and validation-authority maintenance | Hosted trust boundary | Active |
@@ -96,8 +96,10 @@ between those artifacts.
 
 **Implementation.** Northstar uses versioned JSON records such as
 `northstar/plan/1`, `northstar/check-evidence/1`, and
-`northstar/execution-report/3`. SHA-256 digests bind the live issue body, plan,
-base commit, approval, evidence, and maintenance manifest.
+`northstar/execution-report/3` on the locked baseline. Candidate PR #18 adds
+`northstar/execution-report/4` for explicitly staged criteria.
+SHA-256 digests bind the live issue body, plan, base commit, approval, evidence,
+and maintenance manifest.
 
 **Compatibility.** This makes the guide's traceability and source-of-truth
 requirements machine-verifiable. It does not replace the issue, pull request,
@@ -154,6 +156,12 @@ request and a separate `agent/implement/<task-id>` branch created from the
 approved base SHA. Lower-risk work may use the guide's plan + execution
 mode when policy allows it.
 
+For the Issue #14 AC15 browser canary, the candidate adds a separate
+`plan/<task-id>-canary` branch and a file-backed plan artifact. The distinct
+branch keeps the still-open zero-file bootstrap plan from being mistaken for
+the canary; the canary plan must carry a validated `canaryFor` binding and a
+current independent native review.
+
 **Compatibility target.** Both guide-defined workflow modes must remain available;
 the current all-risk authorizer requirement does not prove the lower-risk mode.
 Separating publication from planning preserves the required read-only planning
@@ -161,7 +169,10 @@ boundary.
 
 **Trust and operational effects.** Approval binds to a plan-only commit and
 cannot be reused after the plan or base changes. Exact branch names are a
-Northstar convention, not a universal guide requirement.
+Northstar convention, not a universal guide requirement. The canary suffix is
+not a second implementation branch or a substitute for its approved base; the
+trusted verifier re-reads the explicit canary PR, artifact blob and reviewer
+before it can resolve AC15.
 
 **Rollback.** Close the implementation pull request, return to the approved
 base, and republish a new plan when scope or assumptions change.
@@ -169,35 +180,130 @@ base, and republish a new plan when scope or assumptions change.
 **Northstar evidence.** `.github/agents/plan.agent.md`,
 `.github/agents/implement.agent.md`, `scripts/plan-stop.mjs`,
 `scripts/publish-plan.mjs`, `scripts/plan-approval.mjs`, and
-`.github/workflows/plan-gate.yml`.
+`.github/workflows/plan-gate.yml`. Candidate
+[PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) at
+`2ce3cf8a69439c22246de7d5449ce186e23bd584` adds and locally tests the
+`plan/<task-id>-canary` path; the candidate is not merged or accepted.
 
-## EXT-004 - Exact pre-tool authorization
+## EXT-004 - Bounded task resolution and exact pre-tool authorization
 
 **Guide gap.** The guide requires hooks, tool allow lists, capability limits,
 path scope, and least privilege. It leaves repository-specific command grammar,
-tool payload parsing, base ancestry checks, and precedence rules unspecified.
+tool payload parsing, base ancestry checks, precedence rules, and the time
+budget for live task and plan resolution unspecified. It also does not
+prescribe a selector syntax or binding procedure for resolving an existing
+implementation PR to its live task, plan, base, and execution context. The
+guide's branch isolation and role boundaries (Unit 2, lines 2296-2326; Unit 4,
+lines 2504-2593; Unit 5, lines 2015-2021) do not define this repository-local
+lookup protocol.
 
-**Implementation.** Northstar's native `PreToolUse` hook resolves a trusted
-live task contract and approved plan, denies shell metacharacters and
-non-allowlisted command shapes, extracts paths from supported tool payloads,
-checks issue and plan scope, verifies the implementation branch and approved
-base ancestry, and categorically denies privileged operations.
+**Implementation.** Northstar's native `SessionStart` and `UserPromptSubmit`
+hooks resolve the live task contract and approved plan before the
+`PreToolUse` hook authorizes an action. The measured live resolver path took
+55.076 seconds, longer than the previous 20-second startup budget. Candidate
+PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) at
+`bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` raises only those two resolution
+budgets to 90 seconds; the fast `PreToolUse` authorization remains 10 seconds.
+If resolution fails, the authorizer denies writes when it runs to completion
+without complete task and plan identity. Command-hook timeouts are fail-open,
+including `PreToolUse`, so no universal denial is claimed if the authorization
+hook itself times out. An interrupted workspace lock can be reclaimed only by
+its matching owner after the resolver process exits.
 
-**Compatibility.** This is a concrete, stricter implementation of the guide's
-pre-action and least-privilege controls. It remains defense in depth; complete
-diff checks, GitHub policy, and human acceptance are still required.
+Candidate commit `b05b481525053fdc82b35b113824cec4bcc98bc6` adds the explicit
+`Task PR: #<number>` implementation selector. It resolves only an open,
+same-repository PR linked to one task issue, then binds the selected plan's
+base and the local worktree or Cloud execution context to the live PR branch
+and head. The exact `npm run plan:approved` refresh is permitted only for a
+trusted, owner-bound high-risk implementation session with a valid plan; the
+command still re-fetches the independent plan-only approval.
+
+**Compatibility.** The bounded lookup adds time to resolve authority; it does
+not grant additional tools, widen task scope, or relax approval, exact PR,
+branch/head/base, diff, GitHub policy, or human-acceptance requirements. The
+PR selector is an explicit lookup into GitHub's system of record, not an
+inference from a branch name or cached task. PR author class and branch naming
+conventions are not authority: the live same-repository PR, linked issue,
+task-bound plan, exact base/head, and ancestry establish the binding. The
+setting uses the documented
+`timeout` alias for `timeoutSec`; GitHub's hook reference does not specify a
+maximum. This is a concrete implementation of the guide's independent
+pre-action and least-privilege controls, not a substitute for them.
 
 **Trust and operational effects.** Unknown commands and unknown tool payload
-shapes fail closed. Hook timeout behavior supplied by the host remains a
-documented platform limitation and is not represented as complete mediation.
+shapes fail closed when the authorization command completes. Copilot command
+hook timeouts are fail-open, including `PreToolUse`; a longer startup budget
+does not change that platform behavior. Copilot CLI 1.0.90-2 completed two
+simultaneous read-only task-resolution sessions with the 90-second setting,
+but this does not prove VS Code parity. GitHub reads use the existing
+read-scoped API helper; missing identity, stale branch/head/base, or unavailable
+GitHub data stops resolution. Two pre-fix Cloud canaries stopped without an
+active task contract. A post-fix Cloud run completed its Actions wrapper, but
+the task's artifact-view calls failed and no task-binding result was inspectable;
+Cloud execution therefore remains unverified. This setting is not represented
+as complete mediation.
 
 **Rollback.** Revert policy and authorizer changes together. A failing
 authorizer must be repaired through the approved control-plane maintenance
 path, not bypassed by renaming or disabling hooks.
 
 **Northstar evidence.** `.github/hooks/agent-boundary.json`,
-`scripts/authorize-tool.mjs`, `scripts/check-scope.mjs`, and
-`tests/unit/tool-authorization.test.ts`.
+`scripts/authorize-tool.mjs`, `scripts/check-scope.mjs`,
+`tests/unit/resolve-task.test.ts`, `tests/unit/combined-session.test.ts`,
+`tests/unit/tool-authorization.test.ts`, and
+[`COPILOT-SURFACES.md`](COPILOT-SURFACES.md). Candidate commit
+`f1c40a961451d29fed04ac37ad01eb63ddec076d` is published to draft PR #27 on
+base `2ce3cf8a69439c22246de7d5449ce186e23bd584`; plan PR #26 remains approved
+at `42721d4ee34a55cb031567d3942dd037e5bbe513` by review `5362561711`.
+
+The candidate contains two related corrections. Commit `92a8af6` removes the
+extra `pull.user.type === "Bot"` and `copilot/`-branch-prefix predicates while
+retaining exact same-repository PR, linked issue, plan, base, branch, head, and
+approved-base ancestry checks. Commit `f1c40a9` centralizes session identity
+resolution across SessionStart, UserPromptSubmit, PreToolUse, audit, Stop, and
+CLI entry points: it prefers explicit event/CLI identity, then Copilot host
+session variables, then the exact GitHub Actions repository/run/attempt tuple.
+Missing or malformed identity still fails closed; the Actions attempt
+distinguishes reruns.
+
+At `f1c40a9`, the full local suite passes 541 unit tests and PostgreSQL
+acceptance passes 10/10 using per-suite temporary schemas. Lint, typecheck,
+build, 79 governance checks, plan gate, and exact-base scope (75 paths, zero
+violations) pass. `npm audit` reports zero vulnerabilities; secret scanning
+passes 199 files; workflow compilation is clean and Poutine reports zero
+findings. Pinned Zizmor reports 83 unsuppressed findings and is the remaining
+local `validate:all` failure.
+
+A local Cloud-shaped hook simulation omitted session ID from the hook payload
+and supplied it only through the host environment. SessionStart resolved Issue
+#16, plan #26, PR #27, base/head and Cloud execution context; PreToolUse allowed
+the authorized plan-gate command, and `plan:gate` passed. This is local
+integration evidence, not a Cloud host canary.
+
+Hosted run
+[`36984950941`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36984950941)
+evaluates PR #27 at `f1c40a9`. `vibeprogrammer` approved this exact head and
+`human-review` now passes; plan-contract, plan-approval, scope, quality,
+acceptance, dependency review, CodeQL, secret-scan, merge-validation, and
+governance also pass. Repository-controls and evidence fail,
+`validation-authority` is missing, and the report is `review_required` with
+9/10 criteria proven. AC9 remains unproven and PR #27 remains draft.
+
+The hosted repository-controls job uses the pull-request `github.token` with
+`contents: read`, so ruleset/legacy-protection, App and secret-inventory
+lookups return HTTP 403 and are correctly recorded as unavailable. Separate
+read-only API checks verified the active main ruleset's strict PR/CODEOWNERS
+controls, empty bypass list, required status identities, and enabled secret
+scanning/push protection. No external setting or permission was changed.
+
+The latest actual Cloud canary,
+[`36930550238`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36930550238),
+ran on predecessor `92a8af6`, before the session-identity fallback. Its
+`npm run plan:gate -- --pr 27` tool call returned `bash success=false` without
+a command result or artifacts. No actual Cloud run has tested `f1c40a9`;
+after the repeated opaque failure, the bounded retry stopped. AC9 remains
+unproven, and these candidates do not change the locked baseline or establish
+conformance.
 
 ## EXT-005 - Payload-minimized local audit
 
@@ -237,13 +343,34 @@ stale, cross-run, or cross-commit evidence. `ready_for_review` means local
 proof is complete; `ready_for_acceptance` additionally requires current hosted
 review and policy evidence.
 
+The approved Issue #14 plan moves AC15 to a post-bootstrap,
+pre-final-acceptance stage. The report generator can return `ready_for_review`
+after local evidence and every non-deferred criterion pass; it still lists
+missing or failed hosted checks, leaves AC15 unverified, and cannot produce
+`ready_for_acceptance`. The protected system-maintenance gate accepts a staged
+report only when AC15 is the sole unproven criterion and
+`browser-plan-canary` is the sole missing hosted check; any other hosted
+failure blocks that stage. Even an accepted staged report publishes a failing,
+not successful, `trusted-acceptance` status. The trusted default-branch
+verifier binds a native APPROVED review of the exact canary plan artifact to
+the original issue digest, bootstrap plan/base and review, implementation
+PR/head, source/evidence runs, merge ancestry, and canary PR/head/blob before
+resolving AC15. The one-time Issue #24 integration is activation, not
+acceptance; only a fresh report with every criterion proven may publish
+trusted success.
+
 **Compatibility.** The extension prevents self-reported success from replacing
 the guide's system signals. Neither readiness state means that an agent
 approved its own work.
 
 **Trust and operational effects.** Producers and the fan-in consumer form part
 of validation authority. Hosted evidence must be re-resolved for the immutable
-head instead of copied from an earlier run.
+head instead of copied from an earlier run. A deferred criterion never counts
+as proven; only a protected, identity-bound browser-canary record can resolve
+it. The trusted publisher and maintenance workflow must understand the same
+stage contract. If any other criterion or hosted check is missing, failed, or
+unverified, the staged maintenance gate rejects the report. Until the canary
+and all other gates pass, final acceptance remains blocked.
 
 **Rollback.** Revert producer, schema, required-check policy, and fan-in
 changes together. Missing evidence remains a failure during rollback.
@@ -251,6 +378,27 @@ changes together. Missing evidence remains a failure during rollback.
 **Northstar evidence.** `scripts/evidence-record.mjs`,
 `scripts/build-execution-report.mjs`, `scripts/check-human-review.mjs`,
 `.github/workflows/governed-change.yml`, and the execution-report tests.
+Candidate [PR #18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18),
+head `2ce3cf8a69439c22246de7d5449ce186e23bd584`, passes `npm run validate`
+(489 unit tests), disposable PostgreSQL acceptance (9/9),
+`npm audit --audit-level=high` (zero vulnerabilities), and
+`npm run agentic:compile`. The approved Issue #14 plan is bound to contract
+`a611cd038b1ea29e17790f2911612e3e0a86ad2b455061292bdb38694f620f6a` and plan
+`e5ce0f4cb9923daa93a00e17c2ef286cc3b0ef32a8b12de51221b515d7424c4c`.
+Hosted [report run 36610256698](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36610256698)
+is `ready_for_review` with AC15 unverified and
+14/15 criteria proven; plan approval, validation-authority, repository-controls,
+human review, and the canary remain pending or failed hosted evidence. Native
+review `5356731352` approves the exact
+implementation head, but hosted `human-review` still fails because GitHub
+reports `reviewDecision` as not `APPROVED`; repository-controls is unavailable
+with HTTP 403 and trusted-acceptance remains failure. The
+[review-event report run 36612195971](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612195971)
+is `review_required`; the
+[trusted-acceptance run 36612770691](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36612770691)
+failed. Local Zizmor also remains blocked with 85 findings. No ruleset, App
+permission, or secret changed. The implementation candidate is not accepted
+and does not change the locked baseline.
 
 ## EXT-007 - Trusted publication and validation-authority maintenance
 
@@ -264,6 +412,27 @@ acceptance verdict for a validation-authority change. A default-branch
 changes additionally require an immutable maintenance manifest, a protected
 `system-maintenance` environment, and revalidation by default-branch code
 before the stable `trusted-acceptance` status is published.
+For the Issue #24 migration continuation, the resolver selects the unique
+maintenance artifact ID from the exact publisher run/attempt and publisher
+job, matching repository, head, and job-time window before download. The
+workflow uses `artifact-ids` rather than a name-only lookup, and revalidation
+requires the publisher attempt to complete successfully before status
+publication. The protected Publish Evidence `workflow_dispatch` selects
+`bootstrap-migration` only on its guarded default-branch/dispatcher path.
+System Maintenance defaults to `open-pr`; attempt inputs are optional for the
+existing browser-plan-canary dispatcher, and the resolver obtains current
+source/publisher attempts from GitHub, binds them to the resolved context, and
+rejects stale supplied attempts. The importer still applies its path allowlist
+and producer provenance checks.
+
+Candidate PR #18 adds a narrow staged maintenance decision for AC15: the
+protected maintenance run may record an environment-approved activation only
+when the report is `ready_for_review`, AC15 is the sole unproven criterion, and
+the browser-canary check is the sole missing hosted check. It still publishes
+a failing status in that stage. A separate trusted dispatch verifies the
+merged source PR, original base/head and merge ancestry plus a fresh native
+canary-plan review; success remains limited to a fully proven
+`ready_for_acceptance` report.
 
 **Compatibility.** This preserves the guide's independent human and platform
 acceptance boundary when the proposed change can alter its own checks.
@@ -271,7 +440,9 @@ acceptance boundary when the proposed change can alter its own checks.
 **Trust and operational effects.** The default branch, protected environment,
 reviewer, workflow definition, evidence allow list, and publisher identity are
 part of the trust root. The first installation requires one explicit audited
-bootstrap; it is not a reusable bypass.
+bootstrap; it is not a reusable bypass. The staged AC15 decision is not a
+success signal or merge waiver, and the explicit merged-PR path is usable only
+from protected code with exact source-run and merge identities.
 
 **Rollback.** Revert to the last trusted default-branch publisher and policy.
 Do not let pull-request code publish a substitute success status.
@@ -280,7 +451,28 @@ Do not let pull-request code publish a substitute success status.
 `scripts/import-evidence-artifacts.mjs`,
 `scripts/maintenance-manifest.mjs`,
 `.github/workflows/publish-evidence.yml`, and
-`.github/workflows/system-maintenance-approval.yml`.
+`.github/workflows/system-maintenance-approval.yml`. Parent PR #18 now includes
+child PR #28 at `2222e882b966588e39a63991ece3a00935898cfc` and remains open,
+unmerged, and unaccepted. Its exact-head review and hosted `human-review` pass;
+the report from run `37133142406` is `ready_for_review` with AC15 unverified
+(14/15 proven), while `repository-controls` fails and
+`trusted-acceptance` remains failure. The issue #24 plan PR #25 is approved
+at `ad4da17e679ba66d28025354021df9cc5ab18158` (review `5400367350`), bound to
+contract `8763c017…` and parent base `2ce3cf8…`.
+
+Protected Publish Evidence runs
+[`37133208919`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133208919)
+and
+[`37133310243`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133310243)
+on `main` at `b65c2de…` failed before the controls audit because the old
+importer rejected `poutine-report.json`, `poutine.sarif`, and
+`zizmor-comparison.json`. A local replay using the importer and path-safety
+helper whose blobs match the reviewed PR #18 merge commit accepted all 22
+files from source run `37133142406`. This proves importer behavior only, not
+the protected App audit or trusted status publication. Ruleset `23998987`
+remains active and strict with no bypass actors; the original
+`repository-controls` integration `15368` and `trusted-acceptance` App
+`5075466` are unchanged. No ruleset change or hosted acceptance is claimed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 

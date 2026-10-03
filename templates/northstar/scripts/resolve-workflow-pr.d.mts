@@ -4,4 +4,5 @@ export declare function selectWorkflowPullRequest(input: {
   repository: string;
   defaultBranch: string;
   expectedNumber?: number | string;
+  allowMerged?: boolean;
 }): Record<string, unknown>;

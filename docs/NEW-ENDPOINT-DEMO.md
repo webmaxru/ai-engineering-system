@@ -23,10 +23,14 @@ has a draft implementation in PR
 machine plan digest is
 `11bfe6ae20df762202c9e0554fc62b257371f139ca380dec2a2ac8aeea5ffcaf`. Both bind the implementation to
 `agent/implement/aes-surface-evidence` at
-`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. PR #19 remains draft.
-Parent PR #18 was closed by the owner on 2026-09-28 as system-maintenance
-scope cleanup; it remains unmerged and unaccepted. This closure did not change
-PR #19's bound base or clear its hosted blockers.
+`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. PR #19 remains draft on that
+older base; parent PR #18 has since advanced to
+`2222e882b966588e39a63991ece3a00935898cfc` after child PR #28 was merged into
+it. PR #18 remains open and unmerged. Its exact-head review and hosted
+`human-review` pass, while `repository-controls` and `trusted-acceptance`
+remain failed. PR #19 has not been refreshed to the current parent head and
+is not a current-base or cross-surface demonstration; any rebase must follow
+its own task/plan validation and the approved parent integration path.
 
 On the rebased source tree, `npm run validate` passed 470 unit tests and 79
 offline governance checks; `npm run test:acceptance` passed 12/12 with
@@ -37,8 +41,9 @@ zero findings, and no suppressions were added. Hosted Plan Gate, scope,
 acceptance, quality, dependency review, secret scan, CodeQL, and evidence pass
 on the refreshed head. `vibeprogrammer` approved this exact implementation
 head and the hosted `human-review` check passes; `repository-controls` still
-fails. No current VS Code or Copilot cloud run has been completed. Do not
-present this draft as an accepted or cross-surface demo.
+fails. No successful VS Code or issue #17 cloud run has been completed; the
+separate issue #16 GitHub.com canary returned `CANARY-FAIL`. Do not present
+this draft as an accepted or cross-surface demo.
 
 ## Issue #17 task contract summary
 

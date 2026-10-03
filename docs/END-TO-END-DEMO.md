@@ -40,15 +40,29 @@ token in a demo command, transcript, issue, or artifact.
 
 **Safe format now:** show the contract and the cloud planner's correct stop,
 then label the local application rehearsal as a separate proof.
-**Full cloud demo status:** the owner closed the former controller-repair
-issue [webmaxru/northstar-orders-api-demo#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14)
-and PR #18 on 2026-09-28 to retain demo-only open work. They remain unmerged
-and unaccepted; the closure is not a repair or acceptance decision. The
-WI-1842 cloud demonstration therefore remains blocked. Fixture output cannot
-substitute for a successful immutable-head cloud session and trusted
-acceptance.
+**Full cloud demo status:** controller-repair issue
+[webmaxru/northstar-orders-api-demo#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14)
+and PR #18 were reopened on 2026-09-28 to resume conformance remediation.
+They remain unmerged and unaccepted; reopening is not a repair or acceptance
+decision. An earlier issue #16 GitHub.com canary returned `CANARY-FAIL`
+because the active task contract/session identity was unavailable and the
+workspace branch did not match the approved implementation. The latest
+attempt used `/plan 16`, the custom `plan` agent, and base
+`agent/implement/aes-surface-evidence` at
+`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. After the issue body was
+supplied, it produced a chat-only `Plan ready for review` proposal, but its
+`contractDigest` remains an unresolved sentinel because no task-contract
+artifact was resolved and the planner had no shell. A separate local
+`npm run contract:fetch -- --issue 16` in a detached worktree at the same base
+resolved the live issue as trusted with body digest `2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`;
+this matches approved plan PR #26 but does not repair the cloud session. The
+branch remains at the base; no commit, source change, or PR resulted. The
+WI-1842 cloud demonstration remains blocked until cloud task authority and a
+digest-bound, publishable plan are established. The run reported no permission
+denial; fixture output cannot substitute for a successful immutable-head cloud
+session and trusted acceptance.
 
-## Current follow-up state (2026-09-28)
+## Current follow-up state (2026-10-02)
 
 The historical run above remains a demonstration of a **correct stop**, not a
 completed WI-1842 delivery. Later maintenance candidates and their subsequent
@@ -56,20 +70,92 @@ scope closures have not changed that conclusion:
 
 | Evidence | Current state |
 | --- | --- |
-| Former controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f` was independently reviewed and passed hosted acceptance tests, but hosted `evidence` and `repository-controls` failed. The owner closed it as scope cleanup; it is unmerged and unaccepted. |
-| Former local isolation candidate | PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) passed local `validate` (500 unit tests), PostgreSQL acceptance (10/10), scope and merge checks against PR #18's head. It was closed by owner scope direction; full `validate:all` exits 1 on 84 Zizmor findings and hosted evidence/repository-controls failed. |
-| Historical local CLI canaries | Two read-only canaries for now-closed issue #16 matched task/contract/plan/base/session/owner identities. They are not an implementation or acceptance run for WI-1842. |
+| Controller repair | PR [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18) is open at `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local validation passes 489 unit tests and isolated PostgreSQL acceptance 9/9. Native review `5356731352` is approved, but the hosted `human-review` check still fails because GitHub reports `reviewDecision` as not `APPROVED`; repository-controls metadata is unavailable with HTTP 403. Report `36610256698` is `ready_for_review` with 14/15 criteria proven and AC15 unverified; trusted-acceptance remains failure. No ruleset setting changed and PR #18 remains unmerged/unaccepted. |
+| Local isolation candidate | PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) is at `f1c40a961451d29fed04ac37ad01eb63ddec076d` on approved parent base `2ce3cf8…`; plan PR #26 is approved (review `5362561711`). Local `validate` passes 541 unit tests and 79 governance checks, PostgreSQL acceptance passes 10/10, and the plan gate passes. Two simultaneous read-only CLI sessions independently resolved the task and plan in separate worktrees at predecessor `bb767fc…`. |
+| Hosted PR #27 evaluation | `vibeprogrammer` approved exact head `f1c40a9…`. Run `36984950941` passes current-head `human-review`, plan, scope, quality, acceptance, CodeQL, dependency, secret, merge, and governance checks. `repository-controls` and `evidence` fail; `validation-authority` is missing and AC9 remains unproven (9/10 criteria proven). The report is `review_required`. |
+| Trusted-acceptance bootstrap | PR #25's refreshed Issue #24 plan is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66` (review `5357419226`). Child PR [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28) is at `cb507e20cd0cb8fdeabfedaece67510a651757b0` on parent base `2ce3cf8…`, with exact-head approval `5391273930`; local `validate` passes 527 unit/79 governance checks, PostgreSQL acceptance 9/9, and the secret scan/workflow compiler pass. Governed Change run `37001565136` passes current-head `human-review` but fails dependency-review, repository-controls, and evidence. |
+| Current local CLI canaries | Two simultaneous read-only sessions for issue #16 matched task/contract/approved-plan/base/session/owner identities on PR #27 predecessor `bb767fc…`. They are not an implementation or acceptance run for WI-1842. |
 | Historical GitHub.com cloud attempt | PR [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) was closed after using the default `main` base and producing zero changed files. It does not prove cloud isolation. |
+| Current GitHub.com cloud canaries | Read-only sessions `26c6b1b9-9f6f-43f7-81bc-e457b915b440` (Issue #16, PR #30) and `12ec3302-9b64-473f-9339-1a9b844637ef` (attempted Issue #24, PR #32) both stopped because `artifacts/task-contract.json` was absent. PR #30 and the invalid Issue #24 attempt used PR #27 predecessor `bb767fc…`; neither changed source files. |
 | VS Code | No Local or Copilot Agent Host canary was completed. |
 
-The GitHub.com Agents page returned “Unable to load tasks” with a
-stale-cache/account-switch warning during the current follow-up. Do not use
-that page state as task evidence. No successful cloud plan → act → evaluate
-sequence or `ready_for_acceptance` decision has been recorded.
+These current cloud runs reinforce that task-contract bootstrap is still
+blocked; the missing artifact is not a permission denial. They do not validate
+WI-1842 or an Issue #16 cloud implementation. An earlier GitHub.com Agents UI
+run proves that the custom agent and base-branch selectors could be set correctly,
+but task-contract bootstrap still did not resolve issue #16. Its chat-only
+plan is not a publishable or approved plan until the canonical contract digest
+is bound. The proposal's assertion that PR #26 approval is stale also
+conflicts with the current approved PR #26 plan on the same contract digest
+and base; do not decide that conflict in the runbook. Do not use the proposal
+for implementation or the earlier session on `main` as task evidence. No
+successful cloud plan → act → evaluate sequence or `ready_for_acceptance`
+decision has been recorded.
 
 The currently open demo tasks are WI-1842 (#4) and WI-1843 (#17); PR #19 is
-the draft WI-1843 candidate. Closed maintenance work is not active authority
-for either demo and its closure does not repair the framework baseline.
+the draft WI-1843 candidate. Maintenance work is reopened for conformance
+remediation; its status does not make the demo candidates accepted or repair
+the framework baseline.
+
+## Latest maintenance and Cloud status (2026-10-02)
+
+Northstar PR [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27)
+is still draft at `f1c40a961451d29fed04ac37ad01eb63ddec076d` on parent base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584`. Local `npm run validate` passes
+79 governance checks, lint, typecheck, build, and 541 unit tests; PostgreSQL
+acceptance passes 10/10, audit reports zero vulnerabilities, and secret
+scanning passes. `npm run validate:all` reaches Zizmor and fails on 83
+unsuppressed findings.
+
+Hosted run `36984950941` passes current-head human-review, plan-contract,
+plan-approval, scope, quality, acceptance, dependency-review, CodeQL,
+secret-scan, merge-validation, and governance; repository-controls and
+evidence fail. The report is `review_required` with 9/10 criteria proven,
+`validation-authority` absent, and AC9 unproven. There is no hosted
+`ready_for_acceptance`.
+
+The pull-request repository-controls job uses `github.token` with
+`contents: read`; GitHub returns HTTP 403 for ruleset, legacy-protection,
+App, and secret-inventory lookups. Separate read-only GitHub API calls verified
+the active `main` ruleset has no bypass actors, requires PR/CODEOWNERS review
+and strict checks, binds `repository-controls` to Actions integration `15368`
+and `trusted-acceptance` to GitHub App integration `5075466`, and has secret
+scanning and push protection enabled. The check still fails closed because
+the PR token cannot verify all metadata. No settings changed.
+
+The published candidate now resolves session identity from the hook payload,
+Copilot session environment, or—when Copilot session variables are unavailable—
+the exact GitHub Actions repository/run/attempt. A local Cloud-shaped
+SessionStart → PreToolUse simulation with no session ID in the event payload
+binds Issue #16, plan #26, PR #27, base/head, and the environment session; the
+plan gate passes. This is not a real Cloud host run.
+
+Issue #24 PR #28 is at `cb507e2` on the same parent base, with exact-head
+approval from `vibeprogrammer`. Its protected Publish Evidence dispatch
+selects migration mode only on the guarded default branch; System Maintenance
+resolves omitted run attempts from GitHub so the browser-plan-canary route
+remains usable while stale supplied attempts fail. The local focused tests,
+`validate`, PostgreSQL acceptance, secret scan, and workflow compilation pass.
+Governed Change run `37001565136` passes current-head review but still reports
+`review_required` because dependency-review, repository-controls, and evidence
+fail. Trusted Publish Evidence run `37001721147` ran the old protected
+default-branch resolver at `b65c2de` and could not find the stacked PR #28
+targeting the parent branch; PR #28 contains the resolver fix but is not yet
+integrated into trusted code. Issue #24 prohibits dependency-manifest edits,
+and PR #28 remains draft/unaccepted.
+
+Cloud runs `36900971355` and `36901509449` on `a5c64fc` did not establish
+task binding: the first only fetched the contract; the second returned
+`bash success=false` on the plan gate without output. The post-fix canary
+`36930550238` on predecessor `92a8af6` again returned `success=false` for the
+plan-gate tool and published no artifacts. No Cloud run has tested the newer
+session-identity fallback. Do not present these as successful execution:
+there is still no WI-1842 Cloud **plan → act → evaluate** sequence or hosted
+`ready_for_acceptance`.
+
+Show the local application/fixture rehearsal separately from the Cloud
+bootstrap stops. PR #27 remains draft and unaccepted; the local candidate does
+not establish a fixed or accepted Cloud demo.
 
 ## 1. Reproduce the local fixture rehearsal
 

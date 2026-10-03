@@ -2,6 +2,7 @@ name: Governance Review
 
 on:
   schedule:
+    # CUSTOMIZE the review cadence to the repository's operating schedule.
     - cron: "17 7 * * 1"
   workflow_dispatch:
 
@@ -22,7 +23,16 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run governance:online
+      - name: Audit visible controls and report unavailable administration APIs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # CUSTOMIZE these repository variables for separately approved App identities.
+          # Identity metadata does not grant administration or secret-inventory access.
+          NORTHSTAR_TRUSTED_PUBLISHER_APP_LOGIN: ${{ vars.TRUSTED_PUBLISHER_APP_LOGIN }}
+          NORTHSTAR_TRUSTED_PUBLISHER_APP_ID: ${{ vars.TRUSTED_PUBLISHER_APP_ID }}
+          NORTHSTAR_DISPATCH_APP_LOGIN: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_LOGIN }}
+          NORTHSTAR_DISPATCH_APP_ID: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_ID }}
+        run: npm run governance:online
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -8,8 +8,13 @@ import {
   splitProhibitions,
 } from "./task-contract.mjs";
 import { inferRisk, riskRank } from "./risk-policy.mjs";
+import { validateCloudExecution } from "./execution-context.mjs";
+import { canonicalPlan, extractPlanContract, validatePlanContract } from "./plan-contract.mjs";
+import { readPlanArtifact, validatePlanOnlyFiles } from "./plan-artifact.mjs";
+import { planBranch } from "./publish-plan.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
+const SHA = /^[0-9a-f]{40}$/;
 
 function normalize(path) {
   return String(path).replace(/\\/g, "/").replace(/^\.\//, "");
@@ -61,6 +66,10 @@ export function parseNameStatus(raw) {
   return paths;
 }
 
+export function isPlanOnlyBranch(taskId, headBranch, plan) {
+  return headBranch === planBranch(taskId, Boolean(plan?.canaryFor));
+}
+
 export function evaluateExecutionContext({
   taskId,
   plan,
@@ -68,11 +77,12 @@ export function evaluateExecutionContext({
   baseBranch,
   baseSha,
   descendsFromApprovedBase,
+  cloudAuthorized = false,
 }) {
   const expectedHeadBranch =
     `agent/implement/${String(taskId).toLowerCase()}`;
   const violations = [
-    ...(headBranch === expectedHeadBranch
+    ...(headBranch === expectedHeadBranch || cloudAuthorized
       ? []
       : [`head branch ${headBranch || "<detached>"} is not ${expectedHeadBranch}`]),
     ...(baseBranch === plan.baseBranch
@@ -135,6 +145,8 @@ function main() {
   let baseBranch;
   let headBranch;
   let descendsFromApprovedBase = true;
+  let cloudAuthorized = false;
+  let planOnly = false;
   if (pr) {
     const expectedHead = valueOf("--expected-head");
     const pull = JSON.parse(
@@ -178,15 +190,51 @@ function main() {
     descendsFromApprovedBase =
       comparison.merge_base_commit?.sha === plan.baseSha &&
       ["ahead", "identical"].includes(comparison.status);
+    const cloudPull = JSON.parse(gh(["api", `repos/{owner}/{repo}/pulls/${pr}`]));
+    const repository = JSON.parse(gh(["api", "repos/{owner}/{repo}"])).full_name;
+    const mergedPull = cloudPull.state === "closed" && cloudPull.merged === true &&
+      typeof cloudPull.merged_at === "string" && SHA.test(cloudPull.merge_commit_sha ?? "");
+    const allowMerged = process.argv.includes("--allow-merged");
+    if (cloudPull.state !== "open" && !(allowMerged && mergedPull)) {
+      throw new Error("Scope validation requires an open PR or an explicitly allowed merged source PR.");
+    }
+    if (cloudPull.head?.repo?.full_name !== repository ||
+        cloudPull.base?.repo?.full_name !== repository ||
+        cloudPull.base?.ref !== plan.baseBranch) {
+      throw new Error("Scope validation requires the exact same-repository task and base branch.");
+    }
+    cloudAuthorized = validateCloudExecution({
+      pull: cloudPull, repository, contract, plan, branch: headBranch, headSha,
+      descendsFromApprovedBase,
+    });
+    if (cloudPull.head.sha !== headSha || cloudPull.base.sha !== baseSha) {
+      throw new Error("Pull request identity changed during scope evaluation.");
+    }
+    if (mergedPull && allowMerged) baseSha = plan.baseSha;
+    if (isPlanOnlyBranch(contract.id, headBranch, plan)) {
+      const artifact = readPlanArtifact(headSha, contract.id, { run: gh });
+      const committed = extractPlanContract(artifact.body);
+      const validation = validatePlanContract(committed, contract);
+      const shape = validatePlanOnlyFiles({ taskId: contract.id, files, entry: artifact.entry });
+      planOnly = validation.ok && shape.ok && baseSha === plan.baseSha &&
+        committed && canonicalPlan(committed) === canonicalPlan(plan) && descendsFromApprovedBase;
+      if (!planOnly) throw new Error("The plan-only PR does not contain exactly its validated task plan artifact.");
+    }
     paths = files.flatMap((file) =>
       [file.previous_filename, file.filename].filter(Boolean),
     );
-    const current = JSON.parse(
-      gh(["pr", "view", pr, "--json", "headRefOid"]),
-    );
-    if (expectedHead && current.headRefOid !== expectedHead) {
+    const current = JSON.parse(gh(["api", `repos/{owner}/{repo}/pulls/${pr}`]));
+    const currentIsMerged = current.state === "closed" && current.merged === true &&
+      typeof current.merged_at === "string" &&
+      current.merge_commit_sha === cloudPull.merge_commit_sha;
+    if ((current.state !== "open" && !(allowMerged && currentIsMerged)) ||
+        current.head?.sha !== cloudPull.head?.sha ||
+        current.base?.sha !== cloudPull.base?.sha ||
+        current.base?.ref !== cloudPull.base?.ref ||
+        current.body !== cloudPull.body ||
+        (expectedHead && current.head?.sha !== expectedHead)) {
       throw new Error(
-        `Pull request head changed during scope evaluation: expected ${expectedHead}, found ${current.headRefOid}.`,
+        `Pull request identity changed during scope evaluation: expected ${expectedHead}, found ${current.head?.sha}.`,
       );
     }
   } else {
@@ -207,13 +255,13 @@ function main() {
     } catch {
       descendsFromApprovedBase = false;
     }
-    const raw = git(["diff", "--name-status", "-M", `${baseSha}...${headSha}`]);
-    paths = parseNameStatus(raw);
+    const raw = git(["diff", "--name-status", "-M", `${baseSha}`]);
+    paths = [...parseNameStatus(raw), ...git(["ls-files", "--others", "--exclude-standard"]).split(/\r?\n/).filter(Boolean)];
   }
   const result = evaluateChangedPaths(
     paths,
-    contract.inputs.scope,
-    plan,
+    planOnly ? { allowed: [`docs/plans/${contract.id.toLowerCase()}.md`], prohibited: [] } : contract.inputs.scope,
+    planOnly ? null : plan,
   );
   const isolation = evaluateExecutionContext({
     taskId: contract.id,
@@ -222,6 +270,7 @@ function main() {
     baseBranch,
     baseSha,
     descendsFromApprovedBase,
+    cloudAuthorized: cloudAuthorized || planOnly,
   });
   const isolationViolations = isolation.violations;
   result.ok = result.ok && isolationViolations.length === 0;
@@ -236,6 +285,7 @@ function main() {
     expectedHeadBranch: isolation.expectedHeadBranch,
     isolationViolations,
     generatedAt: new Date().toISOString(),
+    planOnly,
     ...result,
   };
   const out = valueOf("--out") ?? "artifacts/scope-report.json";

@@ -1,6 +1,9 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  cacheContract,
   contractFromFile,
   matchesPattern,
   parseIssueBody,
@@ -8,6 +11,10 @@ import {
   taskScope,
 } from "../../scripts/task-contract.mjs";
 import { resolveIssueNumber } from "../../scripts/session-start.mjs";
+import {
+  claimWorkspaceOwner,
+  releaseWorkspaceClaim,
+} from "../../scripts/workspace-owner.mjs";
 
 const SEED = "tests/fixtures/WI-1842.issue.md";
 
@@ -39,6 +46,23 @@ describe("parsing a task contract out of an issue body", () => {
     expect(contract.source.issue).toBeNull();
     expect(contract.source.trusted).toBe(false);
     expect(contract.source.bodyDigest).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("prevents the contract cache from escaping its owning workspace", () => {
+    const root = mkdtempSync(join(tmpdir(), "northstar-contract-cache-"));
+    const owner = claimWorkspaceOwner({
+      root,
+      issue: null,
+      sessionId: "offline-demo",
+      env: { GITHUB_REPOSITORY: "fixture/northstar" },
+    });
+    try {
+      expect(() => cacheContract(contractFromFile(SEED), "../outside.json", owner))
+        .toThrow(/stay inside the repository/);
+    } finally {
+      releaseWorkspaceClaim(owner);
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("carries prohibited scope and stop conditions", () => {

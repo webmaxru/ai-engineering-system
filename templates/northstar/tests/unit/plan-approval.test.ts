@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   evaluateFinalApproval,
+  evaluateNativePlanApproval,
   evaluatePlanApproval,
   latestReviewsByUser,
   parseApprovalRecord,
   renderApprovalRecord,
-  type ApprovalRecord,
+  type LegacyApprovalRecord,
   type Review,
 } from "../../scripts/plan-approval.mjs";
 import { planDigest, type PlanContract } from "../../scripts/plan-contract.mjs";
@@ -56,7 +57,7 @@ const review: Review = {
   user: { login: "reviewer", type: "User" },
 };
 
-function record(overrides: Partial<ApprovalRecord> = {}): ApprovalRecord {
+function record(overrides: Partial<LegacyApprovalRecord> = {}): LegacyApprovalRecord {
   return {
     schema: "northstar/plan-approval/1",
     taskId: contract.id,
@@ -78,6 +79,72 @@ function record(overrides: Partial<ApprovalRecord> = {}): ApprovalRecord {
 describe("human plan approval", () => {
   it("round-trips a durable approval record", () => {
     expect(parseApprovalRecord(renderApprovalRecord(record()))).toEqual(record());
+  });
+
+  describe("native approval of an immutable plan artifact", () => {
+    const input = {
+      plan,
+      contract,
+      pr: {
+        number: 12, url: "https://github.com/example/reference/pull/12",
+        body: "", author: { login: "agent-author" }, isDraft: false,
+        headRefOid: "b".repeat(40), baseRefOid: "a".repeat(40),
+      },
+      reviews: [review],
+      files: [{ filename: "docs/plans/wi-1842.md", status: "added", sha: "c".repeat(40) }],
+      entry: { path: "wi-1842.md", type: "blob", mode: "100644", sha: "c".repeat(40) },
+      eligibleReviewers: ["reviewer"],
+      repository: "example/reference",
+    };
+
+    it("binds native review to the immutable plan and task", () => {
+      expect(evaluateNativePlanApproval(input)).toMatchObject({
+        ok: true,
+        record: {
+          schema: "northstar/plan-approval/2",
+          source: "github-review",
+          reviewId: review.id,
+          planDigest: planDigest(plan),
+          contractDigest: contract.source.bodyDigest,
+          artifactPath: "docs/plans/wi-1842.md",
+          artifactBlobSha: "c".repeat(40),
+          reviewedCommit: "b".repeat(40),
+        },
+      });
+    });
+
+    it("rejects changed task, plan base, head, and plan-only file set", () => {
+      expect(evaluateNativePlanApproval({
+        ...input, contract: { ...contract, source: { ...contract.source, bodyDigest: "0".repeat(64) } },
+      }).ok).toBe(false);
+      expect(evaluateNativePlanApproval({
+        ...input, pr: { ...input.pr, baseRefOid: "d".repeat(40) },
+      }).ok).toBe(false);
+      expect(evaluateNativePlanApproval({
+        ...input, pr: { ...input.pr, headRefOid: "d".repeat(40) },
+      }).ok).toBe(false);
+      expect(evaluateNativePlanApproval({
+        ...input, files: [...input.files, { filename: "src/server.ts", status: "modified", sha: "f".repeat(40) }],
+      }).ok).toBe(false);
+    });
+
+    it("does not turn comments, self-review, bot review, or dismissed review into approval", () => {
+      for (const invalidReview of [
+        { ...review, state: "COMMENTED" },
+        { ...review, state: "DISMISSED" },
+        { ...review, user: { login: "reviewer", type: "Bot" } },
+        { ...review, user: { login: "agent-author", type: "User" } },
+      ]) {
+        expect(evaluateNativePlanApproval({ ...input, reviews: [invalidReview] }).ok).toBe(false);
+      }
+      expect(evaluateNativePlanApproval({ ...input, eligibleReviewers: [] }).ok).toBe(false);
+      expect(evaluateNativePlanApproval({
+        ...input, pr: { ...input.pr, isDraft: true },
+      }).ok).toBe(false);
+      expect(evaluateNativePlanApproval({
+        ...input, reviews: [review, { ...review, id: 92, state: "CHANGES_REQUESTED", submitted_at: "2026-09-04T12:00:00Z" }],
+      }).ok).toBe(false);
+    });
   });
 
   it("accepts a human review bound to the plan-only commit and digests", () => {

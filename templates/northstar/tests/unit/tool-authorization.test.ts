@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { join, resolve } from "node:path";
 import {
   classifyTool,
   evaluateToolCall,
@@ -146,13 +147,19 @@ describe("stdin payloads survive shell noise", () => {
     }
   });
 
-  it("denies and reports what it received when there is no object at all", () => {
+  it("rejects multiple objects and arbitrary shell noise without retaining raw input", () => {
+    for (const raw of [`prefix ${call}`, `${call}\n${call}`, `${call}\nnot-a-continuation`, "null", "[]"]) {
+      expect(parsePayload(raw).ok).toBe(false);
+    }
+  });
+
+  it("denies malformed JSON without echoing the received payload", () => {
     const parsed = parsePayload("not json at all");
 
     expect(parsed.ok).toBe(false);
     if (!parsed.ok) {
       expect(parsed.decision.permissionDecision).toBe("deny");
-      expect(parsed.decision.permissionDecisionReason).toMatch(/not json at all/);
+      expect(parsed.decision.permissionDecisionReason).not.toContain("not json at all");
       expect(parsed.decision.permissionDecisionReason).toMatch(/line continuation/);
     }
   });
@@ -172,6 +179,28 @@ describe("stdin payloads survive shell noise", () => {
 });
 
 describe("works with both harness schemas", () => {
+  it("normalizes supported host edit paths without widening scope", () => {
+    const repoRoot = resolve(import.meta.dirname, "../..");
+    const scoped = { ...context, repoRoot };
+    const file = join(repoRoot, "src", "app.ts");
+    expect(evaluateToolCall({
+      tool_name: "Edit", tool_input: JSON.stringify({ file_path: file }),
+    }, scoped).permissionDecision).toBe("allow");
+    expect(evaluateToolCall({
+      tool_name: "Edit",
+      tool_input: `*** Begin Patch\n*** Update File: ${file}\n@@\n-old\n+new\n*** End Patch\n`,
+    }, scoped).permissionDecision).toBe("allow");
+    expect(evaluateToolCall({
+      tool_name: "Edit",
+      tool_input: `*** Begin Patch\n*** Update File: ${file}\n*** Move to: ${join(repoRoot, ".github", "workflows", "bad.yml")}\n@@\n-old\n+new\n*** End Patch\n`,
+    }, scoped).permissionDecision).toBe("deny");
+    expect(evaluateToolCall({
+      toolName: "edit", toolArgs: { path: join(repoRoot, "..", "outside.ts") },
+    }, scoped).permissionDecision).toBe("deny");
+    expect(evaluateToolCall({
+      toolName: "edit", toolArgs: { patch: "unrecognized patch" },
+    }, scoped).permissionDecision).toBe("deny");
+  });
   // GitHub cloud agent and Copilot CLI send toolName/toolArgs; VS Code sends
   // tool_name/tool_input with its own tool names. One policy has to read both.
   it("accepts the VS Code shape and tool names", () => {
@@ -216,6 +245,65 @@ describe("works with both harness schemas", () => {
     ).toMatchObject({ permissionDecision: "allow" });
   });
 
+  it("allows explicit worktree preparation only for the current owned task session", () => {
+    const sessionId = "session-16";
+    const workspaceContext = {
+      ...context,
+      issue: 16,
+      sessionId,
+      workspaceOwnerMatches: true,
+    };
+    const command =
+      "npm run workspace:prepare -- --issue 16 --path C:\\worktrees\\task-16 --session-id session-16";
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, workspaceContext))
+      .toMatchObject({ permissionDecision: "allow" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...workspaceContext, workspaceOwnerMatches: false,
+    })).toMatchObject({ permissionDecision: "deny" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...workspaceContext, sessionId: "another-session",
+    })).toMatchObject({ permissionDecision: "deny" });
+  });
+
+  it("allows workspace release only for the current approved owner", () => {
+    const workspaceContext = {
+      ...context,
+      issue: 16,
+      sessionId: "session-16",
+      workspaceOwnerMatches: true,
+    };
+    const command =
+      "npm run workspace:release -- --issue 16 --session-id session-16";
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, workspaceContext))
+      .toMatchObject({ permissionDecision: "allow" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...workspaceContext, workspaceOwnerMatches: false,
+    })).toMatchObject({ permissionDecision: "deny" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...workspaceContext, sessionId: "another-session",
+    })).toMatchObject({ permissionDecision: "deny" });
+  });
+
+  it("asks before clearing unowned task authority caches", () => {
+    const command =
+      "npm run workspace:release -- --issue 16 --session-id session-16 --clear-unowned";
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...context,
+      sessionId: "session-16",
+      workspaceOwnerMatches: false,
+    })).toMatchObject({ permissionDecision: "ask" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...context,
+      sessionId: "another-session",
+      workspaceOwnerMatches: false,
+    })).toMatchObject({ permissionDecision: "deny" });
+    expect(evaluateToolCall({ toolName: "bash", toolArgs: { command } }, {
+      ...context,
+      sessionId: "session-16",
+      workspaceOwnerMatches: true,
+    })).toMatchObject({ permissionDecision: "deny" });
+  });
+
   it("emits both the flat and the hookSpecificOutput shapes", () => {
     const rendered = renderDecision(
       evaluateToolCall({ toolName: "read", toolArgs: { path: "AGENTS.md" } }, context),
@@ -238,6 +326,19 @@ describe("works with both harness schemas", () => {
 });
 
 describe("capability boundary during normal work", () => {
+  it("requires plan approval for high risk but permits validated lower-risk execution", () => {
+    const call = { toolName: "edit", toolArgs: { path: "src/app.ts" } };
+    expect(evaluateToolCall(call, {
+      ...context, approvedPlan: false, validPlan: true, requirePlanApproval: false,
+    }).permissionDecision).toBe("allow");
+    expect(evaluateToolCall(call, {
+      ...context, approvedPlan: false, validPlan: true, requirePlanApproval: true,
+    }).permissionDecision).toBe("deny");
+    expect(evaluateToolCall(call, { ...context, role: "plan" }).permissionDecision).toBe("deny");
+    expect(evaluateToolCall({
+      toolName: "bash", toolArgs: { command: "npm run test:unit" },
+    }, { ...context, role: "plan" }).permissionDecision).toBe("deny");
+  });
   it("allows edits inside the contract's allowed scope", () => {
     for (const path of [
       "src/services/postgres-idempotent-order-service.ts",
@@ -270,9 +371,27 @@ describe("capability boundary during normal work", () => {
     expect(
       evaluateToolCall(
         { toolName: "bash", toolArgs: { command: "npm run contract:fetch -- --issue 4" } },
-        context,
+        { ...context, issue: 4, sessionId: "session-4" },
       ),
     ).toMatchObject({ permissionDecision: "allow" });
+    expect(
+      evaluateToolCall(
+        {
+          toolName: "bash",
+          toolArgs: { command: "npm run contract:fetch -- --issue 4 --session-id session-4" },
+        },
+        { ...context, issue: 4, sessionId: "session-4" },
+      ),
+    ).toMatchObject({ permissionDecision: "allow" });
+    expect(
+      evaluateToolCall(
+        {
+          toolName: "bash",
+          toolArgs: { command: "npm run contract:fetch -- --issue 4 --session-id other-session" },
+        },
+        { ...context, issue: 4, sessionId: "session-4" },
+      ),
+    ).toMatchObject({ permissionDecision: "deny" });
     expect(
       evaluateToolCall(
         {
@@ -448,12 +567,27 @@ describe("an ungoverned session is not judged against someone else's task", () =
     ).toMatchObject({ permissionDecision: "deny" });
   });
 
-  it("allows only read-only bootstrap commands before a contract resolves", () => {
+  it("allows task bootstrap only with a session identity before a contract resolves", () => {
+    const bootstrapContext = { issue: 4, sessionId: "session-4" };
     expect(
       evaluateToolCall({
         tool_name: "runInTerminal",
         tool_input: { command: "npm run contract:fetch -- --issue 4" },
       }),
+    ).toMatchObject({ permissionDecision: "deny" });
+    expect(
+      evaluateToolCall({
+        tool_name: "runInTerminal",
+        tool_input: { command: "npm run contract:fetch -- --issue 4" },
+      }, bootstrapContext),
+    ).toMatchObject({ permissionDecision: "allow" });
+    expect(
+      evaluateToolCall({
+        tool_name: "runInTerminal",
+        tool_input: {
+          command: "npm run contract:fetch -- --issue 4 --session-id session-4",
+        },
+      }, bootstrapContext),
     ).toMatchObject({ permissionDecision: "allow" });
     expect(
       evaluateToolCall({

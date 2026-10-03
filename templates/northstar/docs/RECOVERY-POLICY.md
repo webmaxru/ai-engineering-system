@@ -37,6 +37,26 @@ Automated repair stops when any condition is true:
 The escalation report must state what failed, what was attempted, the evidence
 that exists, and the available options or recommended next step.
 
+## Task and session isolation
+
+Stop retry state is keyed by repository, task ID, contract digest, plan digest,
+base SHA, and explicit session ID. A new task session cannot inherit another
+session's retry budget. The Stop gate also requires the cached task session to
+match the workspace owner before validation or evidence writes begin.
+
+The workspace resolver uses an atomic lock with owner key, process ID, host,
+start time, and token. Only the same owner on the same host may reclaim the
+lock, and only after the recorded process is no longer running. A malformed,
+foreign, or cross-host lock is preserved and escalated rather than reset.
+
+Task authority files left without an owner are not a migration source. Normal
+task startup preserves them and stops. After verifying that they are obsolete,
+a human may explicitly run
+`npm run workspace:release -- --issue <number> --session-id <current-session-id> --clear-unowned`.
+The pre-tool policy asks before this cleanup; it removes only the known task
+authority caches, never other evidence or arbitrary paths. Active owners
+require the ordinary owner-matched release command.
+
 ## Rollback
 
 - Keep unsafe work isolated on a branch.

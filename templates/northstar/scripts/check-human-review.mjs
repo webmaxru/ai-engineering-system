@@ -1,16 +1,13 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { approvalPolicyForRisk } from "./risk-policy.mjs";
 import { evaluateFinalApproval } from "./plan-approval.mjs";
+import { githubJson, githubPages, runGitHub } from "./github-api.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 
 function gh(args) {
-  return execFileSync("gh", args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  return runGitHub(args);
 }
 
 function valueOf(flag) {
@@ -37,9 +34,13 @@ if (expectedHead && pull.headRefOid !== expectedHead) {
   );
   process.exit(1);
 }
-const reviews = JSON.parse(
-  gh(["api", `repos/{owner}/{repo}/pulls/${pr}/reviews`]),
-);
+const allReviews = githubPages(`repos/{owner}/{repo}/pulls/${pr}/reviews?per_page=100`);
+const reviewers = [...new Set(allReviews.filter((review) => review.user?.type === "User").map((review) => review.user.login))];
+const eligible = new Set(reviewers.filter((login) => {
+  const permission = githubJson(`repos/{owner}/{repo}/collaborators/${encodeURIComponent(login)}/permission`);
+  return ["write", "maintain", "admin"].includes(permission.permission);
+}));
+const reviews = allReviews.filter((review) => eligible.has(review.user?.login));
 const policy = approvalPolicyForRisk(plan.risk);
 const result = evaluateFinalApproval({
   reviews,

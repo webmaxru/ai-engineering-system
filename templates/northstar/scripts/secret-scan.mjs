@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { lstatSync, readFileSync } from "node:fs";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
@@ -32,14 +32,35 @@ export function scanText(text, file = "<memory>") {
   return findings;
 }
 
-export function scanTrackedFiles(files) {
-  return files.flatMap((file) => {
+export function scanTrackedFiles(files, { root = REPO_ROOT, read = (file) => readFileSync(file, "utf8") } = {}) {
+  if (!Array.isArray(files) || files.length === 0) {
+    throw new Error("No source files were supplied; no secret scan was verified.");
+  }
+  const findings = [];
+  const errors = [];
+  for (const file of [...new Set(files)]) {
     try {
-      return scanText(readFileSync(resolve(REPO_ROOT, file), "utf8"), file);
-    } catch {
-      return [];
+      if (typeof file !== "string" || !file.trim()) throw new Error("Invalid source path.");
+      const absolute = resolve(root, file);
+      const path = relative(root, absolute);
+      if (!path || isAbsolute(path) || path === ".." || path.startsWith(`..${sep}`)) {
+        throw new Error("Source path is outside the repository.");
+      }
+      let cursor = resolve(root);
+      for (const part of path.split(sep)) {
+        cursor = join(cursor, part);
+        if (lstatSync(cursor).isSymbolicLink()) throw new Error("Symbolic links are not source scan inputs.");
+      }
+      if (!lstatSync(absolute).isFile()) throw new Error("Source path is not a regular file.");
+      findings.push(...scanText(read(absolute), file));
+    } catch (error) {
+      errors.push(new Error(`Secret scan could not read ${file} (${error.code ?? error.name}).`));
     }
-  });
+  }
+  if (errors.length > 0) {
+    throw new AggregateError(errors, `Secret scan incomplete: ${errors.length} unreadable or invalid input(s); ${findings.length} finding(s) in readable inputs.`);
+  }
+  return findings;
 }
 
 function main() {
@@ -69,5 +90,13 @@ const invokedDirectly =
   import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (invokedDirectly) {
-  main();
+  try {
+    main();
+  } catch (error) {
+    process.stderr.write(`Secret scan failed: ${error.message}\n`);
+    if (error instanceof AggregateError) {
+      for (const failure of error.errors) process.stderr.write(`${failure.message}\n`);
+    }
+    process.exitCode = 1;
+  }
 }

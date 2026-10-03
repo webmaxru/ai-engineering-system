@@ -139,8 +139,8 @@ files or a renamed hook.
 
 | Demonstration | Current status |
 | --- | --- |
-| [WI-1842](END-TO-END-DEMO.md) | Local application and fixture rehearsal plus an actual cloud planner stop; PR #13 and PR #18 are closed historical attempts, and PR #29 was a closed wrong-base/no-change attempt—not a cloud delivery |
-| [Add `GET /orders/:id`](NEW-ENDPOINT-DEMO.md) | Draft PR #19 is rebased onto `17e7a5c`; exact-head review, hosted `human-review`, local validation and PostgreSQL acceptance (12/12) pass, while full Zizmor, hosted repository-controls, and cross-surface proof remain outstanding |
+| [WI-1842](END-TO-END-DEMO.md) | Local application and fixture rehearsal plus an actual cloud planner stop; PR #13 and PR #29 are closed historical attempts. Controller PR #18 now includes child PR #28 at head `2222e882…`; its report is `ready_for_review` (14/15), AC15 is unverified, `human-review` passes, and `repository-controls`/`trusted-acceptance` still fail. A local importer replay is not hosted acceptance; no accepted cloud delivery is claimed |
+| [Add `GET /orders/:id`](NEW-ENDPOINT-DEMO.md) | Draft PR #19 remains on base `17e7a5c`, while parent PR #18 has advanced to `2222e882…`; its plan/base must be refreshed before claiming current-base evidence. Exact-head review and local validation/PostgreSQL acceptance (12/12) pass, but full Zizmor, hosted repository-controls, and cross-surface proof remain outstanding |
 
 The [technical extensions register](TECHNICAL-EXTENSIONS.md) identifies which
 mechanisms are Northstar/framework choices rather than guide requirements.

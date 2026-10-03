@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { classify, decide, failureSignature } from "../../scripts/repair-budget.mjs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { classify, decide, failureEvidence, failureSignature, runStopAttempt } from "../../scripts/repair-budget.mjs";
 
 const CONCURRENCY_FAILURE =
   "AssertionError: expected 2 to be 1 // creates exactly one order under concurrent cross-instance retries";
@@ -32,6 +35,11 @@ describe("failure signatures", () => {
 });
 
 describe("classification decides which layer changes", () => {
+  it("does not classify a passing policy-test filename as the cause of a failed assertion", () => {
+    expect(classify("PASS tests/unit/risk-policy.test.ts\nAssertionError: expected replay to be true"))
+      .toMatchObject({ layer: "reasoning", action: "repair" });
+  });
+
   it("sends permission failures to a human instead of a new prompt", () => {
     expect(classify("EACCES: permission denied writing .github/workflows/ci.yml")).toMatchObject({
       layer: "policy",
@@ -87,6 +95,131 @@ describe("repair budget", () => {
 
     expect(result.decision).toBe("repair");
     expect(result.remainingAttempts).toBe(2);
+  });
+
+  const temporary: string[] = [];
+  afterEach(() => temporary.splice(0).forEach((path) => rmSync(path, { recursive: true, force: true })));
+
+  function temp() {
+    const root = mkdtempSync(join(tmpdir(), "northstar-recovery-"));
+    temporary.push(root);
+    return root;
+  }
+
+  const scope = {
+    repository: "fixture/northstar", taskId: "RECOVERY",
+    contractDigest: "a".repeat(64), planDigest: "b".repeat(64),
+    baseSha: "c".repeat(40), headSha: "d".repeat(40), sessionId: "fixture-session",
+  };
+
+  describe("durable actual Stop accounting", () => {
+    it("counts several failed checks in one Stop as one attempt", () => {
+      const result = runStopAttempt(scope, () => ({
+        failures: [
+          failureEvidence({ check: "quality", message: "AssertionError: expected a to be b" }),
+          failureEvidence({ check: "acceptance", message: "AssertionError: expected x to be y" }),
+        ],
+        checks: ["quality", "acceptance"],
+      }), { root: temp() });
+      expect(result.decision).toBe("repair");
+      expect(result.remainingAttempts).toBe(2);
+      expect(result.attempts).toHaveLength(1);
+      expect(result.history).toHaveLength(2);
+    });
+
+    it("keeps retry history isolated per session while preserving repeats across HEAD changes", () => {
+      const root = temp();
+      const evaluate = () => ({ failures: [failureEvidence({ check: "quality", message: CONCURRENCY_FAILURE })] });
+      const first = runStopAttempt({ ...scope, sessionId: "first-session" }, evaluate, { root });
+      const second = runStopAttempt({
+        ...scope, sessionId: "first-session", headSha: "e".repeat(40),
+      }, evaluate, { root });
+      expect(first.decision).toBe("repair");
+      expect(second).toMatchObject({ decision: "escalate", repeats: 2, reason: expect.stringContaining("same quality") });
+      expect(second.path).toBe(first.path);
+      expect(second.attempts.map(({ sessionId }) => sessionId)).toEqual(["first-session", "first-session"]);
+      const isolated = runStopAttempt({
+        ...scope, sessionId: "second-session",
+      }, evaluate, { root });
+      expect(isolated.decision).toBe("repair");
+      expect(isolated.path).not.toBe(first.path);
+      expect(isolated.attempts).toHaveLength(1);
+      let invoked = false;
+      const third = runStopAttempt({
+        ...scope, sessionId: "first-session",
+      }, () => { invoked = true; return { failures: [] }; }, { root });
+      expect(invoked).toBe(false);
+      expect(third.attempts).toHaveLength(2);
+    });
+
+    it("enforces three actual attempts even when the failures change", () => {
+      const root = temp();
+      for (const [index, word] of ["replay", "conflict", "metrics"].entries()) {
+        const result = runStopAttempt(scope, () => ({
+          failures: [failureEvidence({ check: "quality", message: `AssertionError: expected ${word} to be true` })],
+        }), { root });
+        expect(result.attempts).toHaveLength(index + 1);
+        expect(result.decision).toBe(index === 2 ? "escalate" : "repair");
+        if (index === 2) expect(result.reason).toContain("budget");
+      }
+    });
+
+    it("allows only one repaired environment retry, even when diagnostics change", () => {
+      const root = temp();
+      runStopAttempt(scope, () => ({ failures: [failureEvidence({ check: "acceptance", message: "ECONNREFUSED" })] }), { root });
+      const retry = runStopAttempt(scope, () => ({ failures: [failureEvidence({ check: "acceptance", message: "ETIMEDOUT" })] }), { root });
+      expect(retry).toMatchObject({ decision: "escalate", reason: expect.stringContaining("environment retry") });
+    });
+
+    it.each(["permission denied", "CodeQL vulnerability", "opaque diagnostic"])("keeps escalation latched for %s", (message) => {
+      const root = temp();
+      const first = runStopAttempt(scope, () => ({ failures: [failureEvidence({ check: "quality", message })] }), { root });
+      let invoked = false;
+      const second = runStopAttempt(scope, () => { invoked = true; return { failures: [] }; }, { root });
+      expect(first.decision).toBe("escalate");
+      expect(second.decision).toBe("escalate");
+      expect(invoked).toBe(false);
+    });
+
+    it("persists only normalized signatures and classifications, not raw command output", () => {
+      const result = runStopAttempt(scope, () => ({
+        failures: [failureEvidence({ check: "quality", message: "AssertionError: expected private-diagnostic-marker to be absent" })],
+      }), { root: temp() });
+      const saved = readFileSync(result.path, "utf8");
+      expect(saved).not.toContain("private-diagnostic-marker");
+      expect(saved).toContain(result.history[0]!.signature);
+    });
+
+    it("rejects corrupt and interrupted history rather than resetting the budget", () => {
+      const root = temp();
+      const first = runStopAttempt(scope, () => ({ failures: [failureEvidence({ check: "quality", message: CONCURRENCY_FAILURE })] }), { root });
+      const original = readFileSync(first.path, "utf8");
+      writeFileSync(first.path, "{");
+      expect(() => runStopAttempt(scope, () => ({ failures: [] }), { root })).toThrow(/Malformed/);
+      const interrupted = JSON.parse(original) as { attempts: Array<{ status: string; completedAt: string | null }> };
+      interrupted.attempts[0]!.status = "running";
+      interrupted.attempts[0]!.completedAt = null;
+      writeFileSync(first.path, JSON.stringify(interrupted));
+      expect(runStopAttempt(scope, () => ({ failures: [] }), { root })).toMatchObject({
+        decision: "escalate", reason: expect.stringContaining("interrupted"),
+      });
+    });
+
+    it("serializes competing Stop invocations without spending two attempts", () => {
+      const root = temp();
+      const result = runStopAttempt(scope, () => {
+        expect(() => runStopAttempt(scope, () => ({ failures: [] }), { root })).toThrow(/lock unavailable/);
+        return { failures: [failureEvidence({ check: "quality", message: CONCURRENCY_FAILURE })] };
+      }, { root });
+      expect(result.attempts).toHaveLength(1);
+    });
+
+    it("retains a policy escalation even when a later legacy failure looks repairable", () => {
+      expect(decide([
+        { check: "policy", message: "permission denied" },
+        { check: "quality", message: CONCURRENCY_FAILURE },
+      ]).decision).toBe("escalate");
+    });
   });
 
   it("escalates when the same check fails twice with the same signature", () => {

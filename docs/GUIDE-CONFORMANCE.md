@@ -14,19 +14,28 @@ and cannot override it.
 | Canonical-text guide SHA-256 | `c247b45ed53bb7b901954611c3bc03a37294d9adfb02a6542d71522f694f62be` |
 | Framework baseline | `webmaxru/ai-engineering-system@9c8be3c` plus this audit and non-normative bookkeeping repairs |
 | Audited reference baseline | `webmaxru/northstar-orders-api-demo@b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; current `main`, known defective |
+| Current inert snapshot source | Candidate PR #27 at `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`; local unit and PostgreSQL validation pass, but full validation and hosted acceptance remain blocked; snapshot release status stays `known-defective` |
 | Earlier repairs | Terminology, workflow syntax and artifact handoff merged in `webmaxru/northstar-orders-api-demo#7`, `webmaxru/northstar-orders-api-demo#10`, and `webmaxru/northstar-orders-api-demo#12` |
-| Current reference work | On 2026-09-28, the owner closed system-maintenance issues [#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14), [#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16), [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20), [#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and [#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24) and their maintenance PRs to retain demo-only open work. Demo issues [#4](https://github.com/webmaxru/northstar-orders-api-demo/issues/4), [#17](https://github.com/webmaxru/northstar-orders-api-demo/issues/17), and draft PR [#19](https://github.com/webmaxru/northstar-orders-api-demo/pull/19) remain open. The closures are scope cancellations, not accepted fixes. |
-| Current conformance decision | **Blocked**: the locked baseline remains defective; maintenance candidates were closed unmerged, and hosted acceptance/trusted publication remain unestablished |
+| Current reference work | On 2026-09-28, the owner reopened system-maintenance issues [#14](https://github.com/webmaxru/northstar-orders-api-demo/issues/14), [#16](https://github.com/webmaxru/northstar-orders-api-demo/issues/16), [#20](https://github.com/webmaxru/northstar-orders-api-demo/issues/20), [#22](https://github.com/webmaxru/northstar-orders-api-demo/issues/22), and [#24](https://github.com/webmaxru/northstar-orders-api-demo/issues/24), with plan/implementation PRs [#15](https://github.com/webmaxru/northstar-orders-api-demo/pull/15), [#18](https://github.com/webmaxru/northstar-orders-api-demo/pull/18), [#21](https://github.com/webmaxru/northstar-orders-api-demo/pull/21), [#23](https://github.com/webmaxru/northstar-orders-api-demo/pull/23), [#25](https://github.com/webmaxru/northstar-orders-api-demo/pull/25), [#26](https://github.com/webmaxru/northstar-orders-api-demo/pull/26), [#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27), and [#28](https://github.com/webmaxru/northstar-orders-api-demo/pull/28), to resume conformance remediation. The earlier closures were scope cancellations, not accepted fixes. Demo issues [#4](https://github.com/webmaxru/northstar-orders-api-demo/issues/4), [#17](https://github.com/webmaxru/northstar-orders-api-demo/issues/17), and draft PR [#19](https://github.com/webmaxru/northstar-orders-api-demo/pull/19) remain open; historical PRs [#13](https://github.com/webmaxru/northstar-orders-api-demo/pull/13) and [#29](https://github.com/webmaxru/northstar-orders-api-demo/pull/29) remain closed. |
+| Current conformance decision | **Blocked**: the locked baseline remains defective; reopened maintenance candidates are unmerged and unaccepted, and hosted acceptance/trusted publication remain unestablished |
 | Experimental comparison | `reference/ai-engineering-system-agent-hooks@cbb22f1e90f8edcce8e019c4c867af8daebe7605` |
 
 A change to the guide content or hash invalidates this conclusion until the
 framework and reference are audited again.
 
-`architecture-lock.json` records this identity and intentionally blocks a
-successful release verification while required reference changes remain
-pending. Run `pwsh -File tools/verify-architecture.ps1` to check the guide,
+`architecture-lock.json` records the current validated snapshot source and
+intentionally blocks a successful release verification while required
+reference changes remain pending. The audited `main` baseline remains the
+historically inspected `b65c2de…` commit; the PR #27 snapshot is an unaccepted
+candidate and is for study, not adoption. Since the snapshot lock points to
+`bfb2cbf…`, run the verifier against a Northstar worktree at that exact commit
+(not the unchanged `main` checkout) to check the guide,
 extension coverage, non-self-governance boundary, one-way Northstar reference,
 snapshot, and conformance decision.
+On 2026-09-30, that exact-path run verified all 174 locked snapshot files, then
+stopped at the expected release gate: the audited reference is `known-defective`,
+not accepted. `node --test tools/verify-architecture.test.mjs` passes 7/7.
+This is a fail-closed conformance result, not a path or snapshot-integrity error.
 
 The earlier parser/terminology blockers are resolved in the inspected source;
 the workflow now creates jobs. This does not imply release acceptance.
@@ -38,30 +47,333 @@ task authority was absent. A missing-artifact probe exposed a false-positive
 readiness decision.
 
 The 117-file snapshot matches the exact audited revision for inspection. It is
-**not approved for adoption**. The owner closed the system-maintenance
-workstreams to retain demo-only open work; none of their plans or implementations
-was merged or accepted. The remaining demo tasks do not repair the locked
-baseline, and hosted acceptance and trusted publication remain unestablished.
+**not approved for adoption**. The owner reopened the system-maintenance
+workstreams to resume remediation. Reopening restores active work; it does not
+accept a plan, implementation, or hosted control. The remaining demo tasks do
+not repair the locked baseline, and hosted acceptance and trusted publication
+remain unestablished.
 The historical candidate evidence below does not change the locked `main`
 baseline.
 
-## Demo and closed-maintenance status (2026-09-28)
+## Demo and reopened-maintenance status (as of 2026-10-02)
 
 | Work | Current evidence | Remaining gate |
 | --- | --- | --- |
-| Repair and combined-mode controller: issue #14, PR #18 | Historical head `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; independent review exists; hosted acceptance tests passed | Issue and PR were closed by the owner for scope on 2026-09-28; `repository-controls` and evidence failed; unmerged and unaccepted |
-| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Historical head `fc59deefc31213b2c596bd0384008f77a9955c4f`; 500 unit tests, 10 PostgreSQL acceptance tests, scope/merge checks and two read-only CLI identity canaries passed | Issue and PRs were closed by the owner for scope; full `validate:all` fails on 84 Zizmor findings; hosted evidence/controls fail; AC9 cloud isolation was not proved |
-| Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | Historical head `0260fe99fdd48672d83f83d45849ac9487d38fe2` received exact-head approval; hosted `human-review` and `evidence` passed | Issue and PRs were closed by the owner for scope; `repository-controls` failed, so trusted acceptance was not established |
-| Repository controls: issue #22, plan PR #23 | Plan approval existed for base `17e7a5c5…` | Issue and PR were closed by the owner for scope; no ruleset setting was changed |
-| Workflow scanner: issue #20, plan PR #21 | Prior plan approval existed for base `2e3cd083…` | Issue and PR were closed by the owner for scope; the base was stale and no scanner findings were fixed |
-| WI-1842 rehearsal: issue #4, PR #13 | The issue remains as the plan-first demo task; PR #13 recorded the planner stopping because the cached task contract was absent | PR #13 was closed as a stale, zero-file rehearsal; it does not prove a successful cloud run |
-| Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; exact-head approval and hosted `human-review` pass; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | PR #19 remains draft; full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes), hosted `repository-controls` fails, and no VS Code/cloud run is proven |
+| Repair and combined-mode controller: issue #14, PRs #15/#18 | PR #18 head `2ce3cf8a69439c22246de7d5449ce186e23bd584`; local `npm run validate` passes (489 unit tests), disposable PostgreSQL acceptance passes 9/9, `npm audit --audit-level=high` reports 0 vulnerabilities, and `agentic:compile` passes | Native review `5356731352` is APPROVED, but hosted `human-review` still fails because GitHub reports `reviewDecision` as not `APPROVED`; repository-controls is unavailable with HTTP 403, and trusted-acceptance fails. Source report `36610256698` is `ready_for_review` with 14/15 criteria proven; AC15 is unverified. Review-event report `36612195971` is `review_required`. Local Zizmor remains blocked with 85 findings. No merge or hosted-setting change is claimed |
+| Parallel isolation: issue #16, plan PR #26, implementation PR #27 | Approved plan PR #26 head `42721d4ee34a55cb031567d3942dd037e5bbe513` binds contract `2afe7ed6…`, plan `d020ca88…`, and parent base `2ce3cf8…` (review `5362561711`). PR #27 head `f1c40a961451d29fed04ac37ad01eb63ddec076d` is on that base; local validation passes 541 unit tests, 79 governance checks, and PostgreSQL acceptance 10/10; plan gate passes and scope has 75 paths/zero violations. A local Cloud-shaped hook simulation resolved environment-only session identity through SessionStart and PreToolUse and passed plan-gate; this is not Cloud host evidence. | `vibeprogrammer` approved the exact PR #27 head on 2026-10-02. Hosted run `36984950941` now passes `human-review` and the core plan/scope/quality/acceptance/security checks, but `repository-controls` and `evidence` fail. The report is `review_required`: `validation-authority` is absent, trusted current-run revalidation is missing, 9/10 criteria are proven (AC1–AC8 and AC10), and AC9 remains unproven. The 403s come from the pull-request workflow's read-only `github.token`; they do not establish that settings are disabled. The bounded Cloud retry remains exhausted and no Cloud session has tested the session-identity fallback. |
+| Trusted acceptance: issue #24, plan PR #25, implementation PR #28 | PR #25 head `7d0a78d8da741c911a31941477562060ae6c6d66` has exact approval review `5357419226`, contract digest `93a40b20…`, and parent base `2ce3cf8a…`. PR #28 is at `cb507e20cd0cb8fdeabfedaece67510a651757b0` on that base and was approved by `vibeprogrammer` on its exact head (review `5391273930`). Local `validate` passes 527 unit tests and 79 governance checks; PostgreSQL acceptance passes 9/9, secret scan covers 185 files, and agentic compilation passes. | Hosted run `37001565136` now passes current-head `human-review`, plan, scope, quality, acceptance, CodeQL, merge, secret-scan, and governance; dependency-review, repository-controls, and evidence fail. The report remains `review_required`: `validation-authority` is absent and trusted current-run revalidation is missing. `npm audit` finds two high advisories inherited from base (Fastify 5.12.1 and `brace-expansion`); Issue #24 prohibits manifest/lockfile changes. Trusted Publish Evidence run `37001721147` executes current `main` code at `b65c2de` and fails because its deployed resolver only finds PRs targeting `main`; PR #28 is stacked on `agent/implement/aes-surface-evidence`. PR #28 contains the planned exact-base resolver change, but it is not active on the protected default branch. The PR remains draft/unaccepted; no acceptance or ruleset change is claimed. |
+| Repository controls: issue #22, plan PR #23 | Plan work is bound to base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f` | Issue and PR are reopened; the #24 preflight remains blocked. No ruleset setting was changed |
+| Workflow scanner: issue #20, plan PR #21 | Refreshed plan head `6795e32beba33e7ac109bf020ae8f3b377042cc4` is based on `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`; contract digest `df654e265c20e6390e31b6e3d3939c20ef2202584241942f57df282684245f76`, plan digest `76a25183507e0702bcdd14db89577d4c59a9f508030fba7804692a6b781172e3`; exact-head review, `plan-approval`, and `human-review` pass | Hosted `evidence` and `repository-controls` fail; implementation stays blocked by issue #22 |
+| WI-1842 rehearsal: issue #4, PR #13 | The issue remains as the plan-first demo task; PR #13 recorded the planner stopping because the cached task contract was absent | PR #13 is a closed stale, zero-file rehearsal; it does not prove a successful cloud run. Historical PR #29 is also closed after using the wrong base and making no changes |
+| Endpoint demonstration: issue #17, PR #19 | Head `cf7622166e48cdc543121adaa37a0ab57dcb4c45`; exact-head approval and hosted `human-review` pass; local `validate` (470 unit tests), PostgreSQL acceptance (12/12), scope and merge checks pass | PR #19 remains draft; full `validate:all` fails at Zizmor (86 findings, 65 errors/21 notes), hosted `repository-controls` fails, and no successful issue #17 cloud run is proven |
+
+### Repository-control diagnosis (2026-10-02)
+
+The hosted `repository-controls` job in pull-request workflows uses
+`github.token` with `contents: read`. GitHub returns HTTP 403 when that token
+tries to read the ruleset, legacy branch-protection details, App metadata, and
+secret inventories; the check correctly fails closed and reports those inputs
+as unavailable, not disabled. Separate read-only GitHub API checks verified
+that ruleset `23998987` is active on `main`, has no bypass actors, requires
+pull requests, CODEOWNERS review and strict checks, and binds
+`repository-controls` to Actions integration `15368` and `trusted-acceptance`
+to GitHub App integration `5075466`; secret scanning and push protection are
+enabled. The legacy
+branch-protection endpoint returns 404 because the active ruleset supplies the
+branch controls. App/secret metadata remains unavailable to the PR workflow
+token. No settings, secrets, permissions, or integrations were changed.
+
+### Stacked trusted-publisher result (2026-10-02)
+
+After the exact-head approval of PR #28, Governed Change run `37001565136`
+passed `human-review` but failed dependency-review, repository-controls, and
+evidence. Its trusted Publish Evidence follow-up,
+[`37001721147`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37001721147),
+ran on protected-default-branch code at `b65c2de` and failed with
+“Expected exactly one open same-repository pull request ... targeting main;
+found 0” for the stacked PR #28 head. The approved candidate contains a
+resolver/test change for an exact declared same-repository stacked base, but
+that code is not deployed on `main`. Do not treat the failed publisher run as
+proof of acceptance or bypass its validation boundary.
+
+### Issue #24 parent preflight (2026-10-03)
+
+Child PR #28 was merged into parent PR #18 at
+`2222e882b966588e39a63991ece3a00935898cfc`; PR #18 remains open against
+`main`. Reviewer `vibeprogrammer` approved that exact head (review
+`5401432763`). Issue #24 plan PR #25 is approved at
+`ad4da17e679ba66d28025354021df9cc5ab18158` (review `5400367350`), bound to
+contract digest `8763c017e195fc22c2a4b4c3347ad961616eeaa8ee56029a72c2f315e33bf01c`
+and parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`.
+
+Governed Change run
+[`37133142406`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133142406)
+on the exact PR #18 head passes the source checks and publishes a truthful
+`ready_for_review` report with 14/15 criteria proven; AC15 is unverified.
+`repository-controls` is the remaining failed Governed Change check.
+`trusted-acceptance` remains a failure from protected Publisher run
+`37133121752`; it is not a success or acceptance signal.
+
+Protected Publish Evidence runs
+[`37133208919`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133208919)
+and
+[`37133310243`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133310243)
+ran on the old default-branch code at `b65c2de…` and failed before the
+controls audit because its artifact importer rejected
+`poutine-report.json`, `poutine.sarif`, and `zizmor-comparison.json`. A local
+replay of the exact source-run artifacts using the importer and path-safety
+helper whose Git blobs match the reviewed PR #18 merge commit accepted all 22
+imported files, including those three paths. This verifies the importer
+behavior only; it is not protected-publisher or hosted-controls evidence.
+
+The same detached checkout at the exact PR #18 merge commit also ran
+`contract:from-pr` against live issue #14, resolved the current workflow-run
+metadata through `resolve-workflow-run.mjs` as PR #18/head `2222e882`/base
+`main@b65c2de`/source run `37133142406` attempt 1 with eight artifact IDs,
+and passed `import-workflow-results.mjs` for seven producer-bound check
+records. This was a local replay using read-only GitHub API access, not the
+protected Publisher job: it did not mint App credentials, audit live hosted
+controls, or write a status. Publisher readiness after merge is therefore
+better supported at the resolver/import layer but remains unverified at the
+protected App/status layer.
+
+Ruleset `23998987` remains active and strict, with no bypass actors and all
+original required contexts intact, including `repository-controls` from
+integration `15368` and `trusted-acceptance` from App `5075466`. The saved
+preflight snapshot matches the live ruleset. No temporary window, settings
+change, PR #18 merge, or successful post-merge Publisher audit has occurred.
+The plan still reserves the temporary window and parent merge to a human.
+This state follows the guide’s plan → act → evaluate lifecycle and its use of
+pull-request checks and human review as evaluation signals (Learning Path
+Units 1 and 5); local importer proof is not presented as hosted acceptance.
+
+### Cross-issue sequencing blocker (2026-10-03)
+
+The live issue relationships are Issue #22 blocked by Issue #24 and Issue #20
+blocked by Issue #22. Issue #24's approved sequence is #24, then #22, then
+#20, but its AC6 assigns the existing Zizmor baseline to Issue #20 and
+prohibits claiming parent `ready_for_acceptance` until #20 and the required
+hosted checks pass. Issue #22's contract requires fresh successful
+`trusted-acceptance` from App `5075466` on the exact parent head before its
+`repository-controls` window. The current approved sequence therefore has no
+demonstrated route through Issue #22's preflight if the Issue #20 findings
+continue to block trusted success.
+
+This is a task-order/preflight conflict, not authority to weaken or bypass a
+required status. Keep ruleset `23998987` unchanged until an independently
+reviewed plan establishes a no-bypass order that can satisfy the exact-head
+preflight. PRs #23 and #21 are still based on `17e7a5c…`; refresh and
+independently approve the affected plans against the resulting exact base
+before implementation or another settings window.
+
+## Historical follow-up local and owner-session evidence (2026-10-01)
+
+This section preserves the state recorded on 2026-10-01. The current PR #27
+and PR #28 status is summarized in the 2026-10-02 table above.
+
+The coordinator's isolated local worktree is bound to live `Task PR: #27`,
+Issue #16, and approved plan #26. The implementation is published at
+`f1c40a961451d29fed04ac37ad01eb63ddec076d`. `SessionStart` and `PreToolUse`
+now resolve a host-provided session ID from the event payload or the Copilot
+session environment; when neither is present, GitHub Actions repository/run/
+attempt identity is used consistently for the task session and workspace
+owner. In a local Cloud-shaped simulation with no session ID in the event
+payload, the hook resolved PR #27, plan #26, base, branch, and head; PreToolUse
+allowed the authorized plan gate, which passed. This is local simulation, not
+Cloud-host evidence.
+
+At `f1c40a9`, `npm run validate` passes instruction sync, 79 governance
+checks, lint, typecheck, build, and 541 unit tests. PostgreSQL acceptance
+passes 10/10 using per-suite temporary schemas; npm audit reports zero
+vulnerabilities, secret scanning passes 199 files, and agentic workflow
+compilation is clean. Exact-base scope reports 75 paths and zero violations.
+The full `npm run validate:all` reaches pinned Zizmor and fails on 83
+unsuppressed findings (19 `artipacked`, 61 `unpinned-uses`, and one each
+`dangerous-triggers`, `obfuscation`, and `template-injection`).
+
+Hosted run
+[`36934750341`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36934750341)
+on `f1c40a9` passes plan-contract, plan-approval, scope-policy, quality,
+acceptance, dependency review, CodeQL, secret-scan, merge-validation, and
+governance. It fails repository-controls, human-review, and evidence; visible
+approvals target older commits, `validation-authority` is missing, and the
+report is `review_required` with 9/10 criteria proven. PR #27 remains draft
+and unaccepted.
+
+Cloud run
+[`36930550238`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36930550238)
+was a bounded, read-only attempt on predecessor `92a8af6`, before the
+environment-session fallback was published. Its one `plan:gate` tool call
+returned `success=false` without a command result; no artifacts or PR changes
+resulted. No Cloud canary has verified the `f1c40a9` identity changes. AC9
+and hosted `ready_for_acceptance` remain unproven. No permissions, secrets,
+rulesets, or protected settings changed.
+
+A separate VS Code 1.140.0 window opened the local `northstar-pr27` worktree in
+Restricted Mode. Its trust banner states that trusting the folder enables all
+features; Copilot is disabled in this mode. No trust decision was made, and no
+Copilot agent, workspace task, or project hook was run. This is an attempted
+host inspection, not VS Code runtime evidence; host parity remains unverified.
+
+## PR-comment Cloud continuation evidence (2026-10-01)
+
+To continue the existing PR rather than assign another writer, a scoped
+`@copilot` comment was posted on PR #27. Copilot Cloud run `36854976862`
+started at head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` and finished two
+minutes later without changing the PR. Its session record states: “no task
+issue is active”; the authorizer denied `runtime-tools-vote_memory` because
+no task contract was active and rejected the first shell inspection because
+it chained commands (`git status ... && git rev-parse ...`). Later
+`git rev-parse` and `pwd` inspections also failed. The run is not
+implementation or validation evidence.
+
+A corrected continuation comment `5931423920` began with `/implement 16` and
+instructed the agent to establish task/plan/owner identity before editing,
+use authorized commands individually, preserve PR #27's branch and stack
+#31, and stop on any authorization denial. Cloud run `36861785538` started
+at `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` and finished at
+2026-10-01T12:28:32Z without a commit. Its Actions trace shows failed reads
+of `artifacts/task-contract.json`, `artifacts/task-session.json`, and
+`artifacts/task-workspace-owner.json`; the Git identity/revision commands
+were also denied. Issue, PR, and plan reads through GitHub MCP succeeded, but
+the run produced no evidence that an active task contract and owner were
+loaded. PR #27 remains draft at the same head and base. The corrected selector
+alone did not produce an implementation or Cloud validation result.
+
+A third continuation comment `5931655271` used the explicit `Task issue: #16`
+and `Task role: implement` selectors. GitHub workflow run `36863278843` was
+created at `2026-10-01T12:39:58Z` and completed successfully at
+`2026-10-01T12:41:53Z`, but the task activity stopped before edits. The
+selector did not activate a task contract: `artifacts/task-contract.json`,
+`artifacts/task-session.json`, and `artifacts/task-workspace-owner.json` were
+missing, so repository commands were denied. PR #27 remains draft at the same
+head and base. The workflow's successful conclusion is not implementation,
+task-binding, or validation evidence.
+
+A fourth, post-fix continuation comment `5932587372` was posted after commit
+`b05b481…`. Copilot Cloud run `36869969461` was created at
+`2026-10-01T13:36:50Z` and its workflow completed successfully at
+`2026-10-01T13:38:48Z` on that head; PR #27 did not change. The log shows
+attempted reads of `task-contract.json`, `task-session.json`,
+`task-workspace-owner.json`, and `execution-context.json`, but all four
+`view` calls returned `success=false`. Bash and GitHub issue/PR reads did
+complete, yet neither the artifact contents nor a task-binding result were
+available in the workflow log or session history. The green workflow wrapper
+therefore does not prove an active Cloud task contract or AC9; no successful
+Cloud canary is claimed.
+
+Two bounded follow-up canaries were run on PR #27 predecessor head
+`a5c64fc2b4d5d09b99b1b79747275525f21751c2`. The request in comment
+`5937004816` started Cloud run `36900971355`; its log records the standalone
+`npm run contract:fetch -- --issue 16` tool call as successful, but the agent
+did not invoke the plan gate, published no result comment, and the run exposed
+no artifacts. Contract-fetch success alone does not prove an active
+implementation role, PR selector, owner/session binding, or AC9. A follow-up
+request in comment `5937072552` started run `36901509449` with only
+`npm run plan:gate -- --pr 27`; the Cloud tool log records `bash
+success=false`, but exposes no command result or actionable denial reason.
+That run also published no artifacts and did not change PR #27. The successful
+workflow wrappers are not plan-gate or task-binding evidence; AC9 remains
+unproven.
+
+A third bounded post-fix Cloud canary was requested in comment
+`5941268614` on PR #27 head `92a8af62939847c0ba3120128afbb3129a12cab6`.
+Run `36930550238` attempted the single `npm run plan:gate -- --pr 27`
+command; the tool log again records `bash success=false` without a command
+result, task-session output, or artifacts. The PR did not change. This was
+before the later host-session environment fallback at `f1c40a9`; there is no
+actual Cloud run validating that follow-up. The repeated opaque tool failure
+remains unclassified and the bounded retry is exhausted, so AC9 stays
+unproven.
+
+### Predecessor Cloud PR-identity fix (head 92a8af6)
+
+The owner-bound PR #27 worktree exposed a separate concrete mismatch in
+`scripts/execution-context.mjs`: it rejected the actual same-repository
+implementation PR because its author was a human and its branch was
+`agent/implement/aes-parallel-isolation`, despite the live PR, linked Issue
+#16, approved plan #26, base, head, and ancestry matching. The guide's
+contributor model says to evaluate agent and human pull requests by the same
+workflow standards (Learning Path Unit 6, lines 385-400). The published fix
+removes only the author-class and branch-prefix checks; exact PR/task/plan/base/
+head and ancestry validation remains required.
+
+This correction was published in draft PR
+[#27](https://github.com/webmaxru/northstar-orders-api-demo/pull/27) at
+`92a8af62939847c0ba3120128afbb3129a12cab6`, on base
+`2ce3cf8a69439c22246de7d5449ce186e23bd584`. The focused execution-context
+test and full `validate` pass (535 unit tests, 79 governance checks, lint,
+typecheck, and build); the plan gate passes and the exact-base scope check
+reports 72 paths with zero violations. PostgreSQL acceptance passes 10/10
+using per-suite temporary schemas; dependency audit reports zero
+vulnerabilities, secret scan passes, and workflow compilation is clean.
+`validate:all` reaches Zizmor and fails on the 83 unsuppressed findings.
+
+Hosted run
+[`36929325151`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36929325151)
+on this head passes plan-contract, plan-approval, scope-policy, quality,
+acceptance, dependency-review, CodeQL, secret-scan, merge-validation, and
+governance-policy. It fails repository-controls, human-review, and evidence;
+the approvals visible on PR #27 target older commits, so the current-head
+human-review gate correctly fails. The evidence report is `review_required`
+with 9/10 criteria proven; `validation-authority` is missing and AC9 remains
+unproven. No successful Cloud task-binding run was produced. This predecessor was published for review, not accepted Northstar behavior or
+conformance evidence; the later `f1c40a9` follow-up is recorded below.
 
 The local CLI canaries establish only that two separately owned worktrees
 loaded matching task, contract, plan, base, session and owner identities. They
-do not prove every VS Code lifecycle hook, a successful cloud task, or hosted
-acceptance. The system-maintenance closures do not change these findings. The
-cloud attempt is recorded as a blocked negative result, not a pass.
+do not prove every VS Code lifecycle hook or hosted acceptance. The separate
+GitHub.com `/plan 16` session `d1dd79e9-183b-473c-a2c5-b7b6e7a2fff5`
+produced an unapproved proposal on `copilot/plan-16`, which is based on `main`
+at `b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`, not the approved `17e7a5c`
+base. It is not valid base-binding evidence. Session
+`5724baed-e173-4722-95ae-077e90c39c6a` confirmed issue/plan/PR metadata but
+could not verify active task/session authority and used workspace branch
+`copilot/agentimplementaes-surface-evidence`, not PR #27's
+`agent/implement/aes-parallel-isolation`. The later session
+`0621d3a5-e662-47f5-b737-bdca4dbe01c4` selected the custom `plan` agent and
+the exact base branch at `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. After
+the issue body was supplied, it produced a chat-only plan proposal; its
+`contractDigest` is an unresolved sentinel because no task-contract artifact
+was available and the planner had no shell. The branch remains at the base;
+no commit or PR resulted. The plan is not publishable or approved until its
+contract digest is bound and the plan-only state is independently reviewed.
+This is evidence of a cloud task-contract bootstrap failure, not of a
+permission denial or successful cloud execution. No parallel cloud proof is
+established.
+
+A fresh local Issue #20 plan-refresh session on branch
+`webmaxru-turbo-carnival` also stopped before repository inspection. The
+`/plan 20` startup attempted to load the `gh` skill and PreToolUse denied it
+because no task contract was active; a follow-up with explicit `Task issue:
+#20` and `Task role: plan` was denied because `"skill" is not a tool this
+policy recognizes`. The session read no issue/PR/scanner data, wrote no plan,
+and changed no files or remote state. PRs #21 and #23 remain bound to the
+stale `17e7a5c…` base while PR #18 is at `2ce3cf8…`; no refreshed approval
+exists. This is an unverified session bootstrap, not a reason to relax policy.
+
+A separate fresh detached local worktree at base `17e7a5c5f1fbf88a92351043c675f555f4c7f04f`
+resolved live issue #16 with `npm run contract:fetch -- --issue 16` and
+recorded body digest `2afe7ed62ca5f99393f36177182291355fb014dc70949456b2116e64e9a736f1`.
+That digest matches approved plan PR #26, whose exact-head review and
+`plan-approval` check pass. The chat-only cloud proposal leaves the digest
+unresolved and repeats the issue's statement that PR #26's approval is stale;
+this conflicts with the current plan/base/check evidence. Do not publish,
+approve, or implement the chat proposal until the contract binding and that
+conflict are reconciled.
+The system-maintenance items are reopened, but none of these statuses accepts
+their plans or implementations.
+
+For this framework follow-up, `node --test tools/verify-architecture.test.mjs`
+passes 7/7 and `npm run build` in `docs-site` produces 20 pages. A verifier run
+against a temporary detached Northstar worktree at the exact locked commit
+`bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` verified all 174 snapshot files,
+then correctly stopped because that reference remains `known-defective` and
+conformance is blocked. Running it against current PR #27 head `a5c64fc…`
+instead stops on the expected snapshot-revision mismatch. `architecture-lock.json`
+and `templates/northstar/reference-lock.json` remain at `bfb2cbf…`; Northstar
+`main` remains `b65c2de…`. The unaccepted candidate is not published as an
+adoption snapshot.
 
 ## Interpretation rules
 
@@ -111,7 +423,7 @@ Status values in this audit:
 | Unit 4 and Unit 5, lines 635-867 | Planning, execution, and validation are separated; use a **plan-first workflow** or **plan + execution workflow** based on risk; planning is read-only | Read-only planning preserved; implementation authorizer requires approved plan/branch even at lower risk, so advertised plan + execution is not proved | Choice advertised but incompletely implemented | EXT-001, EXT-003 |
 | Unit 2 and Unit 4, lines 3835-3967 and 4165-4223 | **Risk-based autonomy** is required; the guide recommends low, medium, high, and critical classifications and stronger controls at higher-impact boundaries | Four-level model exists; catch-all medium rule masks low-risk documentation paths | Recommended model adopted; classifier **blocked** | EXT-002 |
 | Unit 4, Unit 5, and Unit 7, lines 244-278, 1196-1200, and 3998-4307 | Required reviews, required checks, CODEOWNERS, rulesets or branch protection, environments, explicit permissions, and **least privilege** constrain work | Source policy, workflows, CODEOWNERS, role toolsets, protected-environment design, and GitHub App permission boundaries implement the model | Conformant; hosted settings not verified | EXT-004, EXT-008, EXT-009 |
-| Unit 7 and Unit 4, lines 1145-1183, 1748-1836, 2893-2907, and 4048-4070 | Hooks provide pre-action blocking, post-action/error logging, and human escalation; custom agents declare tools, instructions, and handoffs | Native wiring exists; host payload/branch incompatibility, failure-event classification and raw diagnostic echo remain | **Blocked**; see surface matrix | EXT-004, EXT-005 |
+| Unit 7 and Unit 4, lines 1145-1183, 1748-1836, 2893-2907, and 4048-4070 | Hooks provide pre-action blocking, post-action/error logging, and human escalation; custom agents declare tools, instructions, and handoffs | Candidate PR #27 bounds live `SessionStart` and `UserPromptSubmit` resolution at 90 seconds after a measured 55.076-second resolver run. `PreToolUse` remains 10 seconds and denies missing authority when it completes, but the host documents command-hook timeouts as fail-open, including that hook. Local parallel CLI resolution passes; two cloud tasks lacked the task-contract artifact, and logs do not expose the underlying hook failure/timeout cause. Other host payload, failure-event, and diagnostic gaps remain | **Blocked**; see surface matrix | EXT-004, EXT-005 |
 | Unit 6, Unit 7, and workflow units, lines 916-1100, 1334-1441, 1915-1980, and 2365-2591 | GitHub Actions expose triggers, contexts, outputs, permissions, concurrency, orchestration, logs, and artifacts | Repaired workflow creates jobs; examined run fails repository-controls, human-review, plan-approval and evidence | Jobs demonstrated; acceptance **blocked** | EXT-006, EXT-011 |
 | Unit 5, Unit 6, and Unit 7, lines 340-373, 1016-1094, 2708-2816, and 4338-4392 | Meaningful actions produce attributable, run- and commit-linked **workflow outputs and artifacts**; missing evidence is failure | Envelopes exist but absent artifact/null digest can produce readiness; base/attempt and stale Stop report checks are incomplete | **Blocked**, not strict fan-in | EXT-005, EXT-006 |
 | Memory and continuity units, lines 3088-3439 | Issues, pull requests, documents, workflow outputs, logs, and artifacts form external memory and a durable **source of truth** | Fixture trust stays false; live resolution and cache freshness across hosts are not reliable | Design aligned; bootstrap **blocked** | EXT-001, EXT-018 |

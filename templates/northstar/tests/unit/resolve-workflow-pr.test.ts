@@ -50,4 +50,45 @@ describe("workflow-run pull request identity", () => {
       }),
     ).toThrow(/found 2/);
   });
+
+  it("accepts only an explicitly allowed merged PR with exact commit and repository identity", () => {
+    const merged = pull({
+      state: "closed",
+      merged: true,
+      merged_at: "2026-09-01T10:00:00Z",
+      merge_commit_sha: "c".repeat(40),
+    });
+    expect(() => selectWorkflowPullRequest({
+      pulls: [merged],
+      sha,
+      repository,
+      defaultBranch: "main",
+    })).toThrow(/exactly one/);
+    expect(selectWorkflowPullRequest({
+      pulls: [merged],
+      sha,
+      repository,
+      defaultBranch: "main",
+      allowMerged: true,
+    })).toMatchObject({ number: 7, merged: true });
+    for (const invalid of [
+      pull({ state: "closed", merged: false }),
+      pull({ state: "closed", merged: true, merge_commit_sha: "invalid" }),
+      pull({
+        state: "closed",
+        merged: true,
+        merged_at: "2026-09-01T10:00:00Z",
+        merge_commit_sha: "c".repeat(40),
+        base: { ref: "main", repo: { full_name: "another/repository" } },
+      }),
+    ]) {
+      expect(() => selectWorkflowPullRequest({
+        pulls: [invalid],
+        sha,
+        repository,
+        defaultBranch: "main",
+        allowMerged: true,
+      })).toThrow(/exactly one/);
+    }
+  });
 });

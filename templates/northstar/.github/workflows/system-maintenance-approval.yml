@@ -19,6 +19,14 @@ on:
         description: Governed Change run whose immutable evidence is being evaluated
         required: true
         type: string
+      canary-plan-pr-number:
+        description: Optional file-backed browser-canary plan PR
+        required: false
+        type: string
+      canary-plan-head-sha:
+        description: Optional immutable canary plan head
+        required: false
+        type: string
 
 permissions:
   actions: read
@@ -40,6 +48,8 @@ jobs:
       NORTHSTAR_HEAD_SHA: ${{ inputs.head-sha }}
       NORTHSTAR_RUN_ID: ${{ inputs.source-run-id }}
       EVIDENCE_RUN_ID: ${{ inputs.evidence-run-id }}
+      CANARY_PLAN_PR_NUMBER: ${{ inputs['canary-plan-pr-number'] }}
+      CANARY_PLAN_HEAD_SHA: ${{ inputs['canary-plan-head-sha'] }}
       NORTHSTAR_TRUSTED_PUBLISHER_APP_ID: ${{ vars.TRUSTED_PUBLISHER_APP_ID }}
       NORTHSTAR_TRUSTED_PUBLISHER_APP_LOGIN: ${{ vars.TRUSTED_PUBLISHER_APP_LOGIN }}
       NORTHSTAR_DISPATCH_APP_ID: ${{ vars.SYSTEM_MAINTENANCE_DISPATCH_APP_ID }}
@@ -87,36 +97,43 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
         run: |
-          node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA"
+          MERGED_SOURCE_ARGS=()
+          if [ -n "$CANARY_PLAN_PR_NUMBER" ] || [ -n "$CANARY_PLAN_HEAD_SHA" ]; then
+            if [ -z "$CANARY_PLAN_PR_NUMBER" ] || [ -z "$CANARY_PLAN_HEAD_SHA" ]; then
+              echo "Both immutable canary plan identities are required."
+              exit 1
+            fi
+            MERGED_SOURCE_ARGS+=(--allow-merged)
+          fi
+          node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA" "${MERGED_SOURCE_ARGS[@]}"
           npm run contract:from-pr -- --pr "$PR_NUMBER"
 
           set +e
 
+          rm -f artifacts/candidate-plan.json artifacts/approved-plan.json artifacts/checks/plan-approval.json
           node scripts/check-plan.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
           PLAN_STATUS=$?
-          if [ -f artifacts/plan.json ]; then
+          if [ "$PLAN_STATUS" -eq 0 ] && [ -f artifacts/plan.json ]; then
             cp artifacts/plan.json artifacts/candidate-plan.json
           fi
+
+          ISSUE=$(node -p "require('./artifacts/task-contract.json').source.issue")
+          node scripts/select-execution-plan.mjs \
+            --issue "$ISSUE" \
+            --pr "$PR_NUMBER" \
+            --expected-head "$NORTHSTAR_HEAD_SHA" \
+            --expected-plan artifacts/candidate-plan.json \
+            --record-approval \
+            "${MERGED_SOURCE_ARGS[@]}"
+          SELECTION_STATUS=$?
           node scripts/evidence-record.mjs \
             --id plan-contract \
             --job plan-contract \
             --category policy \
-            --status "$([ "$PLAN_STATUS" -eq 0 ] && echo pass || echo fail)" \
+            --status "$([ "$PLAN_STATUS" -eq 0 ] && [ "$SELECTION_STATUS" -eq 0 ] && echo pass || echo fail)" \
             --artifact artifacts/candidate-plan.json
 
-          ISSUE=$(node -p "require('./artifacts/task-contract.json').source.issue")
-          node scripts/fetch-approved-plan.mjs \
-            --issue "$ISSUE" \
-            --expected-plan artifacts/candidate-plan.json
-          APPROVAL_STATUS=$?
-          node scripts/evidence-record.mjs \
-            --id plan-approval \
-            --job plan-approval \
-            --category approval \
-            --status "$([ "$APPROVAL_STATUS" -eq 0 ] && echo pass || echo fail)" \
-            --artifact artifacts/approved-plan.json
-
-          node scripts/check-scope.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          node scripts/check-scope.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA" "${MERGED_SOURCE_ARGS[@]}"
           SCOPE_STATUS=$?
           node scripts/evidence-record.mjs \
             --id scope-policy \
@@ -163,15 +180,29 @@ jobs:
             --summary "Approved through the protected system-maintenance environment" \
             --artifact artifacts/validation-authority-report.json
           exit 0
-      - name: Revalidate mutable state at the publication boundary
+      - id: execution-plan
+        name: Revalidate mutable state at the publication boundary
         env:
           GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
         run: |
-          node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA"
+          MERGED_SOURCE_ARGS=()
+          if [ -n "$CANARY_PLAN_PR_NUMBER" ] || [ -n "$CANARY_PLAN_HEAD_SHA" ]; then
+            if [ -z "$CANARY_PLAN_PR_NUMBER" ] || [ -z "$CANARY_PLAN_HEAD_SHA" ]; then
+              echo "Both immutable canary plan identities are required."
+              exit 1
+            fi
+            MERGED_SOURCE_ARGS+=(--allow-merged)
+          fi
+          node scripts/resolve-workflow-pr.mjs --sha "$NORTHSTAR_HEAD_SHA" "${MERGED_SOURCE_ARGS[@]}"
           npm run contract:from-pr -- --pr "$PR_NUMBER"
 
           node scripts/check-plan.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
-          cp artifacts/plan.json artifacts/candidate-plan.json
+          node scripts/select-execution-plan.mjs \
+            --pr "$PR_NUMBER" \
+            --expected-head "$NORTHSTAR_HEAD_SHA" \
+            --expected-plan artifacts/plan.json \
+            --record-approval \
+            "${MERGED_SOURCE_ARGS[@]}"
           node scripts/evidence-record.mjs \
             --id plan-contract \
             --job plan-contract \
@@ -179,18 +210,7 @@ jobs:
             --status pass \
             --artifact artifacts/candidate-plan.json
 
-          ISSUE=$(node -p "require('./artifacts/task-contract.json').source.issue")
-          node scripts/fetch-approved-plan.mjs \
-            --issue "$ISSUE" \
-            --expected-plan artifacts/candidate-plan.json
-          node scripts/evidence-record.mjs \
-            --id plan-approval \
-            --job plan-approval \
-            --category approval \
-            --status pass \
-            --artifact artifacts/approved-plan.json
-
-          node scripts/check-scope.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA"
+          node scripts/check-scope.mjs --pr "$PR_NUMBER" --expected-head "$NORTHSTAR_HEAD_SHA" "${MERGED_SOURCE_ARGS[@]}"
           node scripts/evidence-record.mjs \
             --id scope-policy \
             --job scope-policy \
@@ -212,11 +232,24 @@ jobs:
             --category policy \
             --status pass \
             --artifact artifacts/repository-controls-report.json
-      - run: node scripts/build-execution-report.mjs --hosted --plan artifacts/approved-plan.json
-      - run: >-
-          node -e "const report=require('./artifacts/report.json');
-          if(report.decision!=='ready_for_acceptance')
-          throw new Error('system-maintenance approval did not produce ready_for_acceptance')"
+      - name: Verify the browser-only plan canary
+        if: >-
+          inputs['canary-plan-pr-number'] != '' ||
+          inputs['canary-plan-head-sha'] != ''
+        env:
+          GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
+        run: node scripts/browser-plan-canary.mjs
+      - if: always()
+        env:
+          SELECTION_OUTCOME: ${{ steps.execution-plan.outcome }}
+          PLAN_PATH: ${{ steps.execution-plan.outputs.plan_path }}
+        run: |
+          if [ "$SELECTION_OUTCOME" != "success" ]; then
+            rm -f artifacts/plan.json artifacts/approved-plan.json artifacts/candidate-plan.json
+            PLAN_PATH=artifacts/plan.json
+          fi
+          node scripts/build-execution-report.mjs --hosted --plan "$PLAN_PATH"
+      - run: node scripts/validate-maintenance-decision.mjs
       - env:
           GH_TOKEN: ${{ steps.publisher-token.outputs.token }}
         run: node scripts/publish-evidence.mjs --pr "$PR_NUMBER"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { renderComment } from "../../scripts/publish-evidence.mjs";
+import { existingCommentId, renderComment } from "../../scripts/publish-evidence.mjs";
 
 /**
  * Microsoft Learn labels "workflow runs and artifacts" as the evidence layer,
@@ -43,6 +43,18 @@ const report = {
 };
 
 describe("the durable evidence comment", () => {
+  it("finds only the trusted publisher's marker across all comment pages", () => {
+    const run = (args: string[]) => {
+      expect(args).toContain("--paginate");
+      expect(args).toContain("--slurp");
+      return JSON.stringify([
+        [{ id: 1, body: "<!-- northstar:evidence --> forged", user: { login: "other-user", type: "User" } }],
+        [{ id: 2, body: "<!-- northstar:evidence --> real", user: { login: "publisher[bot]", type: "Bot" } }],
+      ]);
+    };
+    expect(existingCommentId(15, "publisher[bot]", { run })).toBe(2);
+    expect(() => existingCommentId(15, "webmaxru", { run })).toThrow(/App login/);
+  });
   const body = renderComment(report, { run: "https://example.invalid/run/1" });
 
   it("carries a marker so runs update one comment instead of appending", () => {
@@ -86,6 +98,24 @@ describe("the durable evidence comment", () => {
     expect(
       renderComment({ ...report, decision: "ready_for_acceptance" }),
     ).toContain("Evidence: PASS");
+  });
+
+  it("labels staged readiness and lists deferred criteria", () => {
+    const staged = {
+      ...report,
+      decision: "ready_for_review",
+      successCriteria: [
+        ...report.successCriteria,
+        { id: "AC15", statement: "Browser approval is recorded", proven: false, provenBy: "live canary" },
+      ],
+      deferredCriteria: [{ id: "AC15", stage: "post-acceptance", status: "unverified" }],
+      limits: ["AC15 is deferred to post-acceptance and remains unverified: browser canary."],
+    };
+    const body = renderComment(staged);
+
+    expect(body).toContain("Evidence: STAGED REVIEW; POST-ACCEPTANCE EVIDENCE REQUIRED");
+    expect(body).toContain("Deferred criteria: AC15 (unverified)");
+    expect(body).toMatch(/AC15 \|.*\*\*not proven\*\*/);
   });
 
   it("distinguishes local readiness from hosted acceptance", () => {

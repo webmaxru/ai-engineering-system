@@ -12,11 +12,11 @@
  *   stdout -> {"permissionDecision": "allow" | "deny", "permissionDecisionReason": "..."}
  */
 
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { Buffer } from "node:buffer";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { lstatSync, readFileSync } from "node:fs";
+import { posix, resolve, win32 } from "node:path";
 import {
   DEFAULT_SCOPE,
   isPathAllowed,
@@ -25,7 +25,10 @@ import {
   splitProhibitions,
   taskScope,
 } from "./task-contract.mjs";
-import { planDigest } from "./plan-contract.mjs";
+import { planDigest, validatePlanContract } from "./plan-contract.mjs";
+import { planArtifactPath } from "./plan-artifact.mjs";
+import { approvalPolicyForRisk } from "./risk-policy.mjs";
+import { assertWorkspaceOwner, readWorkspaceOwner, workspaceOwnerIdentity } from "./workspace-owner.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 
@@ -39,13 +42,16 @@ const ALLOWED_COMMANDS = [
   // Resolving the contract must be allowed, or the agent cannot bootstrap the
   // very boundary that governs it. It only reads an issue and writes into
   // artifacts/, so it grants no authority over the working tree.
-  /^npm run contract:fetch -- --issue \d+$/,
+  /^npm run contract:fetch -- --issue [1-9]\d*(?: --session-id [A-Za-z0-9._-]+)?$/,
   /^npm run plan:show$/,
   /^npm run plan:gate -- --pr \d+$/,
   /^npm run lint$/,
   /^npm run typecheck$/,
   /^npm run build$/,
   /^npm run test:unit$/,
+  /^npm run test:unit -- (?:tests\/unit\/[A-Za-z0-9._/-]+\.test\.ts)(?: tests\/unit\/[A-Za-z0-9._/-]+\.test\.ts)*$/,
+  /^npm run workspace:prepare -- --issue [1-9]\d* --path \S+ --session-id [A-Za-z0-9._-]+$/,
+  /^npm run workspace:release -- --issue [1-9]\d* --session-id [A-Za-z0-9._-]+(?: --clear-unowned)?$/,
   /^npm run test:acceptance$/,
   /^npm run governance:check$/,
   /^npm run security:secrets$/,
@@ -121,6 +127,41 @@ const DENIED_COMMAND_PATTERNS = [
 
 function normalize(filePath) {
   return String(filePath).replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+export function normalizeEditPath(filePath, repoRoot = REPO_ROOT) {
+  if (typeof filePath !== "string" || !filePath || /[\0\r\n]/.test(filePath)) {
+    throw new Error("An edit target is missing or malformed.");
+  }
+  let input = filePath;
+  if (/^file:/i.test(input)) input = fileURLToPath(input);
+  else if (/^[a-z][a-z0-9+.-]*:/i.test(input) && !/^[a-z]:[\\/]/i.test(input)) {
+    throw new Error("Only repository files may be edited.");
+  }
+  if (input.replace(/\\/g, "/").split("/").includes("..")) {
+    throw new Error("Parent traversal is not an authorized edit path.");
+  }
+  const paths = /^[a-z]:[\\/]|^\\\\/i.test(repoRoot) ? win32 : posix;
+  const absolute = paths.resolve(repoRoot, input);
+  const relative = paths.relative(paths.resolve(repoRoot), absolute);
+  if (!relative || paths.isAbsolute(relative) || relative === ".." || relative.startsWith(`..${paths.sep}`)) {
+    throw new Error("The edit target is outside the repository.");
+  }
+  const segments = relative.split(paths.sep);
+  if (segments.some((segment) =>
+    segment === ".git" || /[<>:"|?*]/.test(segment) || /[ .]$/.test(segment) ||
+    /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment)
+  )) throw new Error("The edit target is not a portable repository file.");
+  let cursor = paths.resolve(repoRoot);
+  for (const segment of segments) {
+    cursor = paths.join(cursor, segment);
+    try {
+      if (lstatSync(cursor).isSymbolicLink()) throw new Error("Symbolic-link edit targets are not authorized.");
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  return relative.replace(/\\/g, "/");
 }
 
 function allow(reason) {
@@ -256,17 +297,47 @@ export function classifyTool(rawName) {
 
 export function normalizeToolCall(call) {
   const rawName = String(call?.toolName ?? call?.tool_name ?? "");
-  const args = call?.toolArgs ?? call?.tool_input ?? {};
+  let args = call?.toolArgs ?? call?.tool_input ?? {};
+  if (typeof args === "string") {
+    try {
+      args = JSON.parse(args);
+    } catch {
+      if (args.startsWith("*** Begin Patch")) args = { patch: args };
+      else throw new Error("Tool arguments must be a supported JSON object or patch envelope.");
+    }
+  }
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new Error("Tool arguments must be an object.");
+  }
 
   const paths = [];
-  for (const key of ["path", "file", "filePath", "uri"]) {
+  for (const key of ["path", "file", "filePath", "file_path", "uri", "oldPath", "newPath", "destination"]) {
     if (typeof args[key] === "string") paths.push(args[key]);
   }
   if (Array.isArray(args.files)) {
     for (const entry of args.files) {
       if (typeof entry === "string") paths.push(entry);
       else if (entry && typeof entry.path === "string") paths.push(entry.path);
+      else throw new Error("A multi-file edit contains an unsupported path entry.");
     }
+  }
+  for (const key of ["edits", "replacements"]) {
+    if (!Array.isArray(args[key])) continue;
+    for (const entry of args[key]) {
+      const target = entry?.filePath ?? entry?.file_path ?? entry?.path;
+      if (typeof target !== "string") throw new Error("A multi-edit entry has no supported path.");
+      paths.push(target);
+    }
+  }
+  const patch = args.patch ?? args.input;
+  if (patch !== undefined) {
+    if (typeof patch !== "string" || !patch.startsWith("*** Begin Patch\n") ||
+        !patch.trimEnd().endsWith("*** End Patch")) {
+      throw new Error("Unrecognized patch format; no edit paths were authorized.");
+    }
+    const targets = [...patch.matchAll(/^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$/gm)];
+    if (!targets.length) throw new Error("The patch contains no explicit file paths.");
+    paths.push(...targets.map((match) => match[1]));
   }
 
   return {
@@ -279,16 +350,34 @@ export function normalizeToolCall(call) {
 
 /**
  * @param {{toolName?: string, tool_name?: string, toolArgs?: Record<string, unknown>, tool_input?: Record<string, unknown>}} call
- * @param {{scope?: {allowed: string[]}, taskId?: string}} [context]
+ * @param {{
+ *   scope?: {allowed: string[]}, taskId?: string, issue?: number,
+ *   sessionId?: string, workspaceOwnerMatches?: boolean,
+ *   trustedContract?: boolean, approvedPlan?: boolean, validPlan?: boolean,
+ *   requirePlanApproval?: boolean, branchAuthorized?: boolean, role?: string,
+ *   canPropose?: boolean, planScope?: {allowed: string[]}, repoRoot?: string
+ * }} [context]
  */
 export function evaluateToolCall(call, context = {}) {
-  const { rawName, kind, paths, command } = normalizeToolCall(call);
+  let normalized;
+  try {
+    normalized = normalizeToolCall(call);
+  } catch (error) {
+    return deny(error.message);
+  }
+  const { rawName, kind, command } = normalized;
+  let { paths } = normalized;
   const governed = Boolean(context.taskId);
   const trusted = context.trustedContract === true;
   const approved = context.approvedPlan === true;
+  const proposedExecution = context.validPlan === true &&
+    context.requirePlanApproval === false;
+  const canExecute = approved || proposedExecution;
   const branchAuthorized = context.branchAuthorized === true;
   const scope = context.scope ?? DEFAULT_SCOPE;
   const where = governed ? `the ${context.taskId} scope` : "the default scope";
+  const canPropose = trusted && context.role === "implement" &&
+    context.canPropose === true;
 
   // A dangerous string is dangerous whatever the tool claims to be, and whether
   // or not a task governs this session.
@@ -308,6 +397,7 @@ export function evaluateToolCall(call, context = {}) {
   }
 
   if (kind === "edit") {
+    if (context.role === "plan") return deny("The planner is read-only; publication uses an explicit human handoff.");
     if (!governed) {
       return deny(
         "no task contract is active; autonomous writes require precise inputs, outputs, and success criteria",
@@ -316,7 +406,17 @@ export function evaluateToolCall(call, context = {}) {
     if (!trusted) {
       return deny("the active task contract is not trusted GitHub issue authority");
     }
-    if (!approved) {
+    if (canPropose) {
+      try {
+        const proposalPaths = paths.map((target) => normalizeEditPath(target, context.repoRoot));
+        if (proposalPaths.length === 1 && proposalPaths[0] === "artifacts/plan-proposal.md") {
+          return allow("the selected lower-risk session may propose a plan artifact, not edit source yet");
+        }
+      } catch (error) {
+        return deny(error.message);
+      }
+    }
+    if (!canExecute) {
       return deny("no human-approved machine-readable plan authorizes writes");
     }
     if (!branchAuthorized) {
@@ -326,6 +426,11 @@ export function evaluateToolCall(call, context = {}) {
       return ask(
         `"${rawName}" may write but named no path this policy can check`,
       );
+    }
+    try {
+      paths = paths.map((target) => normalizeEditPath(target, context.repoRoot));
+    } catch (error) {
+      return deny(error.message);
     }
 
     // Prohibited beats allowed. A contract that says src/** but not src/api/**
@@ -380,21 +485,81 @@ export function evaluateToolCall(call, context = {}) {
         `"${rawName}" may execute but named no command this policy can check`,
       );
     }
+    const contractFetch =
+      /^npm run contract:fetch -- --issue ([1-9]\d*)(?: --session-id ([A-Za-z0-9._-]+))?$/.exec(command);
+    if (contractFetch) {
+      if (typeof context.sessionId !== "string" || !context.sessionId.trim() ||
+          (contractFetch[2] && contractFetch[2] !== context.sessionId) ||
+          (context.issue && Number(contractFetch[1]) !== context.issue)) {
+        return deny("task contract bootstrap must use the current explicit issue and session identity");
+      }
+      return allow("resolve the explicit task under the current session identity; the owner check precedes cache changes");
+    }
+    const materializeProposal =
+      /^npm run plan:materialize -- --file artifacts\/plan-proposal\.md --execute-proposed --session-id ([A-Za-z0-9._-]+)$/.exec(command);
+    if (canPropose && materializeProposal) {
+      if (materializeProposal[1] !== context.sessionId) {
+        return deny("plan materialization must use the current task session identity");
+      }
+      return allow("validate the exact lower-risk proposal against the live task and isolated base");
+    }
+    const workspaceRelease =
+      /^npm run workspace:release -- --issue ([1-9]\d*) --session-id ([A-Za-z0-9._-]+)( --clear-unowned)?$/.exec(command);
+    if (workspaceRelease) {
+      if (workspaceRelease[3]) {
+        if (workspaceRelease[2] !== context.sessionId ||
+            context.workspaceOwnerMatches === true) {
+          return deny("orphaned task cleanup requires the current session and no active workspace owner");
+        }
+        return ask(
+          "this explicit recovery removes unowned task authority caches; verify they are obsolete before cleanup",
+        );
+      }
+      if (context.role === "plan" || !trusted || !canExecute || !branchAuthorized ||
+          Number(workspaceRelease[1]) !== context.issue ||
+          workspaceRelease[2] !== context.sessionId ||
+          context.workspaceOwnerMatches !== true) {
+        return deny("workspace release must match the approved task, current session, and owned workspace");
+      }
+      return allow("release only the current session's owned task workspace");
+    }
+    const workspacePreparation =
+      /^npm run workspace:prepare -- --issue ([1-9]\d*) --path (\S+) --session-id ([A-Za-z0-9._-]+)$/.exec(command);
+    if (workspacePreparation) {
+      if (context.role === "plan" || !trusted || !canExecute || !branchAuthorized) {
+        return deny("workspace preparation requires a trusted task, approved plan, and dedicated implementation branch");
+      }
+      if (Number(workspacePreparation[1]) !== context.issue ||
+          workspacePreparation[3] !== context.sessionId ||
+          context.workspaceOwnerMatches !== true) {
+        return deny("workspace preparation must match the current task issue, session, and owned workspace");
+      }
+      return allow("prepare a new dedicated worktree from the approved immutable base without switching this checkout");
+    }
     if (ALLOWED_COMMANDS.some((pattern) => pattern.test(command))) {
       if (
-        /^npm run (contract:fetch|plan:show)\b/.test(command) ||
+        /^npm run plan:show\b/.test(command) ||
         /^git (status|diff|log)\b/.test(command)
       ) {
         return allow("command is in the validation allowlist");
       }
+      if (context.role === "plan") return deny("The planner cannot execute validation or implementation commands.");
       if (!trusted) {
         return deny("the active task contract is not trusted GitHub issue authority");
       }
-      if (!approved) {
+      if (!canExecute) {
         return deny("no human-approved machine-readable plan authorizes execution");
       }
       if (!branchAuthorized) {
         return deny("execution requires the task's dedicated implementation branch");
+      }
+      if (command.startsWith("npm run test:unit -- ")) {
+        const selectors = command.slice("npm run test:unit -- ".length).split(" ");
+        if (selectors.some((target) => target.includes("..") ||
+            !isPathAllowed(target, scope) || !context.planScope ||
+            !isPathAllowed(target, context.planScope))) {
+          return deny("A targeted test selector is outside the task or plan scope.");
+        }
       }
       return allow("command is in the approved validation allowlist");
     }
@@ -402,7 +567,7 @@ export function evaluateToolCall(call, context = {}) {
       pattern.test(command),
     );
     if (environment) {
-      if (!trusted || !approved || !branchAuthorized) {
+      if (context.role === "plan" || !trusted || !canExecute || !branchAuthorized) {
         return deny(
           "environment preparation requires a trusted task contract, approved plan, and dedicated implementation branch",
         );
@@ -438,9 +603,8 @@ async function readStdin() {
  *
  * Shells add noise. A bash line continuation (`\`) pasted into PowerShell
  * arrives as an extra argument, so stdin ends up holding the JSON object
- * followed by a stray `\` line. Rather than failing with an unreviewable
- * "not valid JSON", find the first balanced object and report precisely what
- * could not be parsed when there isn't one.
+ * followed by a stray `\` line. Accept only that known suffix in addition to
+ * clean JSON; arbitrary prefixes, suffixes, or multiple objects remain invalid.
  *
  * @param {string} raw
  * @returns {{ok: true, value: unknown} | {ok: false, reason: string}}
@@ -462,44 +626,19 @@ export function parsePayload(raw) {
   }
 
   try {
-    return { ok: true, value: JSON.parse(text) };
-  } catch {
-    // fall through to balanced-object extraction
-  }
-
-  const start = text.indexOf("{");
-  if (start !== -1) {
-    let depth = 0;
-    let inString = false;
-    let escaped = false;
-    for (let i = start; i < text.length; i += 1) {
-      const character = text[i];
-      if (escaped) {
-        escaped = false;
-      } else if (character === "\\" && inString) {
-        escaped = true;
-      } else if (character === '"') {
-        inString = !inString;
-      } else if (!inString && character === "{") {
-        depth += 1;
-      } else if (!inString && character === "}") {
-        depth -= 1;
-        if (depth === 0) {
-          try {
-            return { ok: true, value: JSON.parse(text.slice(start, i + 1)) };
-          } catch {
-            break;
-          }
-        }
-      }
+    const value = JSON.parse(text.replace(/\r?\n\\$/, ""));
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error("A tool call must be an object.");
     }
+    return { ok: true, value };
+  } catch {
+    // A malformed envelope is not permission to select a convenient inner object.
   }
 
-  const preview = text.length > 120 ? `${text.slice(0, 120)}...` : text;
   return {
     ok: false,
     decision: deny(
-      `tool call payload was not valid JSON. Received: ${JSON.stringify(preview)}. If you pasted a multi-line command, note that a trailing "\\" is a bash line continuation and is not one in PowerShell.`,
+      'Tool call payload was not valid JSON; raw input is intentionally omitted. Check the host envelope and shell line continuation.',
     ),
   };
 }
@@ -538,23 +677,37 @@ async function main() {
       } catch {
         plan = null;
       }
+      const validation = validatePlanContract(plan, contract);
       const approvedPlan =
+        validation.ok &&
         Boolean(contract?.source?.trusted) &&
         plan?.schema === "northstar/plan/1" &&
         plan?.taskId === contract?.id &&
         plan?.contractDigest === contract?.source?.bodyDigest &&
-        plan?.approval?.schema === "northstar/plan-approval/1" &&
+        (
+          plan?.approval?.schema === "northstar/plan-approval/1" ||
+          (
+            plan?.approval?.schema === "northstar/plan-approval/2" &&
+            plan.approval.source === "github-review" &&
+            plan.approval.artifactPath === planArtifactPath(contract.id) &&
+            /^[0-9a-f]{40}$/.test(plan.approval.artifactBlobSha)
+          )
+        ) &&
         plan?.approval?.taskId === contract?.id &&
         plan?.approval?.contractDigest === contract?.source?.bodyDigest &&
         plan?.approval?.planDigest === plan?.planDigest &&
         plan?.planDigest === planDigest(plan);
       let branch = null;
+      let headSha = null;
       let descendsFromApprovedBase = false;
       try {
         branch = execFileSync("git", ["branch", "--show-current"], {
           cwd: REPO_ROOT,
           encoding: "utf8",
           stdio: ["ignore", "pipe", "ignore"],
+        }).trim();
+        headSha = execFileSync("git", ["rev-parse", "HEAD"], {
+          cwd: REPO_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"],
         }).trim();
         if (plan?.baseSha) {
           execFileSync(
@@ -570,16 +723,73 @@ async function main() {
       } catch {
         descendsFromApprovedBase = false;
       }
-      const branchAuthorized =
+      let branchAuthorized =
         branch === `agent/implement/${String(contract?.id ?? "").toLowerCase()}` &&
         descendsFromApprovedBase;
+      if (!branchAuthorized && process.env.COPILOT_AGENT_PROMPT) {
+        let cloudContext = null;
+        try {
+          cloudContext = JSON.parse(readFileSync(resolve(REPO_ROOT, "artifacts/execution-context.json"), "utf8"));
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+        branchAuthorized = cloudContext?.schema === "northstar/execution-context/1" &&
+          cloudContext.host === "cloud" && cloudContext.branch === branch &&
+          cloudContext.headSha === headSha && cloudContext.baseSha === plan?.baseSha &&
+          cloudContext.taskId === contract?.id &&
+          cloudContext.contractDigest === contract?.source?.bodyDigest &&
+          cloudContext.planDigest === plan?.planDigest && descendsFromApprovedBase;
+      }
+      let session = null;
+      try {
+        session = JSON.parse(readFileSync(resolve(REPO_ROOT, "artifacts/task-session.json"), "utf8"));
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+      const sessionId = parsed.value?.session_id ?? parsed.value?.sessionId;
+      const workspaceOwner = readWorkspaceOwner(REPO_ROOT);
+      let workspaceOwnerMatches = false;
+      if (workspaceOwner && typeof sessionId === "string" && sessionId.trim() &&
+          contract?.source?.trusted === true) {
+        const expectedOwner = workspaceOwnerIdentity({
+          root: REPO_ROOT,
+          issue: contract.source.issue,
+          taskId: contract.id,
+          contractDigest: contract.source.bodyDigest,
+          sessionId,
+          env: process.env,
+          contract,
+        });
+        const currentOwner = assertWorkspaceOwner(REPO_ROOT, expectedOwner);
+        workspaceOwnerMatches = currentOwner?.ownerKey === workspaceOwner.ownerKey &&
+          currentOwner.taskId === contract.id &&
+          currentOwner.contractDigest === contract.source.bodyDigest;
+      }
+      const sessionMatches = workspaceOwnerMatches && Boolean(sessionId) && (
+        session?.sessionId === sessionId && session?.taskId === contract?.id &&
+        session?.contractDigest === contract?.source?.bodyDigest &&
+        session?.workspaceOwner === workspaceOwner?.ownerKey
+      );
       decision = evaluateToolCall(parsed.value, {
         scope: taskScope(contract),
         taskId: contract?.id,
-        trustedContract: contract?.source?.trusted === true,
+        issue: contract?.source?.issue,
+        sessionId,
+        workspaceOwnerMatches,
+        trustedContract: contract?.source?.trusted === true && sessionMatches,
         approvedPlan,
+        validPlan: validation.ok,
+        requirePlanApproval: validation.ok ? approvalPolicyForRisk(plan.risk).requirePlanOnlyApproval : true,
+        role: session?.role ?? null,
+        canPropose: session?.canPropose === true &&
+          session?.workflow === "plan-and-execute" &&
+          session?.taskId === contract?.id &&
+          session?.contractDigest === contract?.source?.bodyDigest &&
+          session?.workspaceHead === headSha &&
+          branch === `agent/implement/${String(contract?.id ?? "").toLowerCase()}`,
         branchAuthorized,
         planScope: plan?.scope,
+        repoRoot: REPO_ROOT,
       });
     } catch (error) {
       decision = deny(/** @type {Error} */ (error).message);

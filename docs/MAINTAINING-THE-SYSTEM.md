@@ -64,18 +64,23 @@ consistent.
 ### 5. Refresh the inert snapshot
 
 When Northstar control-plane files changed, refresh `templates/northstar/` from
-the accepted commit. Preserve the safe `AGENTS.snapshot.md` name, then update
-`reference-lock.json` with the exact source SHA and file hashes. Do not mark
-architecture conformance as restored while any required Northstar pull request,
-hosted workflow proof, or human acceptance remains pending.
+the exact validated Northstar commit. Preserve the safe `AGENTS.snapshot.md`
+name, then update `reference-lock.json` with that commit, its branch, and the
+exact file hashes. If the candidate is not accepted, keep `releaseStatus` as
+`known-defective`, record the remaining validation and hosted gaps, and present
+the snapshot for study only. Never recommend or publish it for adoption while
+`architecture-lock.json` reports blocked conformance. Mark the reference
+accepted and restore conformance only after every required Northstar pull
+request, hosted workflow proof, and human acceptance is complete.
 
 The snapshot is for study and comparison. Northstar remains the executable
 source of truth.
 
-With both repositories checked out as siblings:
+With both repositories checked out and the Northstar worktree at the exact
+`sourceCommit` in `templates/northstar/reference-lock.json`:
 
 ```powershell
-pwsh -File tools\verify-architecture.ps1
+pwsh -File tools\verify-architecture.ps1 -NorthstarPath <Northstar-worktree-at-locked-commit>
 ```
 
 The verifier must fail when `architecture-lock.json` reports a blocked

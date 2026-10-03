@@ -35,11 +35,14 @@ configuration remain in Northstar.
 
 ## Adoption warning
 
-`reference-lock.json` marks this snapshot `known-defective` at
-`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`. The workflow starts, but task
-bootstrap, host compatibility, evidence integrity and scanner defects remain;
-hosted acceptance is unverified. Use it only
-for inspection until the lock points to an accepted repaired Northstar commit.
+`reference-lock.json` marks this snapshot `known-defective` at candidate
+`bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7` from the open, draft Issue #16 PR
+#27. Local validation passes 528 unit tests and 10 PostgreSQL acceptance tests,
+but `validate:all` still fails on 83 Zizmor findings, hosted
+`repository-controls`, `human-review`, and `evidence` fail, and the cloud task
+bootstrap did not produce `artifacts/task-contract.json`. AC9 and hosted
+acceptance remain unverified. Use this snapshot only for inspection, not
+adoption; no accepted repaired Northstar commit exists yet.
 
 Do not copy the directory wholesale and assume the result is safe. The files
 contain Northstar-specific:
