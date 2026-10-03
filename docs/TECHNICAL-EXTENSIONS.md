@@ -451,38 +451,28 @@ Do not let pull-request code publish a substitute success status.
 `scripts/import-evidence-artifacts.mjs`,
 `scripts/maintenance-manifest.mjs`,
 `.github/workflows/publish-evidence.yml`, and
-`.github/workflows/system-maintenance-approval.yml`. Candidate PR #18 at
-`2ce3cf8a69439c22246de7d5449ce186e23bd584` has passing local tests, but
-hosted human-review and repository-controls remain blocked and
-`trusted-acceptance` is failure. Issue #24 plan PR #25 has been rebound to this
-parent base and is approved on exact head `7d0a78d8da741c911a31941477562060ae6c6d66`
-(review `5357419226`). Child PR #28 is pushed at
-`cb507e20cd0cb8fdeabfedaece67510a651757b0` on base
-`2ce3cf8a69439c22246de7d5449ce186e23bd584`.
-Focused resolver/workflow tests pass 62/62; `validate` passes 527 unit tests,
-79 governance checks, lint, typecheck, and build; PostgreSQL acceptance passes
-9/9, secret scan covers 185 files, and workflow compilation has zero
-errors/warnings. `npm run validate:all` stops at `npm audit` with two high
-advisories inherited from base `2ce3cf8…` (Fastify 5.12.1 and
-`brace-expansion`); Issue #24 prohibits manifest/lockfile edits. A separate
-pinned Zizmor run reports 79 findings (18 `artipacked`, 57 `unpinned-uses`,
-two `template-injection`, one `dangerous-triggers`, one `obfuscation`).
+`.github/workflows/system-maintenance-approval.yml`. Parent PR #18 now includes
+child PR #28 at `2222e882b966588e39a63991ece3a00935898cfc` and remains open,
+unmerged, and unaccepted. Its exact-head review and hosted `human-review` pass;
+the report from run `37133142406` is `ready_for_review` with AC15 unverified
+(14/15 proven), while `repository-controls` fails and
+`trusted-acceptance` remains failure. The issue #24 plan PR #25 is approved
+at `ad4da17e679ba66d28025354021df9cc5ab18158` (review `5400367350`), bound to
+contract `8763c017…` and parent base `2ce3cf8…`.
 
-Hosted run
-[`37001565136`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37001565136)
-passes current-head human-review, quality, acceptance, CodeQL,
-plan-contract/approval, scope, merge-validation, secret-scan, and governance.
-Dependency-review, repository-controls, and evidence fail. The report is
-`review_required`, `validation-authority` is absent, and repository-control
-metadata is unavailable to the PR token. The trusted Publish Evidence
-follow-up
-[`37001721147`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37001721147)
-ran protected `main` at `b65c2de` and failed because the deployed resolver
-only recognizes PRs targeting `main`, not the stacked Issue #24 PR. The
-approved PR #28 candidate contains exact declared-base resolution and
-regression tests, but is not yet integrated on the trusted default branch. PR
-#28 remains draft and unmerged; no external setting changed and no
-trusted-acceptance success is claimed.
+Protected Publish Evidence runs
+[`37133208919`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133208919)
+and
+[`37133310243`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/37133310243)
+on `main` at `b65c2de…` failed before the controls audit because the old
+importer rejected `poutine-report.json`, `poutine.sarif`, and
+`zizmor-comparison.json`. A local replay using the importer and path-safety
+helper whose blobs match the reviewed PR #18 merge commit accepted all 22
+files from source run `37133142406`. This proves importer behavior only, not
+the protected App audit or trusted status publication. Ruleset `23998987`
+remains active and strict with no bypass actors; the original
+`repository-controls` integration `15368` and `trusted-acceptance` App
+`5075466` are unchanged. No ruleset change or hosted acceptance is claimed.
 
 ## EXT-008 - Split GitHub App identities and secret placement
 

@@ -23,14 +23,14 @@ has a draft implementation in PR
 machine plan digest is
 `11bfe6ae20df762202c9e0554fc62b257371f139ca380dec2a2ac8aeea5ffcaf`. Both bind the implementation to
 `agent/implement/aes-surface-evidence` at
-`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. PR #19 remains draft and has not
-been refreshed to parent PR #18's current head
-`2ce3cf8a69439c22246de7d5449ce186e23bd584`. Parent PR #18 remains unmerged
-and unaccepted; its exact-head native review is approved, but hosted
-`human-review`, `repository-controls`, and `trusted-acceptance` are not
-passing. PR #19 is not a current-base or cross-surface demonstration; any
-rebase must follow its own task/plan validation and the approved parent
-integration path.
+`17e7a5c5f1fbf88a92351043c675f555f4c7f04f`. PR #19 remains draft on that
+older base; parent PR #18 has since advanced to
+`2222e882b966588e39a63991ece3a00935898cfc` after child PR #28 was merged into
+it. PR #18 remains open and unmerged. Its exact-head review and hosted
+`human-review` pass, while `repository-controls` and `trusted-acceptance`
+remain failed. PR #19 has not been refreshed to the current parent head and
+is not a current-base or cross-surface demonstration; any rebase must follow
+its own task/plan validation and the approved parent integration path.
 
 On the rebased source tree, `npm run validate` passed 470 unit tests and 79
 offline governance checks; `npm run test:acceptance` passed 12/12 with

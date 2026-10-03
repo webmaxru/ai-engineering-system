@@ -75,28 +75,29 @@ parent merge, or hosted acceptance is claimed. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the full preflight
 evidence and remaining human gate.
 
-Issue #16 plan PR #26 is approved at head
+Issue #16 plan PR #26 remains approved at head
 `42721d4ee34a55cb031567d3942dd037e5bbe513` (review `5362561711`), bound to
 parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`, contract
-`2afe7ed6…`, and plan `d020ca88…`. Implementation PR #27 is rebased to that
-base and at candidate head `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`.
-`npm run validate` passes 528 unit tests and 79 offline governance checks;
-PostgreSQL acceptance passes 10/10. The candidate also gives live task/plan
-resolution 90 seconds while retaining the 10-second pre-tool authorization
-hook; command-hook timeouts are fail-open, including pre-tool authorization,
-so denial is not guaranteed if that hook itself times out. Two simultaneous
-local CLI canaries resolved separate owner state at predecessor `bb767fc…`.
-Hosted run `36748901455` at this exact head passes plan-contract,
-plan-approval, scope, quality, acceptance, CodeQL, dependency review,
-secret-scan, merge-validation, and governance. `repository-controls`,
-`human-review`, and `evidence` fail; `validation-authority` was not run. The
-report is `review_required` with 9/10 criteria proven (AC1–AC8 and AC10);
-AC9 remains unproven because cloud task-contract bootstrap failed. The report
-also identifies missing trusted current-run revalidation for plan approval,
-repository controls, and human review. PR #27 remains draft and unmerged. Full `validate:all` at
-`bfb2cbf…` fails at Zizmor with 83 findings (19 `artipacked`, 61
-`unpinned-uses`, one each `dangerous-triggers`, `obfuscation`, and
-`template-injection`). No acceptance or conformance is claimed.
+`2afe7ed6…`, and plan `d020ca88…`. The inert snapshot remains pinned to
+candidate `bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`; that is not the current
+live PR #27 head. PR #27 is currently draft at
+`f1c40a961451d29fed04ac37ad01eb63ddec076d` on the old `2ce3cf8…` parent
+base, which has since advanced to PR #18 head `2222e882…`. Its approved plan
+therefore needs a fresh base binding before further implementation.
+
+At current PR #27 head `f1c40a9…`, hosted run
+[`36984950941`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36984950941)
+passes human-review and core plan, scope, quality, acceptance, security,
+merge, and governance checks; `repository-controls` and `evidence` fail,
+`validation-authority` is absent, and the report is `review_required` with
+9/10 criteria proven. AC9 remains unproven because cloud task-contract
+bootstrap has not been verified. No acceptance or conformance is claimed.
+Local validation at the separate snapshot candidate `bfb2cbf…` passes 528
+unit tests and 79 offline governance checks; PostgreSQL acceptance passes
+10/10, while full `validate:all` fails at Zizmor with 83 findings (19
+`artipacked`, 61 `unpinned-uses`, and one each `dangerous-triggers`,
+`obfuscation`, and `template-injection`). These local results do not change
+the live PR head or its hosted status.
 
 A later owner-bound local write attempt also stopped before editing. The
 workspace records Issue #16, role `implement`, PR #27, the current session
@@ -108,9 +109,10 @@ exact edit preflight denies the write. The current parser also accepts
 role. No workaround, file edit, or test run was performed; this cache/parser
 defect must be corrected through the authorized reference workflow before
 local session writes or AC9 can be claimed.
-The inert template snapshot and `reference-lock.json` remain on
-`b65c2de5c8224342c72c37eeed7ef9f965ad8a2c`; the unaccepted candidate is not
-published as an adoption snapshot.
+The inert template snapshot and `reference-lock.json` are pinned to
+`bfb2cbf1d0f488ced1595f100c14ed8e312bb1f7`; `architecture-lock.json` remains
+`known-defective`/`blocked`. That unaccepted snapshot is for inspection, not
+adoption, and is distinct from PR #27's live `f1c40a9…` head.
 
 Northstar is a fictional TypeScript/Fastify Orders API. Its idempotency
 requirement is deliberately distributed: retries may reach different stateless

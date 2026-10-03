@@ -45,14 +45,16 @@ task-contract bootstrap remains blocked. Its assertion that PR #26 approval
 is stale conflicts with current GitHub evidence and needs human reconciliation.
 
 The runbook's local `ready_for_review` output must not be presented as
-`ready_for_acceptance`. PR #27's current candidate at `bfb2cbf…` passes local
-validation (528 unit tests and 10 PostgreSQL acceptance tests). Hosted run
-`36705616895` passes the plan, scope, quality, acceptance, CodeQL, dependency,
-secret-scan, merge, and governance checks, but `repository-controls`,
-`human-review`, and `evidence` fail; `validation-authority` was not run and
-AC9 remains unproven. Full `validate:all` at `bfb2cbf…` fails on 83 Zizmor
-findings. The maintenance workstream is active again, but those blockers
-remain unresolved.
+`ready_for_acceptance`. The inert snapshot is pinned to candidate
+`bfb2cbf…`, but the live PR #27 head is `f1c40a961451d29fed04ac37ad01eb63ddec076d`
+on parent base `2ce3cf8…`. Parent PR #18 has since advanced to
+`2222e882…`, so PR #27's base and approved plan require refresh before
+further implementation. Hosted run
+[`36984950941`](https://github.com/webmaxru/northstar-orders-api-demo/actions/runs/36984950941)
+passes current-head human-review and core validation but fails
+`repository-controls` and `evidence`; `validation-authority` is absent and
+AC9 remains unproven. The report is `review_required`. The maintenance
+workstream is active again, but no acceptance or conformance is established.
 
 ## Trace the control loop
 
