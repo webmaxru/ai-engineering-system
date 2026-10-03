@@ -67,10 +67,13 @@ The importer and path-safety helper at the reviewed PR #18 merge commit have
 the same Git blobs as the candidate used in a local replay of all 22 files
 from source run `37133142406`; the replay accepted the Poutine and Zizmor
 artifacts. This proves the candidate import behavior only. It does not prove
-that the protected App audit or trusted status publication succeeded. The
-ruleset remains active and strict with an empty bypass list, and its original
-`repository-controls` (integration `15368`) and `trusted-acceptance`
-(integration `5075466`) requirements remain intact. No settings change,
+that the protected App audit or trusted status publication succeeded. A
+separate local replay at the exact merge commit resolved the live run to PR
+#18/head `2222e882`/base `main@b65c2de` and validated seven producer-bound
+check records, but did not mint App credentials, audit hosted controls, or
+write a status. The ruleset remains active and strict with an empty bypass
+list, and its original `repository-controls` (integration `15368`) and
+`trusted-acceptance` (integration `5075466`) requirements remain intact. No settings change,
 parent merge, or hosted acceptance is claimed. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the full preflight
 evidence and remaining human gate.

@@ -126,6 +126,17 @@ helper whose Git blobs match the reviewed PR #18 merge commit accepted all 22
 imported files, including those three paths. This verifies the importer
 behavior only; it is not protected-publisher or hosted-controls evidence.
 
+The same detached checkout at the exact PR #18 merge commit also ran
+`contract:from-pr` against live issue #14, resolved the current workflow-run
+metadata through `resolve-workflow-run.mjs` as PR #18/head `2222e882`/base
+`main@b65c2de`/source run `37133142406` attempt 1 with eight artifact IDs,
+and passed `import-workflow-results.mjs` for seven producer-bound check
+records. This was a local replay using read-only GitHub API access, not the
+protected Publisher job: it did not mint App credentials, audit live hosted
+controls, or write a status. Publisher readiness after merge is therefore
+better supported at the resolver/import layer but remains unverified at the
+protected App/status layer.
+
 Ruleset `23998987` remains active and strict, with no bypass actors and all
 original required contexts intact, including `repository-controls` from
 integration `15368` and `trusted-acceptance` from App `5075466`. The saved
