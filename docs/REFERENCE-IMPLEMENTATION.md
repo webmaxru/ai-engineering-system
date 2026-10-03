@@ -75,6 +75,13 @@ parent merge, or hosted acceptance is claimed. See
 [`GUIDE-CONFORMANCE.md`](GUIDE-CONFORMANCE.md) for the full preflight
 evidence and remaining human gate.
 
+The task sequence also needs a human-reviewed clarification before settings
+work continues: Issue #22 requires trusted-acceptance success, Issue #20 is
+blocked by #22, and Issue #24 assigns the existing Zizmor baseline to #20
+while withholding parent `ready_for_acceptance` until #20 passes. Do not start
+either ruleset window until the affected plan order and exact-base approvals
+show a safe path through those gates.
+
 Issue #16 plan PR #26 remains approved at head
 `42721d4ee34a55cb031567d3942dd037e5bbe513` (review `5362561711`), bound to
 parent base `2ce3cf8a69439c22246de7d5449ce186e23bd584`, contract

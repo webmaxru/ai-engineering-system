@@ -136,6 +136,25 @@ This state follows the guide’s plan → act → evaluate lifecycle and its use
 pull-request checks and human review as evaluation signals (Learning Path
 Units 1 and 5); local importer proof is not presented as hosted acceptance.
 
+### Cross-issue sequencing blocker (2026-10-03)
+
+The live issue relationships are Issue #22 blocked by Issue #24 and Issue #20
+blocked by Issue #22. Issue #24's approved sequence is #24, then #22, then
+#20, but its AC6 assigns the existing Zizmor baseline to Issue #20 and
+prohibits claiming parent `ready_for_acceptance` until #20 and the required
+hosted checks pass. Issue #22's contract requires fresh successful
+`trusted-acceptance` from App `5075466` on the exact parent head before its
+`repository-controls` window. The current approved sequence therefore has no
+demonstrated route through Issue #22's preflight if the Issue #20 findings
+continue to block trusted success.
+
+This is a task-order/preflight conflict, not authority to weaken or bypass a
+required status. Keep ruleset `23998987` unchanged until an independently
+reviewed plan establishes a no-bypass order that can satisfy the exact-head
+preflight. PRs #23 and #21 are still based on `17e7a5c…`; refresh and
+independently approve the affected plans against the resulting exact base
+before implementation or another settings window.
+
 ## Historical follow-up local and owner-session evidence (2026-10-01)
 
 This section preserves the state recorded on 2026-10-01. The current PR #27
